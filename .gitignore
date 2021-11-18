@@ -1,0 +1,57 @@
+###
+ # GitIgnore file for Python Language projects.
+ # See https://git-scm.com/docs/gitignore for documentation.
+ #
+ # https://git.brandon-rodriguez.com/other/gitignore
+ # Version 1.1.2
+ ##
+
+
+# Ignore system files.
+.DS_Store
+Thumbs.db
+
+
+# Ignore environment settings.
+.env/
+.idea/
+.venv/
+.vs/
+.vscode/
+env/
+idea/
+venv/
+vs/
+vscode/
+
+
+# Ignore python cache files.
+*.pyc
+
+
+# Ignore temporary files.
+[Tt]mp/
+[Tt]emp/
+[Tt]empfiles/
+[Tt]emp_files/
+*.tmp
+*.temp
+
+
+# Ignore logfiles.
+[Ll]og/
+[Ll]ogs/
+*.log
+*.log.*
+
+
+# Ignore generated LaTeX files.
+.~lock.*
+*.aux
+*.synctex
+*.synctex.gz
+
+
+###
+ # Project-specific ignores go below here.
+ ##
