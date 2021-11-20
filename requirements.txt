@@ -1,0 +1,18 @@
+###
+ # Specifies Python packages (and package versions) to install in order to run project.
+ #
+ # Execute via "pip install -r requirements.txt" while in the base project directory.
+ ##
+
+
+###
+ # Core Python Packages
+ ##
+mysqlclient     # For connecting to mysql.
+pytz            # For datetime shenanigans.
+
+
+###
+ # Pip Freeze:
+ #      pip freeze -r requirements.txt
+ ##
