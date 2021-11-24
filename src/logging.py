@@ -82,6 +82,15 @@ def get_logging_settings():
                 'backupCount': this.logging_backup_count,
                 'formatter': 'standard',
             },
+            # Query Level - To file.
+            'file_query': {
+                'level': 'QUERY',
+                'class': this.logging_class,
+                'filename': this.logging_directory.joinpath('query.log'),
+                'maxBytes': this.logging_max_bytes,
+                'backupCount': this.logging_backup_count,
+                'formatter': 'standard',
+            },
             # Warn Level - To file.
             'file_warn': {
                 'level': 'WARNING',
@@ -104,7 +113,7 @@ def get_logging_settings():
         'loggers': {
             # All basic logging.
             '': {
-                'handlers': ['console', 'file_debug', 'file_info', 'file_warn', 'file_error'],
+                'handlers': ['console', 'file_debug', 'file_info', 'file_query', 'file_warn', 'file_error'],
                 'level': 'NOTSET',
                 'propagate': False,
             }
@@ -117,8 +126,7 @@ def set_new_log_levels():
     Function for adding new logging levels.
     """
     # Add new logging levels here.
-    pass
-
+    add_logging_level('QUERY', 25)
 
 #endregion User Logging Settings
 
