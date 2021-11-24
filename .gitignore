@@ -56,3 +56,5 @@ vscode/
  # Project-specific ignores go below here.
  ##
 config.py
+*.sqlite
+*.sqlite3

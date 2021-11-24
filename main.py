@@ -1,9 +1,12 @@
+"""
+Entrypoint for building project.
+"""
 
 # System Imports.
-from abc import ABC, abstractmethod
 
 # User Imports.
-from src.connectors.core import AbstractDbConnector
+from config import mysql_config, sqlite_config
+from src.connectors import MySqlConnector, SqliteConnector
 from src.logging import init_logging
 
 
@@ -12,7 +15,19 @@ logger = init_logging(__name__)
 
 
 def main():
-    connector = AbstractDbConnector(debug=True)
+    """
+    Logic entrypoint for building logic + manual testing.
+    """
+    # Initialize db connection objects.
+    mysql_connector = MySqlConnector(
+        mysql_config['host'],
+        mysql_config['port'],
+        mysql_config['user'],
+        mysql_config['password'],
+        mysql_config['name'],
+        debug=True,
+    )
+    sqlite_connector = SqliteConnector(sqlite_config['location'], debug=True)
 
 
 if __name__ == '__main__':

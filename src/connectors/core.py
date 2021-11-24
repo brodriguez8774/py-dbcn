@@ -1,5 +1,6 @@
 """
 Core DB Connector class.
+Should be inherited by language-specific connectors
 """
 
 # System Imports.
@@ -13,10 +14,11 @@ from src.logging import init_logging
 logger = init_logging(__name__)
 
 
-class AbstractDbConnector():
+class AbstractDbConnector(ABC):
     """
     Abstract connector for database and
     """
+    @abstractmethod
     def __init__(self, debug=False):
         logger.debug('Generating (core) Connector class.')
         self.connection = None
@@ -27,6 +29,15 @@ class AbstractDbConnector():
         self.display = self._get_related_display_class()
         self.query = self._get_related_query_class()
         self.validate = self._get_related_validate_class()
+
+    def __del__(self):
+        """
+        Close database connection on exit.
+        """
+        try:
+            self.connection.close()
+        except:
+            pass
 
     def _get_related_database_class(self):
         """
