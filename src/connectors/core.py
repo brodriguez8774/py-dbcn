@@ -82,6 +82,7 @@ class BaseDatabase():
     def _get(self, show=False):
         """
         Gets list of all currently-available databases.
+        :param show: Bool indicating if results should be printed to console or not. Used for "SHOW DATABASES" query.
         """
         # Generate and execute query.
         query = 'SHOW DATABASES;'
@@ -169,6 +170,51 @@ class BaseTables():
     def __init__(self, parent):
         logger.debug('Generating related (core) Query class.')
         self._base = parent
+
+    def _get(self, show=False):
+        """
+        Gets list of all currently-available tables in database.
+        :param show: Bool indicating if results should be printed to console or not. Used for "SHOW TABLES" query.
+        """
+        # Generate and execute query.
+        query = 'SHOW TABLES;'
+        results = self._base.query.execute(query)
+
+        # Convert to more friendly format.
+        formatted_results = []
+        for result in results:
+            formatted_results.append(result[0])
+        results = formatted_results
+
+        if show:
+            logger.info('results: {0}'.format(results))
+
+        # Return data.
+        return results
+
+    def show(self):
+        """
+        Displays all tables available in database.
+        """
+        return self._get(show=True)
+
+    def describe(self, table_name):
+        """
+        Describes given table in database.
+        """
+        # Get list of valid tables.
+        available_tables = self._get()
+
+        # Check if provided table matches value in list.
+        if table_name not in available_tables:
+            raise ValueError(
+                'Could not find table "{0}". Valid options are {1}.'.format(table_name, available_tables)
+            )
+
+        # Generate and execute query.
+        query = 'DESCRIBE {0};'.format(table_name)
+        results = self._base.query.execute(query)
+        logger.info('results: {0}'.format(results))
 
 
 class BaseValidate():
