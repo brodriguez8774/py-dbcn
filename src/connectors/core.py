@@ -110,6 +110,10 @@ class BaseDatabase():
         """
         Selects given database for use.
         """
+        # First, check that provided name is valid format.
+        if not self._base.validate.database_name(db_name):
+            raise ValueError('Invalid database name of "{0}".'.format(db_name))
+
         # Get list of valid databases.
         available_databases = self._get()
 
@@ -123,6 +127,56 @@ class BaseDatabase():
         query = 'USE {0};'.format(db_name)
         self._base.query.execute(query)
         logger.info('Database changed to "{0}".'.format(db_name))
+
+    def create(self, db_name):
+        """
+        Creates new database with provided name.
+        :param db_name: Desired name of new database.
+        """
+        # First, check that provided name is valid format.
+        if not self._base.validate.database_name(db_name):
+            raise ValueError('Invalid database name of "{0}".'.format(db_name))
+
+        # Get list of valid databases.
+        available_databases = self._get()
+
+        # Check if provided database matches value in list.
+        if db_name in available_databases:
+            # Database already exists. Raise error.
+            raise ValueError('Database with name "{0}" already exists'.format(db_name))
+
+        # Create new database.
+        query = 'CREATE DATABASE {0};'.format(db_name)
+        self._base.query.execute(query)
+        logger.info('Created database "{0}".'.format(db_name))
+
+    def drop(self, db_name):
+        """
+        Deletes database with provided name.
+        :param db_name: Name of database to delete.
+        """
+        # First, check that provided name is valid format.
+        if not self._base.validate.database_name(db_name):
+            raise ValueError('Invalid database name of "{0}".'.format(db_name))
+
+        # Get list of valid databases.
+        available_databases = self._get()
+
+        # Check if provided database matches value in list.
+        if db_name not in available_databases:
+            # Database does not exist. Raise error.
+            raise ValueError('Database with name "{0}" already exists'.format(db_name))
+
+        # Remove database.
+        query = 'DROP DATABASE {0};'.format(db_name)
+        self._base.query.execute(query)
+        logger.info('Dropped database "{0}".'.format(db_name))
+
+    def delete(self, db_name):
+        """
+        Alias for database "drop" function.
+        """
+        self.drop(db_name)
 
 
 class BaseDisplay():
@@ -216,6 +270,57 @@ class BaseTables():
         results = self._base.query.execute(query)
         logger.info('results: {0}'.format(results))
 
+    def create(self, table_name):
+        """
+        Creates new table with provided name.
+        :param table_name: Desired name of new table.
+        """
+        # First, check that provided name is valid format.
+        if not self._base.validate.table_name(table_name):
+            raise ValueError('Invalid table name of "{0}".'.format(table_name))
+
+        # Get list of valid tables.
+        available_tables = self._get()
+
+        # Check if provided table matches value in list.
+        if table_name in available_tables:
+            # Table already exists. Raise error.
+            raise ValueError('Table with name "{0}" already exists'.format(table_name))
+
+        # Create new table.
+        raise NotImplemented('Function needs column-definition handling.')
+        query = 'CREATE TABLE {0};'.format(table_name)
+        self._base.query.execute(query)
+        logger.info('Created table "{0}".'.format(table_name))
+
+    def drop(self, table_name):
+        """
+        Deletes table with provided name.
+        :param table_name: Name of table to delete.
+        """
+        # First, check that provided name is valid format.
+        if not self._base.validate.table_name(table_name):
+            raise ValueError('Invalid table name of "{0}".'.format(table_name))
+
+        # Get list of valid tables.
+        available_tables = self._get()
+
+        # Check if provided tables matches value in list.
+        if table_name not in available_tables:
+            # Table does not exist. Raise error.
+            raise ValueError('Table with name "{0}" already exists'.format(table_name))
+
+        # Remove table.
+        query = 'DROP TABLE {0};'.format(table_name)
+        self._base.query.execute(query)
+        logger.info('Dropped table "{0}".'.format(table_name))
+
+    def delete(self, table_name):
+        """
+        Alias for table "drop" function.
+        """
+        self.drop(table_name)
+
 
 class BaseValidate():
     """
@@ -224,3 +329,21 @@ class BaseValidate():
     def __init__(self, parent):
         logger.debug('Generating related (core) Validate class.')
         self._base = parent
+
+    def database_name(self, name):
+        """
+        Validates that provided database name uses set of acceptable characters.
+        :param name: Potential name of database to validate.
+        :return: True if name is valid | False otherwise.
+        """
+        # For now, always return as valid.
+        return True
+
+    def table_name(self, name):
+        """
+        Validates that provided table name uses set of acceptable characters.
+        :param name: Potential name of table to validate.
+        :return: True if name is valid | False otherwise.
+        """
+        # For now, always return as valid.
+        return True
