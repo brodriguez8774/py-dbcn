@@ -270,14 +270,21 @@ class BaseTables():
         results = self._base.query.execute(query)
         logger.info('results: {0}'.format(results))
 
-    def create(self, table_name):
+    def create(self, table_name, table_columns):
         """
         Creates new table with provided name.
         :param table_name: Desired name of new table.
+        :param table_columns: Column values for new table.
         """
         # First, check that provided name is valid format.
         if not self._base.validate.table_name(table_name):
             raise ValueError('Invalid table name of "{0}".'.format(table_name))
+
+        # Check that provided columns are valid format.
+        orig_table_columns = table_columns
+        table_columns = self._base.validate.table_columns(table_columns)
+        if table_columns is None:
+            raise ValueError('Invalid table columns of "{0}"'.format(orig_table_columns))
 
         # Get list of valid tables.
         available_tables = self._get()
@@ -288,8 +295,8 @@ class BaseTables():
             raise ValueError('Table with name "{0}" already exists'.format(table_name))
 
         # Create new table.
-        raise NotImplemented('Function needs column-definition handling.')
-        query = 'CREATE TABLE {0};'.format(table_name)
+        # raise NotImplemented('Function needs column-definition handling.')
+        query = 'CREATE TABLE {0} {1};'.format(table_name, table_columns)
         self._base.query.execute(query)
         logger.info('Created table "{0}".'.format(table_name))
 
@@ -347,3 +354,16 @@ class BaseValidate():
         """
         # For now, always return as valid.
         return True
+
+    def table_columns(self, columns):
+        """
+        Validates that provided column values match expected syntax.
+        :param columns: Str or dict of columns to validate.
+        :return: True if columns are valid | False otherwise.
+        """
+        # Add parenthesis if either side is missing them.
+        if columns[0] != '(' or columns[-1] != ')':
+            columns = '(' + columns + ')'
+
+        # For now, always return as valid.
+        return columns
