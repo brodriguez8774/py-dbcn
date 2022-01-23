@@ -19,6 +19,7 @@ class BaseDisplay():
     """
 
     """
-    def __init__(self, parent):
+    def __init__(self, parent, *args, **kwargs):
         logger.debug('Generating related (core) Display class.')
+
         self._base = parent

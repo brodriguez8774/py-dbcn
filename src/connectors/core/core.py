@@ -1,5 +1,5 @@
 """
-Main section of "Core" DB Connector class.
+"Core" DB Connector class.
 
 Contains generalized database connection logic.
 Should be inherited by language-specific connectors.
@@ -26,8 +26,9 @@ class AbstractDbConnector(ABC):
     Abstract connector for database and
     """
     @abstractmethod
-    def __init__(self, debug=False):
+    def __init__(self, *args, debug=False, **kwargs):
         logger.debug('Generating (core) Connector class.')
+
         self.connection = None
         self._debug = debug
 

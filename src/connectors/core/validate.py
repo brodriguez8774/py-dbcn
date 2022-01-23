@@ -20,8 +20,9 @@ class BaseValidate():
     """
 
     """
-    def __init__(self, parent):
+    def __init__(self, parent, *args, **kwargs):
         logger.debug('Generating related (core) Validate class.')
+
         self._base = parent
 
     def database_name(self, name):

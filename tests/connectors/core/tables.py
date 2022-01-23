@@ -7,7 +7,7 @@ import unittest
 
 # User Imports.
 from config import mysql_config, sqlite_config
-from src.connectors import MySqlConnector, SqliteConnector
+from src.connectors import MysqlDbConnector, PostgresqlDbConnector, SqliteDbConnector
 
 
 class TestCoreTables(unittest.TestCase):
@@ -22,7 +22,7 @@ class TestCoreTables(unittest.TestCase):
         cls.test_database_name = 'python__db_connector__mysql_unittest__{0}'.format(cls.__name__)
 
         # Initialize db connection objects.
-        cls.mysql_connector = MySqlConnector(
+        cls.mysql_connector = MysqlDbConnector(
             mysql_config['host'],
             mysql_config['port'],
             mysql_config['user'],

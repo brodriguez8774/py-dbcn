@@ -19,8 +19,9 @@ class BaseDatabase():
     """
 
     """
-    def __init__(self, parent):
+    def __init__(self, parent, *args, **kwargs):
         logger.debug('Generating related (core) Database class.')
+
         self._base = parent
 
     def _get(self, show=False):

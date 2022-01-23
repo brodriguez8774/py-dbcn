@@ -1,5 +1,5 @@
 """
-Tests for "database" logic of "Core" DB Connector class.
+Tests for "tables" logic of "SqLite" DB Connector class.
 """
 
 # System Imports.
@@ -10,9 +10,9 @@ from config import mysql_config, sqlite_config
 from src.connectors import MysqlDbConnector, PostgresqlDbConnector, SqliteDbConnector
 
 
-class TestCoreDatabase(unittest.TestCase):
+class TestSqliteTables(unittest.TestCase):
     """
-    Tests "Core" DB Connector class database logic.
+    Tests "SqLite" DB Connector class table logic.
     """
     @classmethod
     def setUpClass(cls):

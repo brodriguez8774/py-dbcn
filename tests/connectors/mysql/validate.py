@@ -1,5 +1,5 @@
 """
-Tests for "database" logic of "Core" DB Connector class.
+Tests for "validate" logic of "MySQL" DB Connector class.
 """
 
 # System Imports.
@@ -8,11 +8,12 @@ import unittest
 # User Imports.
 from config import mysql_config, sqlite_config
 from src.connectors import MysqlDbConnector, PostgresqlDbConnector, SqliteDbConnector
+from src.connectors.core.validate import BaseValidate
 
 
-class TestCoreDatabase(unittest.TestCase):
+class TestMysqlValidate(unittest.TestCase):
     """
-    Tests "Core" DB Connector class database logic.
+    Tests "MySQL" DB Connector class validation logic.
     """
     @classmethod
     def setUpClass(cls):

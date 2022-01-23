@@ -7,7 +7,7 @@ import unittest
 
 # User Imports.
 from config import mysql_config, sqlite_config
-from src.connectors import MySqlConnector, SqliteConnector
+from src.connectors import MysqlDbConnector, PostgresqlDbConnector, SqliteDbConnector
 
 
 class TestCoreDisplay(unittest.TestCase):
