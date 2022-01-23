@@ -1,0 +1,123 @@
+"""
+Database section of "Core" DB Connector class.
+
+Contains generalized database connection logic.
+Should be inherited by language-specific connectors.
+"""
+
+# System Imports.
+
+# User Imports.
+from src.logging import init_logging
+
+
+# Import logger.
+logger = init_logging(__name__)
+
+
+class BaseDatabase():
+    """
+
+    """
+    def __init__(self, parent):
+        logger.debug('Generating related (core) Database class.')
+        self._base = parent
+
+    def _get(self, show=False):
+        """
+        Gets list of all currently-available databases.
+        :param show: Bool indicating if results should be printed to console or not. Used for "SHOW DATABASES" query.
+        """
+        # Generate and execute query.
+        query = 'SHOW DATABASES;'
+        results = self._base.query.execute(query)
+
+        # Convert to more friendly format.
+        formatted_results = []
+        for result in results:
+            formatted_results.append(result[0])
+        results = formatted_results
+
+        if show:
+            logger.info('results: {0}'.format(results))
+
+        # Return data.
+        return results
+
+    def show(self):
+        """
+        Displays all databases available for selection.
+        """
+        return self._get(show=True)
+
+    def use(self, db_name):
+        """
+        Selects given database for use.
+        """
+        # First, check that provided name is valid format.
+        if not self._base.validate.database_name(db_name):
+            raise ValueError('Invalid database name of "{0}".'.format(db_name))
+
+        # Get list of valid databases.
+        available_databases = self._get()
+
+        # Check if provided database matches value in list.
+        if db_name not in available_databases:
+            raise ValueError(
+                'Could not find database "{0}". Valid options are {1}.'.format(db_name, available_databases)
+            )
+
+        # Generate and execute query.
+        query = 'USE {0};'.format(db_name)
+        self._base.query.execute(query)
+        logger.info('Database changed to "{0}".'.format(db_name))
+
+    def create(self, db_name):
+        """
+        Creates new database with provided name.
+        :param db_name: Desired name of new database.
+        """
+        # First, check that provided name is valid format.
+        if not self._base.validate.database_name(db_name):
+            raise ValueError('Invalid database name of "{0}".'.format(db_name))
+
+        # Get list of valid databases.
+        available_databases = self._get()
+
+        # Check if provided database matches value in list.
+        if db_name in available_databases:
+            # Database already exists. Raise error.
+            raise ValueError('Database with name "{0}" already exists'.format(db_name))
+
+        # Create new database.
+        query = 'CREATE DATABASE {0};'.format(db_name)
+        self._base.query.execute(query)
+        logger.info('Created database "{0}".'.format(db_name))
+
+    def drop(self, db_name):
+        """
+        Deletes database with provided name.
+        :param db_name: Name of database to delete.
+        """
+        # First, check that provided name is valid format.
+        if not self._base.validate.database_name(db_name):
+            raise ValueError('Invalid database name of "{0}".'.format(db_name))
+
+        # Get list of valid databases.
+        available_databases = self._get()
+
+        # Check if provided database matches value in list.
+        if db_name not in available_databases:
+            # Database does not exist. Raise error.
+            raise ValueError('Database with name "{0}" already exists'.format(db_name))
+
+        # Remove database.
+        query = 'DROP DATABASE {0};'.format(db_name)
+        self._base.query.execute(query)
+        logger.info('Dropped database "{0}".'.format(db_name))
+
+    def delete(self, db_name):
+        """
+        Alias for database "drop" function.
+        """
+        self.drop(db_name)
