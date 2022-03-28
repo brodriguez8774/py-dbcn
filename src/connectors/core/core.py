@@ -23,7 +23,10 @@ logger = init_logging(__name__)
 
 class AbstractDbConnector(ABC):
     """
-    Abstract connector for database and
+    Abstract/generalized database connector logic, that is universal to all database classes.
+
+    (As this project develops, logic will likely start here,
+    and then be gradually moved to specific connectors as needed.)
     """
     @abstractmethod
     def __init__(self, *args, debug=False, **kwargs):

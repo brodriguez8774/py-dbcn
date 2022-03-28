@@ -17,7 +17,10 @@ logger = init_logging(__name__)
 
 class BaseTables():
     """
+    Abstract/generalized logic, for making table queries.
 
+    (As this project develops, logic will likely start here,
+    and then be gradually moved to specific connectors as needed.)
     """
     def __init__(self, parent, *args, **kwargs):
         logger.debug('Generating related (core) Query class.')

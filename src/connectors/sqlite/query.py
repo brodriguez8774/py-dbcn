@@ -17,7 +17,7 @@ logger = init_logging(__name__)
 
 class SqliteQuery(BaseQuery):
     """
-
+    Logic for making row queries, for SqLite databases.
     """
     def __init__(self, parent, *args, **kwargs):
         # Call parent logic.

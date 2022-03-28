@@ -18,7 +18,10 @@ logger = init_logging(__name__)
 
 class BaseValidate():
     """
+    Abstract/generalized logic, for validating various queries and query subsections.
 
+    (As this project develops, logic will likely start here,
+    and then be gradually moved to specific connectors as needed.)
     """
     def __init__(self, parent, *args, **kwargs):
         logger.debug('Generating related (core) Validate class.')

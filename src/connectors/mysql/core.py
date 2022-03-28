@@ -23,7 +23,7 @@ logger = init_logging(__name__)
 
 class MysqlDbConnector(AbstractDbConnector):
     """
-    Abstract connector for database and
+    Database connector logic for MySQL databases.
     """
     def __init__(self, db_host, db_port, db_user, db_pass, db_name, *args, debug=False, **kwargs):
         db_port = int(db_port)

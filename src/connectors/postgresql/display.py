@@ -17,7 +17,7 @@ logger = init_logging(__name__)
 
 class PostgresqlDisplay(BaseDisplay):
     """
-
+    Logic for displaying queries and other project output in prettier format, for PostgreSQL databases.
     """
     def __init__(self, parent, *args, **kwargs):
         # Call parent logic.

@@ -22,7 +22,7 @@ logger = init_logging(__name__)
 
 class PostgresqlDbConnector(AbstractDbConnector):
     """
-    Abstract connector for database and
+    Database connector logic for PostgreSQL databases.
     """
     def __init__(self, *args, debug=False, **kwargs):
         # Call parent logic.

@@ -23,7 +23,7 @@ logger = init_logging(__name__)
 
 class SqliteDbConnector(AbstractDbConnector):
     """
-    Abstract connector for database and
+    Database connector logic for SqLite databases.
     """
     def __init__(self, db_location, *args, debug=False, **kwargs):
         # Call parent logic.
