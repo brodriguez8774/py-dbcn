@@ -18,3 +18,9 @@ class TestCoreDatabase(unittest.TestCase):
     def setUpClass(cls):
         # Run parent setup logic.
         super().setUpClass()
+
+    def test__create_database__success(self):
+        """"""
+
+    def test__create_database__failure(self):
+        """"""

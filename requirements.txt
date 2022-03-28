@@ -10,6 +10,8 @@
  ##
 mysqlclient     # For connecting to mysql.
 pytz            # For datetime shenanigans.
+pytest          # Base Pytest package. Current preferred testing method.
+pytest-xdist    # Additional Pytest features, such as multithreading and looping.
 
 
 ###
