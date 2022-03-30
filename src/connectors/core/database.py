@@ -91,7 +91,7 @@ class BaseDatabase():
         # Check if provided database matches value in list.
         if db_name in available_databases:
             # Database already exists. Raise error.
-            raise ValueError('Database with name "{0}" already exists'.format(db_name))
+            raise ValueError('Database with name "{0}" already exists.'.format(db_name))
 
         # Create new database.
         query = 'CREATE DATABASE {0};'.format(db_name)
@@ -113,7 +113,7 @@ class BaseDatabase():
         # Check if provided database matches value in list.
         if db_name not in available_databases:
             # Database does not exist. Raise error.
-            raise ValueError('Database with name "{0}" already exists'.format(db_name))
+            raise ValueError('Database with name "{0}" does not exist.'.format(db_name))
 
         # Remove database.
         query = 'DROP DATABASE {0};'.format(db_name)
