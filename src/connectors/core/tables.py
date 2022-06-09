@@ -72,6 +72,8 @@ class BaseTables():
         results = self._base.query.execute(query)
         logger.info('results: {0}'.format(results))
 
+        return results
+
     def create(self, table_name, table_columns):
         """
         Creates new table with provided name.
@@ -129,3 +131,23 @@ class BaseTables():
         Alias for table "drop" function.
         """
         self.drop(table_name)
+
+    def count(self, table_name):
+        """
+        Returns number of all records present in provided table.
+        :param table_name: Name of table to count.
+        """
+        # Get list of valid tables.
+        available_tables = self._get()
+
+        # Check if provided table matches value in list.
+        if table_name not in available_tables:
+            raise ValueError(
+                'Could not find table "{0}". Valid options are {1}.'.format(table_name, available_tables)
+            )
+
+        # Count records in table.
+        result = self._base.query.select(table_name, 'COUNT(*)')
+        result = result[0][0]
+
+        return result

@@ -3,10 +3,9 @@ Tests for "tables" logic of "MySQL" DB Connector class.
 """
 
 # System Imports.
-
-# User Imports.
 import MySQLdb
 
+# User Imports.
 from .test_core import TestMysqlDatabaseParent
 
 
@@ -22,6 +21,7 @@ class TestMysqlTables(TestMysqlDatabaseParent):
         # Initialize database for tests.
         db_name = 'python__db_connector__test_tables'
         cls.connector.database.create(db_name)
+        cls.connector.database.use(db_name)
 
         # Define default table columns.
         cls._columns_query = """(
@@ -131,3 +131,37 @@ class TestMysqlTables(TestMysqlDatabaseParent):
         results = self.connector.tables.show()
         self.assertGreaterEqual(len(results), 1)
         self.assertIn(table_name, results)
+
+    def test__count_table(self):
+        """
+        Test `COUNT TABLE` query.
+        """
+        table_name = 'test_tables__count'
+
+        # Verify table exists.
+        try:
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query))
+        except MySQLdb.OperationalError:
+            # Table already exists, as we want.
+            pass
+
+        # Check tables prior to test query. Verify expected table returned.
+        results = self.connector.tables.show()
+        self.assertGreaterEqual(len(results), 1)
+        self.assertIn(table_name, results)
+
+        # Run test query with empty table.
+        results = self.connector.tables.count(table_name)
+        self.assertEqual(results, 0)
+
+        # Add one record and run test query again.
+        self.connector.query.execute('INSERT INTO {0} VALUES (1, "test_name_1", "test_desc_1");'.format(table_name))
+        results = self.connector.tables.count(table_name)
+        self.assertEqual(results, 1)
+
+        # # Add second record and run test query again.
+        self.connector.query.execute('INSERT INTO {0} VALUES (2, "test_name_2", "test_desc_2");'.format(table_name))
+        results = self.connector.tables.count(table_name)
+        self.assertEqual(results, 2)
+
+        # Works for 0, 1, and 2. Assume works for all further n+1 values.
