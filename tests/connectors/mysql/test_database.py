@@ -43,7 +43,7 @@ class TestMysqlDatabase(TestMysqlDatabaseParent):
 
         # Remove database and verify expected results changed.
         with self.subTest('SHOW query when database does not exist'):
-            # Verify database exists.
+            # Verify database does not exist.
             try:
                 self.connector.query.execute('DROP DATABASE {0};'.format(db_name))
             except MySQLdb.OperationalError:
@@ -69,22 +69,16 @@ class TestMysqlDatabase(TestMysqlDatabaseParent):
             # Database does not yet exist, as we want.
             pass
 
-        # Check databases prior to test query.
+        # Check databases prior to test query. Verify expected database did not return.
         results = self.connector.database.show()
-
-        # Verify expected database did not return.
         self.assertNotIn(db_name, results)
 
         # Run test query.
         self.connector.database.create(db_name)
 
-        # Check databases after test query.
+        # Check databases after test query. Verify expected database returned.
         results = self.connector.database.show()
-
-        # Verify at least one database returned.
         self.assertGreaterEqual(len(results), 1)
-
-        # Verify expected database returned.
         self.assertIn(db_name, results)
 
     def test__create_database__failure(self):
@@ -100,13 +94,9 @@ class TestMysqlDatabase(TestMysqlDatabaseParent):
             # Database already exists, as we want.
             pass
 
-        # Check databases prior to test query.
+        # Check databases prior to test query. Verify expected database returned.
         results = self.connector.database.show()
-
-        # Verify at least one database returned.
         self.assertGreaterEqual(len(results), 1)
-
-        # Verify expected database returned.
         self.assertIn(db_name, results)
 
         # Run test query.
@@ -126,13 +116,9 @@ class TestMysqlDatabase(TestMysqlDatabaseParent):
             # Database already exists, as we want.
             pass
 
-        # Check databases prior to test query.
+        # Check databases prior to test query. Verify expected database returned.
         results = self.connector.database.show()
-
-        # Verify at least one database returned.
         self.assertGreaterEqual(len(results), 1)
-
-        # Verify expected database returned.
         self.assertIn(db_name, results)
 
         # Run test query.
@@ -158,10 +144,8 @@ class TestMysqlDatabase(TestMysqlDatabaseParent):
             # Database does not exist, as we want.
             pass
 
-        # Check databases prior to test query.
+        # Check databases prior to test query. Verify expected database did not return.
         results = self.connector.database.show()
-
-        # Verify expected database did not return.
         self.assertNotIn(db_name, results)
 
         # Run test query.
@@ -181,25 +165,17 @@ class TestMysqlDatabase(TestMysqlDatabaseParent):
             # Database already exists, as we want.
             pass
 
-        # Check databases prior to test query.
+        # Check databases prior to test query. Verify expected database returned.
         results = self.connector.database.show()
-
-        # Verify at least one database returned.
         self.assertGreaterEqual(len(results), 1)
-
-        # Verify expected database returned.
         self.assertIn(db_name, results)
 
         # Run test query.
         self.connector.database.delete(db_name)
 
-        # Check databases after test query.
+        # Check databases after test query. Verify expected database did not return.
         results = self.connector.database.show()
-
-        # Verify at least one database returned.
         self.assertGreaterEqual(len(results), 1)
-
-        # Verify expected database did not return.
         self.assertNotIn(db_name, results)
 
     def test__delete_database__failure(self):
@@ -215,10 +191,8 @@ class TestMysqlDatabase(TestMysqlDatabaseParent):
             # Database does not yet exist, as we want.
             pass
 
-        # Check databases prior to test query.
+        # Check databases prior to test query. Verify expected database did not return.
         results = self.connector.database.show()
-
-        # Verify expected database did not return.
         self.assertNotIn(db_name, results)
 
         # Run test query.
