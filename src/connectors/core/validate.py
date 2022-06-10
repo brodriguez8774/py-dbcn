@@ -32,16 +32,18 @@ class BaseValidate():
         """
         Validates that provided database name uses set of acceptable characters.
         :param name: Potential name of database to validate.
-        :return: True if name is valid | False otherwise.
+        :return: True if valid | False otherwise.
         """
         # For now, always return as valid.
         return True
+
+    # region Name Validation
 
     def table_name(self, name):
         """
         Validates that provided table name uses set of acceptable characters.
         :param name: Potential name of table to validate.
-        :return: True if name is valid | False otherwise.
+        :return: True if valid | False otherwise.
         """
         # For now, always return as valid.
         return True
@@ -99,3 +101,54 @@ class BaseValidate():
 
         # For now, always return as valid.
         return columns
+
+    # endregion Name Validation
+
+    # region Clause Validation
+
+    def select_clause(self, clause):
+        """
+        Validates that provided clause follows acceptable format.
+        :param clause: SELECT clause to validate.
+        :return: True if valid | False otherwise.
+        """
+        # For now, always return as valid.
+        return True
+
+    def columns_clause(self, clause):
+        """
+        Validates that provided clause follows acceptable format.
+        :param clause: COLUMNS clause to validate.
+        :return: True if valid | False otherwise.
+        """
+        # For now, always return as valid.
+        return True
+
+    def values_clause(self, clause):
+        """
+        Validates that provided clause follows acceptable format.
+        :param clause: VALUES clause to validate.
+        :return: True if valid | False otherwise.
+        """
+        # For now, always return as valid.
+        return True
+
+    def where_clause(self, clause):
+        """
+        Validates that provided clause follows acceptable format.
+        :param clause: WHERE clause to validate.
+        :return: True if valid | False otherwise.
+        """
+        # For now, always return as valid.
+        return True
+
+    def order_by_clause(self, clause):
+        """
+        Validates that provided clause follows acceptable format.
+        :param clause: ORDER_BY clause to validate.
+        :return: True if valid | False otherwise.
+        """
+        # For now, always return as valid.
+        return True
+
+    # endregion Clause Validation
