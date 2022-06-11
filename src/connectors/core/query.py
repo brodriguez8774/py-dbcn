@@ -27,9 +27,10 @@ class BaseQuery():
 
         self._base = parent
 
-    def execute(self, query):
+    def execute(self, query, display_query=True):
         """"""
-        logger.query(query)
+        if display_query:
+            logger.query(query)
 
         # Create connection and execute query.
         cursor = self._base.connection.cursor()

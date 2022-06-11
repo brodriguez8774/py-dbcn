@@ -43,7 +43,7 @@ class BaseTables():
         results = formatted_results
 
         if show:
-            logger.info('results: {0}'.format(results))
+            self._base.display.tables._get(results, logger)
 
         # Return data.
         return results
