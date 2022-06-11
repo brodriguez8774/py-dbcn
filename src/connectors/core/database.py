@@ -27,6 +27,20 @@ class BaseDatabase():
 
         self._base = parent
 
+    def select(self):
+        """Returns name of currently selected database."""
+        return (self._base.query.execute(
+            'SELECT DATABASE();',
+            display_query=False,
+        )[0][0]).strip()
+
+    def current(self):
+        """Returns name of currently selected database.
+
+        Alias for select().
+        """
+        return self.select()
+
     def _get(self, show=False):
         """
         Gets list of all currently-available databases.

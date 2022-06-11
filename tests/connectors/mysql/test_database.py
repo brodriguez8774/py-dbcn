@@ -18,6 +18,57 @@ class TestMysqlDatabase(TestMysqlDatabaseParent):
         # Run parent setup logic.
         super().setUpClass()
 
+    def test__select(self):
+        """
+        Test logic for `SELECT;` query.
+        """
+        with self.subTest('With default database selected'):
+            # Varify default database name is returned.
+            result = self.connector.database.select()
+            self.assertEqual(result, 'test_database')
+
+            # Verify alias func returns same result.
+            result = self.connector.database.current()
+            self.assertEqual(result, 'test_database')
+
+        with self.subTest('With select_1 database selected'):
+            db_name = 'python__db_connector__test_database__select_1'
+
+            # Verify database exists.
+            try:
+                self.connector.query.execute('CREATE DATABASE {0};'.format(db_name))
+            except MySQLdb.ProgrammingError:
+                # Database already exists, as we want.
+                pass
+
+            # Switch databases and verify select changed.
+            self.connector.database.use(db_name)
+            result = self.connector.database.select()
+            self.assertEqual(result, db_name)
+
+            # Verify alias func returns same result.
+            result = self.connector.database.current()
+            self.assertEqual(result, db_name)
+
+        with self.subTest('With select_2 database selected'):
+            db_name = 'python__db_connector__test_database__select_2'
+
+            # Verify database exists.
+            try:
+                self.connector.query.execute('CREATE DATABASE {0};'.format(db_name))
+            except MySQLdb.ProgrammingError:
+                # Database already exists, as we want.
+                pass
+
+            # Switch databases and verify select changed.
+            self.connector.database.use(db_name)
+            result = self.connector.database.select()
+            self.assertEqual(result, db_name)
+
+            # Verify alias func returns same result.
+            result = self.connector.database.current()
+            self.assertEqual(result, db_name)
+
     def test__show_database(self):
         """
         Test logic for `SHOW DATABASES;` query.
