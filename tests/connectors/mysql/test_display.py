@@ -245,8 +245,8 @@ class TestMysqlDisplayTable(TestMysqlDatabaseParent):
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertEqual(self.get_output(ilog, 0), 'SHOW TABLES;')
-            self.assertEqual(self.get_output(ilog, 1), 'Empty Set')
+            self.assertText(self.get_output(ilog, 0), 'SHOW TABLES;')
+            self.assertText(self.get_output(ilog, 1), 'Empty Set')
 
         with self.subTest('Db name longer - Pt 1'):
             # Create table.
@@ -255,8 +255,8 @@ class TestMysqlDisplayTable(TestMysqlDatabaseParent):
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertEqual(self.get_output(ilog, 0), 'SHOW TABLES;')
-            self.assertEqual(self.get_output(ilog, 1), EXPECTED__TABLE__SHOW__DB_LONGER__PT_1)
+            self.assertText(self.get_output(ilog, 0), 'SHOW TABLES;')
+            self.assertText(self.get_output(ilog, 1), EXPECTED__TABLE__SHOW__DB_LONGER__PT_1)
 
         with self.subTest('Db name longer - Pt 2'):
             # Create table.
@@ -265,8 +265,8 @@ class TestMysqlDisplayTable(TestMysqlDatabaseParent):
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertEqual(self.get_output(ilog, 0), 'SHOW TABLES;')
-            self.assertEqual(self.get_output(ilog, 1), EXPECTED__TABLE__SHOW__DB_LONGER__PT_2)
+            self.assertText(self.get_output(ilog, 0), 'SHOW TABLES;')
+            self.assertText(self.get_output(ilog, 1), EXPECTED__TABLE__SHOW__DB_LONGER__PT_2)
 
         with self.subTest('Db name longer - Pt 3'):
             # Create table.
@@ -275,8 +275,8 @@ class TestMysqlDisplayTable(TestMysqlDatabaseParent):
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertEqual(self.get_output(ilog, 0), 'SHOW TABLES;')
-            self.assertEqual(self.get_output(ilog, 1), EXPECTED__TABLE__SHOW__DB_LONGER__PT_3)
+            self.assertText(self.get_output(ilog, 0), 'SHOW TABLES;')
+            self.assertText(self.get_output(ilog, 1), EXPECTED__TABLE__SHOW__DB_LONGER__PT_3)
 
         with self.subTest('Db name and table name equal length'):
             # Create table.
@@ -288,8 +288,8 @@ class TestMysqlDisplayTable(TestMysqlDatabaseParent):
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertEqual(self.get_output(ilog, 0), 'SHOW TABLES;')
-            self.assertEqual(self.get_output(ilog, 1), EXPECTED__TABLE__SHOW__EQUAL_LENGTH)
+            self.assertText(self.get_output(ilog, 0), 'SHOW TABLES;')
+            self.assertText(self.get_output(ilog, 1), EXPECTED__TABLE__SHOW__EQUAL_LENGTH)
 
         with self.subTest('Table name longer - Pt 1'):
             # Create table.
@@ -301,8 +301,8 @@ class TestMysqlDisplayTable(TestMysqlDatabaseParent):
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertEqual(self.get_output(ilog, 0), 'SHOW TABLES;')
-            self.assertEqual(self.get_output(ilog, 1), EXPECTED__TABLE__SHOW__TABLE_LONGER__PT_1)
+            self.assertText(self.get_output(ilog, 0), 'SHOW TABLES;')
+            self.assertText(self.get_output(ilog, 1), EXPECTED__TABLE__SHOW__TABLE_LONGER__PT_1)
 
         with self.subTest('Table name longer - Pt 2'):
             # Create table.
@@ -311,8 +311,8 @@ class TestMysqlDisplayTable(TestMysqlDatabaseParent):
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertEqual(self.get_output(ilog, 0), 'SHOW TABLES;')
-            self.assertEqual(self.get_output(ilog, 1), EXPECTED__TABLE__SHOW__TABLE_LONGER__PT_2)
+            self.assertText(self.get_output(ilog, 0), 'SHOW TABLES;')
+            self.assertText(self.get_output(ilog, 1), EXPECTED__TABLE__SHOW__TABLE_LONGER__PT_2)
 
         with self.subTest('Table name longer - Pt 3'):
             # Create table.
@@ -324,6 +324,6 @@ class TestMysqlDisplayTable(TestMysqlDatabaseParent):
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertEqual(self.get_output(ilog, 0), 'SHOW TABLES;')
-            self.assertEqual(self.get_output(ilog, 1), EXPECTED__TABLE__SHOW__TABLE_LONGER__PT_3)
+            self.assertText(self.get_output(ilog, 0), 'SHOW TABLES;')
+            self.assertText(self.get_output(ilog, 1), EXPECTED__TABLE__SHOW__TABLE_LONGER__PT_3)
 

@@ -39,3 +39,24 @@ class TestMysqlDatabaseParent(unittest.TestCase):
 
         # Run parent teardown logic.
         super().tearDownClass()
+
+    def assertText(self, actual_text, expected_text):
+        """Wrapper for assertEquals, that prints values to console on mismatch."""
+        actual_text = str(actual_text).strip()
+        expected_text = str(expected_text).strip()
+
+        # Attempt assertion.
+        try:
+            self.assertEqual(actual_text, expected_text)
+        except AssertionError as err:
+            # Assertion failed. Provide debug output.
+            print('\n\n\n\n')
+            print('ACTUAL:')
+            print(actual_text)
+            print('\n')
+            print('EXPECTED:')
+            print(expected_text)
+            print('\n\n\n\n')
+
+            # Raise original error.
+            raise AssertionError(err)
