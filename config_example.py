@@ -6,7 +6,7 @@ If modifying these values at all, please copy to a new "config.py" file and edit
 
 # SqLite connection values.
 sqlite_config = {
-    'location': 'db_location'
+    'location': 'db.sqlite3'
 }
 
 
