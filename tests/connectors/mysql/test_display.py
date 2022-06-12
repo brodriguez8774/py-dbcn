@@ -10,7 +10,7 @@ from .test_core import TestMysqlDatabaseParent
 
 EXPECTED__TABLE__SHOW__DB_LONGER__PT_1 = """
 +------------------------------------------------------+
-| Tables in python__db_connector__test_display__tables |
+| Tables in python__db_connector__test_d__tables__show |
 +------------------------------------------------------+
 | category                                             |
 +------------------------------------------------------+
@@ -19,7 +19,7 @@ EXPECTED__TABLE__SHOW__DB_LONGER__PT_1 = """
 
 EXPECTED__TABLE__SHOW__DB_LONGER__PT_2 = """
 +------------------------------------------------------+
-| Tables in python__db_connector__test_display__tables |
+| Tables in python__db_connector__test_d__tables__show |
 +------------------------------------------------------+
 | category                                             |
 | priority                                             |
@@ -29,7 +29,7 @@ EXPECTED__TABLE__SHOW__DB_LONGER__PT_2 = """
 
 EXPECTED__TABLE__SHOW__DB_LONGER__PT_3 = """
 +------------------------------------------------------+
-| Tables in python__db_connector__test_display__tables |
+| Tables in python__db_connector__test_d__tables__show |
 +------------------------------------------------------+
 | a                                                    |
 | category                                             |
@@ -40,7 +40,7 @@ EXPECTED__TABLE__SHOW__DB_LONGER__PT_3 = """
 
 EXPECTED__TABLE__SHOW__EQUAL_LENGTH = """
 +------------------------------------------------------+
-| Tables in python__db_connector__test_display__tables |
+| Tables in python__db_connector__test_d__tables__show |
 +------------------------------------------------------+
 | a                                                    |
 | category                                             |
@@ -52,7 +52,7 @@ EXPECTED__TABLE__SHOW__EQUAL_LENGTH = """
 
 EXPECTED__TABLE__SHOW__TABLE_LONGER__PT_1 = """
 +-------------------------------------------------------+
-| Tables in python__db_connector__test_display__tables  |
+| Tables in python__db_connector__test_d__tables__show  |
 +-------------------------------------------------------+
 | a                                                     |
 | category                                              |
@@ -65,7 +65,7 @@ EXPECTED__TABLE__SHOW__TABLE_LONGER__PT_1 = """
 
 EXPECTED__TABLE__SHOW__TABLE_LONGER__PT_2 = """
 +-------------------------------------------------------+
-| Tables in python__db_connector__test_display__tables  |
+| Tables in python__db_connector__test_d__tables__show  |
 +-------------------------------------------------------+
 | a                                                     |
 | category                                              |
@@ -79,7 +79,7 @@ EXPECTED__TABLE__SHOW__TABLE_LONGER__PT_2 = """
 
 EXPECTED__TABLE__SHOW__TABLE_LONGER__PT_3 = """
 +----------------------------------------------------------+
-| Tables in python__db_connector__test_display__tables     |
+| Tables in python__db_connector__test_d__tables__show     |
 +----------------------------------------------------------+
 | a                                                        |
 | category                                                 |
@@ -90,6 +90,36 @@ EXPECTED__TABLE__SHOW__TABLE_LONGER__PT_3 = """
 | zzz                                                      |
 +----------------------------------------------------------+
 """.strip()
+
+
+EXPECTED__TABLE__DESCRIBE__COLS_ID = """
++-------+------+------+-----+---------+----------------+
+| Field | Type | Null | Key | Default | Extra          |
++-------+------+------+-----+---------+----------------+
+| id    | int  | NO   | PRI | NULL    | auto_increment |
++-------+------+------+-----+---------+----------------+
+"""
+
+
+EXPECTED__TABLE__DESCRIBE__COLS_ID_NAME = """
++-------+--------------+------+-----+---------+----------------+
+| Field | Type         | Null | Key | Default | Extra          |
++-------+--------------+------+-----+---------+----------------+
+| id    | int          | NO   | PRI | NULL    | auto_increment |
+| name  | varchar(100) | YES  |     | NULL    |                |
++-------+--------------+------+-----+---------+----------------+
+"""
+
+
+EXPECTED__TABLE__DESCRIBE__COLS_ID_NAME_DESC = """
++-------------+--------------+------+-----+---------+----------------+
+| Field       | Type         | Null | Key | Default | Extra          |
++-------------+--------------+------+-----+---------+----------------+
+| id          | int          | NO   | PRI | NULL    | auto_increment |
+| name        | varchar(100) | YES  |     | NULL    |                |
+| description | varchar(100) | YES  |     | NULL    |                |
++-------------+--------------+------+-----+---------+----------------+
+"""
 
 
 class TestMysqlDisplay(TestMysqlDatabaseParent):
@@ -224,15 +254,15 @@ class TestMysqlDisplayTable(TestMysqlDatabaseParent):
         super().setUpClass()
 
         # Initialize database for tests.
-        db_name = 'python__db_connector__test_display__tables'
-        cls.connector.database.create(db_name)
-        cls.connector.database.use(db_name)
+        cls.db_name = 'python__db_connector__test_display__tables'
+        cls.connector.database.create(cls.db_name)
+        cls.connector.database.use(cls.db_name)
 
     def get_output(self, log_capture, record_num):
         """Helper function to read captured logging output."""
         return str(log_capture.records[record_num].message).strip()
 
-    def test__display__show_tables__db_name_longer(self):
+    def test__display__show_tables(self):
         """"""
         columns = """(
             id INT NOT NULL AUTO_INCREMENT,
@@ -240,6 +270,11 @@ class TestMysqlDisplayTable(TestMysqlDatabaseParent):
             description VARCHAR(100),
             PRIMARY KEY ( id )
         )"""
+
+        # Since this directly tests display of tables, ensure we use a fresh database.
+        db_name = '{0}d__tables__show'.format(self.db_name[0:-15])
+        self.connector.database.create(db_name)
+        self.connector.database.use(db_name)
 
         with self.subTest('With no tables present'):
             # Capture logging output.
@@ -327,3 +362,33 @@ class TestMysqlDisplayTable(TestMysqlDatabaseParent):
             self.assertText(self.get_output(ilog, 0), 'SHOW TABLES;')
             self.assertText(self.get_output(ilog, 1), EXPECTED__TABLE__SHOW__TABLE_LONGER__PT_3)
 
+    def test__display__describe_tables(self):
+        """"""
+        columns = """(
+            id INT NOT NULL AUTO_INCREMENT,
+            name VARCHAR(100),
+            description VARCHAR(100),
+            PRIMARY KEY ( id )
+        )"""
+        columns = """(
+            id INT NOT NULL AUTO_INCREMENT,
+            PRIMARY KEY ( id )
+        )"""
+
+        # Since this directly tests display of tables, ensure we use a fresh database.
+        db_name = '{0}d__tables__desc'.format(self.db_name[0:-15])
+        self.connector.database.create(db_name)
+        self.connector.database.use(db_name)
+
+        # Create initial table to describe.
+        self.connector.tables.create('category', columns)
+
+        # with self.subTest('With only id'):
+        #     # Capture logging output.
+        #     with self.assertLogs(None, 'INFO') as ilog:
+        #         self.connector.tables.describe('category')
+        #     self.assertText(self.get_output(ilog, 0), 'DESCRIBE category;')
+        #     self.assertText(self.get_output(ilog, 3), EXPECTED__TABLE__DESCRIBE__COLS_ID)
+        #
+        # with self.subTest('Db name longer - Pt 1'):
+        #     pass
