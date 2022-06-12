@@ -366,12 +366,6 @@ class TestMysqlDisplayTable(TestMysqlDatabaseParent):
         """"""
         columns = """(
             id INT NOT NULL AUTO_INCREMENT,
-            name VARCHAR(100),
-            description VARCHAR(100),
-            PRIMARY KEY ( id )
-        )"""
-        columns = """(
-            id INT NOT NULL AUTO_INCREMENT,
             PRIMARY KEY ( id )
         )"""
 
@@ -383,12 +377,29 @@ class TestMysqlDisplayTable(TestMysqlDatabaseParent):
         # Create initial table to describe.
         self.connector.tables.create('category', columns)
 
-        # with self.subTest('With only id'):
-        #     # Capture logging output.
-        #     with self.assertLogs(None, 'INFO') as ilog:
-        #         self.connector.tables.describe('category')
-        #     self.assertText(self.get_output(ilog, 0), 'DESCRIBE category;')
-        #     self.assertText(self.get_output(ilog, 3), EXPECTED__TABLE__DESCRIBE__COLS_ID)
-        #
-        # with self.subTest('Db name longer - Pt 1'):
-        #     pass
+        with self.subTest('With only id'):
+            # Capture logging output.
+            with self.assertLogs(None, 'INFO') as ilog:
+                self.connector.tables.describe('category')
+            self.assertText(self.get_output(ilog, 1), 'DESCRIBE category;')
+            self.assertText(self.get_output(ilog, 2), EXPECTED__TABLE__DESCRIBE__COLS_ID)
+
+        with self.subTest('With id, name'):
+            # Add new table column.
+            self.connector.tables.add_column('category', 'name VARCHAR(100)')
+
+            # Capture logging output.
+            with self.assertLogs(None, 'INFO') as ilog:
+                self.connector.tables.describe('category')
+            self.assertText(self.get_output(ilog, 1), 'DESCRIBE category;')
+            self.assertText(self.get_output(ilog, 2), EXPECTED__TABLE__DESCRIBE__COLS_ID_NAME)
+
+        with self.subTest('With id, name, desc'):
+            # Add new table column.
+            self.connector.tables.add_column('category', 'description VARCHAR(100)')
+
+            # Capture logging output.
+            with self.assertLogs(None, 'INFO') as ilog:
+                self.connector.tables.describe('category')
+            self.assertText(self.get_output(ilog, 1), 'DESCRIBE category;')
+            self.assertText(self.get_output(ilog, 2), EXPECTED__TABLE__DESCRIBE__COLS_ID_NAME_DESC)

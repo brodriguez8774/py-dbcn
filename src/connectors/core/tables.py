@@ -74,7 +74,7 @@ class BaseTables:
         # Generate and execute query.
         query = 'DESCRIBE {0};'.format(table_name)
         results = self._base.query.execute(query)
-        logger.info('results: {0}'.format(results))
+        self._base.display.tables.describe(results, logger)
 
         return results
 
