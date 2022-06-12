@@ -58,6 +58,10 @@ class BaseValidate:
         :param columns: Str or dict of columns to validate.
         :return: True if columns are valid | False otherwise.
         """
+        # NOTE: Column name cannot match:
+        #   * desc
+        #   * ??? Look into further "bad" values.
+
         orig_columns = copy.deepcopy(columns)
 
         # Handle based on passed type.

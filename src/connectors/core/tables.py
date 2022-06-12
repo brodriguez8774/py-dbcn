@@ -108,6 +108,50 @@ class BaseTables:
         self._base.query.execute(query)
         logger.info('Created table "{0}".'.format(table_name))
 
+    def modify(self, table_name, modify_clause, column_clause):
+        """Modifies table column with provided name."""
+        if str(modify_clause).upper() == 'ADD':
+            modify_clause = 'ADD'
+        elif str(modify_clause).upper() == 'DROP':
+            modify_clause = 'DROP'
+        elif str(modify_clause).upper() == 'MODIFY':
+            modify_clause = 'MODIFY'
+        else:
+            err_msg = 'Invalid clause. Accepted values are ADD/DROP/MODIFY. Received "{0}".'.format(modify_clause)
+            raise ValueError(err_msg)
+
+        # Check that provided name is valid format.
+        if not self._base.validate.table_name(table_name):
+            raise ValueError('Invalid table name of "{0}".'.format(table_name))
+
+        # Check that provided COLUMNS clause is valid format.
+        if not self._base.validate.table_columns(column_clause):
+            raise ValueError('Invalid table columns of "{0}".'.format(column_clause))
+
+        # Modify table.
+        query = """
+        ALTER TABLE {0}
+        {1} {2};
+        """.format(table_name, modify_clause, column_clause)
+        self._base.query.execute(query)
+        logger.info('Created table "{0}".'.format(table_name))
+
+    def update(self, table_name, modify_clause, column_clause):
+        """Alias for modify()."""
+        return self.modify(table_name, modify_clause, column_clause)
+
+    def add_column(self, table_name, column_clause):
+        """Adds column to provided table."""
+        return self.modify(table_name, 'ADD', column_clause)
+
+    def drop_column(self, table_name, column_clause):
+        """Drops column from provided table."""
+        return self.modify(table_name, 'DROP', column_clause)
+
+    def modify_column(self, table_name, column_clause):
+        """Modifies column in provided table."""
+        return self.modify(table_name, 'MODIFY', column_clause)
+
     def drop(self, table_name):
         """
         Deletes table with provided name.

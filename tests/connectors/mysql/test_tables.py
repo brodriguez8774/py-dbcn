@@ -114,6 +114,96 @@ class TestMysqlTables(TestMysqlDatabaseParent):
         with self.assertRaises(ValueError):
             self.connector.tables.create(table_name, self._columns_query)
 
+    def test__modify_table__success(self):
+        """
+        Test `ALTER TABLE` query.
+        """
+        table_name = 'test_tables__modify__success'
+        col_1_description = ('id', 'int', 'NO', 'PRI', None, 'auto_increment')
+        col_2_description = ('name', 'varchar(100)', 'YES', '', None, '')
+        col_3_description = ('description', 'varchar(100)', 'YES', '', None, '')
+
+        # Verify table exists.
+        try:
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query))
+        except MySQLdb.OperationalError:
+            # Table already exists, as we want.
+            pass
+
+        # Check tables prior to test query. Verify expected table columns.
+        results = self.connector.tables.describe(table_name)
+        self.assertEqual(len(results), 3)
+        self.assertIn(col_1_description, results)
+        self.assertIn(col_2_description, results)
+        self.assertIn(col_3_description, results)
+
+        # Test dropping name and desc columns.
+        self.connector.tables.modify(table_name, 'DROP', 'name')
+
+        # Check after first drop.
+        results = self.connector.tables.describe(table_name)
+        self.assertEqual(len(results), 2)
+        self.assertIn(col_1_description, results)
+        self.assertNotIn(col_2_description, results)
+        self.assertIn(col_3_description, results)
+
+        # Drop again, with alternative alias method.
+        self.connector.tables.drop_column(table_name, 'description')
+
+        # Check after second drop.
+        results = self.connector.tables.describe(table_name)
+        self.assertEqual(len(results), 1)
+        self.assertIn(col_1_description, results)
+        self.assertNotIn(col_2_description, results)
+        self.assertNotIn(col_3_description, results)
+
+        # Test adding them back.
+        self.connector.tables.modify(table_name, 'ADD', 'description VARCHAR(100)')
+
+        # Check after first add.
+        results = self.connector.tables.describe(table_name)
+        self.assertEqual(len(results), 2)
+        self.assertIn(col_1_description, results)
+        self.assertNotIn(col_2_description, results)
+        self.assertIn(col_3_description, results)
+
+        # Drop again, with alternative alias method.
+        self.connector.tables.add_column(table_name, 'name VARCHAR(100)')
+
+        # Check after second add.
+        results = self.connector.tables.describe(table_name)
+        self.assertEqual(len(results), 3)
+        self.assertIn(col_1_description, results)
+        self.assertIn(col_2_description, results)
+        self.assertIn(col_3_description, results)
+
+        # Alter columns to be different types.
+        self.connector.tables.modify(table_name, 'MODIFY', 'name INT')
+        old_col_2_description = col_2_description
+        col_2_description = ('name', 'int', 'YES', '', None, '')
+
+        # Check after first modify.
+        results = self.connector.tables.describe(table_name)
+        self.assertEqual(len(results), 3)
+        self.assertIn(col_1_description, results)
+        self.assertIn(col_2_description, results)
+        self.assertIn(col_3_description, results)
+        self.assertNotIn(old_col_2_description, results)
+
+        # Drop again, with alternative alias method.
+        self.connector.tables.modify_column(table_name, 'description BOOL')
+        old_col_3_description = col_3_description
+        col_3_description = ('description', 'tinyint(1)', 'YES', '', None, '')
+
+        # Check after second add.
+        results = self.connector.tables.describe(table_name)
+        self.assertEqual(len(results), 3)
+        self.assertIn(col_1_description, results)
+        self.assertIn(col_2_description, results)
+        self.assertIn(col_3_description, results)
+        self.assertNotIn(old_col_2_description, results)
+        self.assertNotIn(old_col_3_description, results)
+
     def test__delete_table__success(self):
         """
         Test `DROP TABLE` query, when table exists.
