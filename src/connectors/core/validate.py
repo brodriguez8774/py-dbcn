@@ -16,7 +16,7 @@ from src.logging import init_logging
 logger = init_logging(__name__)
 
 
-class BaseValidate():
+class BaseValidate:
     """
     Abstract/generalized logic, for validating various queries and query subsections.
 
@@ -26,7 +26,11 @@ class BaseValidate():
     def __init__(self, parent, *args, **kwargs):
         logger.debug('Generating related (core) Validate class.')
 
+        # Define connector root object.
         self._base = parent
+
+        # Define provided direct parent object.
+        self._parent = parent
 
     def database_name(self, name):
         """

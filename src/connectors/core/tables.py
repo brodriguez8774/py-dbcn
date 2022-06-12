@@ -15,7 +15,7 @@ from src.logging import init_logging
 logger = init_logging(__name__)
 
 
-class BaseTables():
+class BaseTables:
     """
     Abstract/generalized logic, for making table queries.
 
@@ -25,7 +25,11 @@ class BaseTables():
     def __init__(self, parent, *args, **kwargs):
         logger.debug('Generating related (core) Query class.')
 
+        # Define connector root object.
         self._base = parent
+
+        # Define provided direct parent object.
+        self._parent = parent
 
     def _get(self, show=False):
         """

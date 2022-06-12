@@ -32,7 +32,7 @@ class MysqlDbConnector(AbstractDbConnector):
         super().__init__(*args, debug=debug, **kwargs)
 
         # Initialize database connection.
-        self.connection = MySQLdb.connect(host=db_host, port=db_port, user=db_user, password=db_pass, db=db_name)
+        self._connection = MySQLdb.connect(host=db_host, port=db_port, user=db_user, password=db_pass, db=db_name)
         logger.info('Created MySQL database connection.')
 
     def _get_related_database_class(self):

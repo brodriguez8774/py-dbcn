@@ -25,7 +25,13 @@ class BaseDisplay:
     def __init__(self, parent, *args, **kwargs):
         logger.debug('Generating related (core) Display class.')
 
+        # Define connector root object.
         self._base = parent
+
+        # Define provided direct parent object.
+        self._parent = parent
+
+        # Define connected children objects.
         self.tables = TableDisplay(self)
 
     def _get_longest(self, array, include_db_name=True):
@@ -55,14 +61,18 @@ class TableDisplay:
     def __init__(self, parent, *args, **kwargs):
         logger.debug('Generating Table Display class.')
 
-        self._base = parent
+        # Define connector root object.
+        self._base = parent._base
+
+        # Define provided direct parent object.
+        self._parent = parent
 
     def _get(self, results, logger):
         """Display method for table._get()."""
         if results:
             # Calculate base values.
-            db_name = self._base._base.database.select()
-            inner_row_len = self._base._get_longest(results)
+            db_name = self._base.database.select()
+            inner_row_len = self._parent._get_longest(results)
             if len(db_name) >= inner_row_len - 9:
                 header_text_len = inner_row_len
                 full_row_len = inner_row_len + 12

@@ -15,7 +15,7 @@ from src.logging import init_logging
 logger = init_logging(__name__)
 
 
-class BaseDatabase():
+class BaseDatabase:
     """
     Abstract/generalized logic, for making queries directly on the database.
 
@@ -25,7 +25,11 @@ class BaseDatabase():
     def __init__(self, parent, *args, **kwargs):
         logger.debug('Generating related (core) Database class.')
 
+        # Define connector root object.
         self._base = parent
+
+        # Define provided direct parent object.
+        self._parent = parent
 
     def select(self):
         """Returns name of currently selected database."""

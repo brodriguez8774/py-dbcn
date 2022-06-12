@@ -32,7 +32,7 @@ class AbstractDbConnector(ABC):
     def __init__(self, *args, debug=False, **kwargs):
         logger.debug('Generating (core) Connector class.')
 
-        self.connection = None
+        self._connection = None
         self._debug = debug
 
         # Create references to related subclasses.
@@ -47,7 +47,7 @@ class AbstractDbConnector(ABC):
         Close database connection on exit.
         """
         try:
-            self.connection.close()
+            self._connection.close()
         except:
             pass
 
