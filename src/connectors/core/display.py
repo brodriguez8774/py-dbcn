@@ -95,9 +95,9 @@ class TableDisplay:
             msg_str += divider
 
             # Finally display output.
-            logger.info('{0}'.format(msg_str))
+            logger.results('{0}'.format(msg_str))
         else:
-            logger.info('Empty Set')
+            logger.results('Empty Set')
 
     def describe(self, results, logger):
         """Display  method for tables.describe()."""
@@ -203,4 +203,4 @@ class TableDisplay:
         msg_str += divider
 
         # Finally display output.
-        logger.info('{0}'.format(msg_str))
+        logger.results('{0}'.format(msg_str))

@@ -106,7 +106,7 @@ class BaseTables:
         # raise NotImplemented('Function needs column-definition handling.')
         query = 'CREATE TABLE {0} {1};'.format(table_name, table_columns)
         self._base.query.execute(query)
-        logger.info('Created table "{0}".'.format(table_name))
+        logger.results('Created table "{0}".'.format(table_name))
 
     def modify(self, table_name, modify_clause, column_clause):
         """Modifies table column with provided name."""
@@ -134,7 +134,7 @@ class BaseTables:
         {1} {2};
         """.format(table_name, modify_clause, column_clause)
         self._base.query.execute(query)
-        logger.info('Created table "{0}".'.format(table_name))
+        logger.results('Created table "{0}".'.format(table_name))
 
     def update(self, table_name, modify_clause, column_clause):
         """Alias for modify()."""
@@ -172,7 +172,7 @@ class BaseTables:
         # Remove table.
         query = 'DROP TABLE {0};'.format(table_name)
         self._base.query.execute(query)
-        logger.info('Dropped table "{0}".'.format(table_name))
+        logger.results('Dropped table "{0}".'.format(table_name))
 
     def delete(self, table_name):
         """

@@ -21,7 +21,7 @@ this.logging_max_bytes = 1024 * 1024 * 10    # Max log file size of 10 MB.
 this.logging_backup_count = 10               # Keep 10 log files before overwriting.
 
 
-#region User Logging Settings
+# region User Logging Settings
 # These functions are separated to make logging modification easier for the end user.
 
 def get_logging_settings():
@@ -62,7 +62,7 @@ def get_logging_settings():
             'console': {
                 'level': 'INFO',
                 'class': 'logging.StreamHandler',
-                'formatter': 'simple',
+                'formatter': 'minimal',
             },
             # Debug Level - To file.
             'file_debug': {
@@ -91,6 +91,14 @@ def get_logging_settings():
                 'backupCount': this.logging_backup_count,
                 'formatter': 'standard',
             },
+            'file_results': {
+                'level': 'RESULTS',
+                'class': this.logging_class,
+                'filename': this.logging_directory.joinpath('results.log'),
+                'maxBytes': this.logging_max_bytes,
+                'backupCount': this.logging_backup_count,
+                'formatter': 'standard',
+            },
             # Warn Level - To file.
             'file_warn': {
                 'level': 'WARNING',
@@ -113,7 +121,13 @@ def get_logging_settings():
         'loggers': {
             # All basic logging.
             '': {
-                'handlers': ['console', 'file_debug', 'file_info', 'file_query', 'file_warn', 'file_error'],
+                'handlers': [
+                    'console',
+                    'file_debug',
+                    'file_info', 'file_query', 'file_results',
+                    'file_warn',
+                    'file_error',
+                ],
                 'level': 'NOTSET',
                 'propagate': False,
             }
@@ -127,11 +141,12 @@ def set_new_log_levels():
     """
     # Add new logging levels here.
     add_logging_level('QUERY', 25)
+    add_logging_level('RESULTS', 26)
 
-#endregion User Logging Settings
+# endregion User Logging Settings
 
 
-#region Logging Helper Functions
+# region Logging Helper Functions
 
 def init_logging(caller, logging_dir=None, handler_class=None, max_file_bytes=None, log_backup_count=None):
     """
@@ -274,4 +289,4 @@ def add_logging_level(level_name, level_num, method_name=None):
     setattr(logging.getLoggerClass(), method_name, log_for_level)
     setattr(logging, method_name, log_to_root)
 
-#endregion Logging Helper Functions
+# endregion Logging Helper Functions

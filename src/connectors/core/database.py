@@ -61,7 +61,7 @@ class BaseDatabase:
         results = formatted_results
 
         if show:
-            logger.info('results: {0}'.format(results))
+            logger.results('results: {0}'.format(results))
 
         # Return data.
         return results
@@ -92,7 +92,7 @@ class BaseDatabase:
         # Generate and execute query.
         query = 'USE {0};'.format(db_name)
         self._base.query.execute(query)
-        logger.info('Database changed to "{0}".'.format(db_name))
+        logger.results('Database changed to "{0}".'.format(db_name))
 
     def create(self, db_name):
         """
@@ -114,7 +114,7 @@ class BaseDatabase:
         # Create new database.
         query = 'CREATE DATABASE {0};'.format(db_name)
         self._base.query.execute(query)
-        logger.info('Created database "{0}".'.format(db_name))
+        logger.results('Created database "{0}".'.format(db_name))
 
     def drop(self, db_name):
         """
@@ -136,7 +136,7 @@ class BaseDatabase:
         # Remove database.
         query = 'DROP DATABASE {0};'.format(db_name)
         self._base.query.execute(query)
-        logger.info('Dropped database "{0}".'.format(db_name))
+        logger.results('Dropped database "{0}".'.format(db_name))
 
     def delete(self, db_name):
         """
