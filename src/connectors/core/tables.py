@@ -195,7 +195,7 @@ class BaseTables:
             )
 
         # Count records in table.
-        result = self._base.query.select(table_name, 'COUNT(*)')
+        result = self._base.records.select(table_name, 'COUNT(*)')
         result = result[0][0]
 
         return result
