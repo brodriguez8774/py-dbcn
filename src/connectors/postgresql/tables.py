@@ -23,4 +23,4 @@ class PostgresqlTables(BaseTables):
         # Call parent logic.
         super().__init__(parent, *args, **kwargs)
 
-        logger.debug('Generating related (PostgreSQL) Query class.')
+        logger.debug('Generating related (PostgreSQL) Tables class.')

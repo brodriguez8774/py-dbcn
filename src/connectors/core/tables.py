@@ -23,7 +23,7 @@ class BaseTables:
     and then be gradually moved to specific connectors as needed.)
     """
     def __init__(self, parent, *args, **kwargs):
-        logger.debug('Generating related (core) Query class.')
+        logger.debug('Generating related (core) Tables class.')
 
         # Define connector root object.
         self._base = parent

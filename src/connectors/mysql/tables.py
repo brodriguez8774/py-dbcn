@@ -23,4 +23,4 @@ class MysqlTables(BaseTables):
         # Call parent logic.
         super().__init__(parent, *args, **kwargs)
 
-        logger.debug('Generating related (MySQL) Query class.')
+        logger.debug('Generating related (MySQL) Tables class.')

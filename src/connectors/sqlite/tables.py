@@ -23,4 +23,4 @@ class SqliteTables(BaseTables):
         # Call parent logic.
         super().__init__(parent, *args, **kwargs)
 
-        logger.debug('Generating related (SqLite) Query class.')
+        logger.debug('Generating related (SqLite) Tables class.')
