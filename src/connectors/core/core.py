@@ -13,6 +13,7 @@ from src.logging import init_logging
 from .database import BaseDatabase
 from .display import BaseDisplay
 from .query import BaseQuery
+from .records import BaseRecords
 from .tables import BaseTables
 from .validate import BaseValidate
 
@@ -39,6 +40,7 @@ class AbstractDbConnector(ABC):
         self.database = self._get_related_database_class()
         self.display = self._get_related_display_class()
         self.query = self._get_related_query_class()
+        self.records = self._get_related_records_class()
         self.tables = self._get_related_tables_class()
         self.validate = self._get_related_validate_class()
 
@@ -68,6 +70,12 @@ class AbstractDbConnector(ABC):
         Overridable method to get the related "query functionality" class.
         """
         return BaseQuery(self)
+
+    def _get_related_records_class(self):
+        """
+        Overridable method to get the related "record functionality" class.
+        """
+        return BaseRecords(self)
 
     def _get_related_tables_class(self):
         """

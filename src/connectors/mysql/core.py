@@ -11,6 +11,7 @@ import MySQLdb
 from .database import MysqlDatabase
 from .display import MysqlDisplay
 from .query import MysqlQuery
+from .records import MysqlRecords
 from .tables import MysqlTables
 from .validate import MysqlValidate
 from src.connectors.core import AbstractDbConnector
@@ -52,6 +53,12 @@ class MysqlDbConnector(AbstractDbConnector):
         Overridable method to get the related "query functionality" class.
         """
         return MysqlQuery(self)
+
+    def _get_related_records_class(self):
+        """
+        Overridable method to get the related "records functionality" class.
+        """
+        return MysqlRecords(self)
 
     def _get_related_tables_class(self):
         """

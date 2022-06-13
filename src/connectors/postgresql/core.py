@@ -10,6 +10,7 @@ Contains database connection logic specific to PostgreSQL databases.
 from .database import PostgresqlDatabase
 from .display import PostgresqlDisplay
 from .query import PostgresqlQuery
+from .records import PostgresqlRecords
 from .tables import PostgresqlTables
 from .validate import PostgresqlValidate
 from src.connectors.core import AbstractDbConnector
@@ -49,6 +50,12 @@ class PostgresqlDbConnector(AbstractDbConnector):
         Overridable method to get the related "query functionality" class.
         """
         return PostgresqlQuery(self)
+
+    def _get_related_records_class(self):
+        """
+        Overridable method to get the related "records functionality" class.
+        """
+        return PostgresqlRecords(self)
 
     def _get_related_tables_class(self):
         """

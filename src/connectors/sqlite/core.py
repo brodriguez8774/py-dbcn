@@ -11,6 +11,7 @@ import sqlite3
 from .database import SqliteDatabase
 from .display import SqliteDisplay
 from .query import SqliteQuery
+from .records import SqliteRecords
 from .tables import SqliteTables
 from .validate import SqliteValidate
 from src.connectors.core import AbstractDbConnector
@@ -50,6 +51,12 @@ class SqliteDbConnector(AbstractDbConnector):
         Overridable method to get the related "query functionality" class.
         """
         return SqliteQuery(self)
+
+    def _get_related_records_class(self):
+        """
+        Overridable method to get the related "records functionality" class.
+        """
+        return SqliteRecords(self)
 
     def _get_related_tables_class(self):
         """
