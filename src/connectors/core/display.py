@@ -33,6 +33,7 @@ class BaseDisplay:
 
         # Define connected children objects.
         self.tables = TableDisplay(self)
+        self.records = RecordDisplay(self)
 
     def _get_longest(self, array, include_db_name=True):
         """Returns count of longest element in provided array.
@@ -57,6 +58,7 @@ class BaseDisplay:
 
 
 class TableDisplay:
+    """Display logic for table queries."""
 
     def __init__(self, parent, *args, **kwargs):
         logger.debug('Generating Table Display class.')
@@ -68,7 +70,7 @@ class TableDisplay:
         self._parent = parent
 
     def _get(self, results, logger):
-        """Display method for tables._get()."""
+        """Display logic for tables._get()."""
         if results:
             # Calculate base values.
             db_name = self._base.database.select()
@@ -100,7 +102,7 @@ class TableDisplay:
             logger.results('Empty Set')
 
     def describe(self, results, logger):
-        """Display  method for tables.describe()."""
+        """Display logic for tables.describe()."""
         # Initialize record col sets.
         field_col_values = []
         type_col_values = []
@@ -204,3 +206,62 @@ class TableDisplay:
 
         # Finally display output.
         logger.results('{0}'.format(msg_str))
+
+
+class RecordDisplay:
+    """Display logic for record/row/entry queries."""
+
+    def __init__(self, parent, *args, **kwargs):
+        logger.debug('Generating Record Display class.')
+
+        # Define connector root object.
+        self._base = parent._base
+
+        # Define provided direct parent object.
+        self._parent = parent
+
+    def select(self, results, logger, table_name):
+        """Display logic for records.select()."""
+        if results:
+            # Calculate column header values.
+            table_cols = [
+                x[0]
+                for x in self._base.tables.describe(table_name)
+            ]
+            col_len_array = []
+            total_col_len = 0
+            for table_col in table_cols:
+                col_len = len(table_col)
+                record_len = self._base.query.execute(
+                    'SELECT MAX(LENGTH({0})) FROM {1};'.format(table_col, table_name)
+                )[0][0]
+                length = max(col_len, record_len or 0)
+                col_len_array.append(length)
+                total_col_len += length + 2
+
+            # Generate divider.
+            divider = ''
+            for length in col_len_array:
+                divider += '{0}{1}'.format('+', ('-' * (length + 2)))
+            divider += '+'
+
+            # Generate column header.
+            header = ''
+            for index in range(len(table_cols)):
+                header += ('| {0:<' + '{0}'.format(col_len_array[index]) + '} ').format(table_cols[index])
+            header += '|'
+
+            # Generate record row output.
+            record_str = ''
+            for record in results:
+                for index in range(len(record)):
+                    record_str += ('| {0:<' + '{0}'.format(col_len_array[index]) + '} ').format(record[index])
+                record_str += '|\n'
+
+            # Combine final string.
+            msg_str = '{0}\n{1}\n{0}\n{2}{0}'.format(divider, header, record_str)
+
+            # Finally display output.
+            logger.results('{0}'.format(msg_str))
+        else:
+            logger.results('Empty Set')

@@ -47,7 +47,7 @@ class BaseRecords:
         query = 'SELECT {0} FROM {1};'.format(select_clause, table_name)
         results = self._base.query.execute(query)
         logger.query('{0}'.format(query))
-        logger.results('{0}'.format(results))
+        self._base.display.records.select(results, logger, table_name)
 
         return results
 

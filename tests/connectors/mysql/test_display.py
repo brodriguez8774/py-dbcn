@@ -122,7 +122,219 @@ EXPECTED__TABLE__DESCRIBE__COLS_ID_NAME_DESC = """
 """
 
 
-class TestMysqlDisplay(TestMysqlDatabaseParent):
+EXPECTED__RECORD__SELECT__PT_1 = """
++----+------+-------------+
+| id | name | description |
++----+------+-------------+
+| 1  | tn   | td          |
++----+------+-------------+
+"""
+EXPECTED__RECORD__SELECT__PT_2 = """
++----+------+-------------+
+| id | name | description |
++----+------+-------------+
+| 1  | tn   | td          |
+| 2  | t n  | t d         |
++----+------+-------------+
+"""
+EXPECTED__RECORD__SELECT__PT_3 = """
++----+------+-------------+
+| id | name | description |
++----+------+-------------+
+| 1  | tn   | td          |
+| 2  | t n  | t d         |
+| 3  | te n | te d        |
++----+------+-------------+
+"""
+EXPECTED__RECORD__SELECT__PT_4 = """
++----+-------+-------------+
+| id | name  | description |
++----+-------+-------------+
+| 1  | tn    | td          |
+| 2  | t n   | t d         |
+| 3  | te n  | te d        |
+| 4  | tes n | tes d       |
++----+-------+-------------+
+"""
+EXPECTED__RECORD__SELECT__PT_5 = """
++----+--------+-------------+
+| id | name   | description |
++----+--------+-------------+
+| 1  | tn     | td          |
+| 2  | t n    | t d         |
+| 3  | te n   | te d        |
+| 4  | tes n  | tes d       |
+| 5  | test n | test d      |
++----+--------+-------------+
+"""
+EXPECTED__RECORD__SELECT__PT_6 = """
++----+---------+-------------+
+| id | name    | description |
++----+---------+-------------+
+| 1  | tn      | td          |
+| 2  | t n     | t d         |
+| 3  | te n    | te d        |
+| 4  | tes n   | tes d       |
+| 5  | test n  | test d      |
+| 6  | test na | test de     |
++----+---------+-------------+
+"""
+EXPECTED__RECORD__SELECT__PT_7 = """
++----+----------+-------------+
+| id | name     | description |
++----+----------+-------------+
+| 1  | tn       | td          |
+| 2  | t n      | t d         |
+| 3  | te n     | te d        |
+| 4  | tes n    | tes d       |
+| 5  | test n   | test d      |
+| 6  | test na  | test de     |
+| 7  | test nam | test des    |
++----+----------+-------------+
+"""
+EXPECTED__RECORD__SELECT__PT_8 = """
++----+-----------+-------------+
+| id | name      | description |
++----+-----------+-------------+
+| 1  | tn        | td          |
+| 2  | t n       | t d         |
+| 3  | te n      | te d        |
+| 4  | tes n     | tes d       |
+| 5  | test n    | test d      |
+| 6  | test na   | test de     |
+| 7  | test nam  | test des    |
+| 8  | test name | test desc   |
++----+-----------+-------------+
+"""
+EXPECTED__RECORD__SELECT__PT_9 = """
++----+-----------+-------------+
+| id | name      | description |
++----+-----------+-------------+
+| 1  | tn        | td          |
+| 2  | t n       | t d         |
+| 3  | te n      | te d        |
+| 4  | tes n     | tes d       |
+| 5  | test n    | test d      |
+| 6  | test na   | test de     |
+| 7  | test nam  | test des    |
+| 8  | test name | test desc   |
+| 9  | test name | test descr  |
++----+-----------+-------------+
+"""
+EXPECTED__RECORD__SELECT__PT_10 = """
++----+-----------+-------------+
+| id | name      | description |
++----+-----------+-------------+
+| 1  | tn        | td          |
+| 2  | t n       | t d         |
+| 3  | te n      | te d        |
+| 4  | tes n     | tes d       |
+| 5  | test n    | test d      |
+| 6  | test na   | test de     |
+| 7  | test nam  | test des    |
+| 8  | test name | test desc   |
+| 9  | test name | test descr  |
+| 10 | test name | test descri |
++----+-----------+-------------+
+"""
+EXPECTED__RECORD__SELECT__PT_11 = """
++-----+-----------+--------------+
+| id  | name      | description  |
++-----+-----------+--------------+
+| 1   | tn        | td           |
+| 2   | t n       | t d          |
+| 3   | te n      | te d         |
+| 4   | tes n     | tes d        |
+| 5   | test n    | test d       |
+| 6   | test na   | test de      |
+| 7   | test nam  | test des     |
+| 8   | test name | test desc    |
+| 9   | test name | test descr   |
+| 10  | test name | test descri  |
+| 101 | test name | test descrip |
++-----+-----------+--------------+
+"""
+EXPECTED__RECORD__SELECT__PT_12 = """
++------+-----------+---------------+
+| id   | name      | description   |
++------+-----------+---------------+
+| 1    | tn        | td            |
+| 2    | t n       | t d           |
+| 3    | te n      | te d          |
+| 4    | tes n     | tes d         |
+| 5    | test n    | test d        |
+| 6    | test na   | test de       |
+| 7    | test nam  | test des      |
+| 8    | test name | test desc     |
+| 9    | test name | test descr    |
+| 10   | test name | test descri   |
+| 101  | test name | test descrip  |
+| 1010 | test name | test descript |
++------+-----------+---------------+
+"""
+EXPECTED__RECORD__SELECT__PT_13 = """
++-------+-----------+----------------+
+| id    | name      | description    |
++-------+-----------+----------------+
+| 1     | tn        | td             |
+| 2     | t n       | t d            |
+| 3     | te n      | te d           |
+| 4     | tes n     | tes d          |
+| 5     | test n    | test d         |
+| 6     | test na   | test de        |
+| 7     | test nam  | test des       |
+| 8     | test name | test desc      |
+| 9     | test name | test descr     |
+| 10    | test name | test descri    |
+| 101   | test name | test descrip   |
+| 1010  | test name | test descript  |
+| 10101 | test name | test descripti |
++-------+-----------+----------------+
+"""
+EXPECTED__RECORD__SELECT__PT_14 = """
++--------+-----------+-----------------+
+| id     | name      | description     |
++--------+-----------+-----------------+
+| 1      | tn        | td              |
+| 2      | t n       | t d             |
+| 3      | te n      | te d            |
+| 4      | tes n     | tes d           |
+| 5      | test n    | test d          |
+| 6      | test na   | test de         |
+| 7      | test nam  | test des        |
+| 8      | test name | test desc       |
+| 9      | test name | test descr      |
+| 10     | test name | test descri     |
+| 101    | test name | test descrip    |
+| 1010   | test name | test descript   |
+| 10101  | test name | test descripti  |
+| 101010 | test name | test descriptio |
++--------+-----------+-----------------+
+"""
+EXPECTED__RECORD__SELECT__PT_15 = """
++---------+-----------+------------------+
+| id      | name      | description      |
++---------+-----------+------------------+
+| 1       | tn        | td               |
+| 2       | t n       | t d              |
+| 3       | te n      | te d             |
+| 4       | tes n     | tes d            |
+| 5       | test n    | test d           |
+| 6       | test na   | test de          |
+| 7       | test nam  | test des         |
+| 8       | test name | test desc        |
+| 9       | test name | test descr       |
+| 10      | test name | test descri      |
+| 101     | test name | test descrip     |
+| 1010    | test name | test descript    |
+| 10101   | test name | test descripti   |
+| 101010  | test name | test descriptio  |
+| 1010101 | test name | test description |
++---------+-----------+------------------+
+"""
+
+
+class TestMysqlDisplayAbstract(TestMysqlDatabaseParent):
     """
     Tests "MySQL" DB Connector class display logic.
     """
@@ -139,6 +351,14 @@ class TestMysqlDisplay(TestMysqlDatabaseParent):
     def get_output(self, log_capture, record_num):
         """Helper function to read captured logging output."""
         return str(log_capture.records[record_num].message).strip()
+
+
+class TestMysqlDisplayCore(TestMysqlDisplayAbstract):
+    """
+    Tests "MySQL" DB Connector class display logic.
+
+    Specifically tests logic defined in base display class.
+    """
 
     def test__get_longest(self):
         with self.subTest('With no entry'):
@@ -243,11 +463,12 @@ class TestMysqlDisplay(TestMysqlDatabaseParent):
             self.assertEqual(return_val, 44)
 
 
-class TestMysqlDisplayTable(TestMysqlDatabaseParent):
+class TestMysqlDisplayTables(TestMysqlDisplayAbstract):
     """
     Tests "MySQL" DB Connector class display logic.
-    """
 
+    Specifically tests logic defined in "tables" display subclass.
+    """
     @classmethod
     def setUpClass(cls):
         # Run parent setup logic.
@@ -257,10 +478,6 @@ class TestMysqlDisplayTable(TestMysqlDatabaseParent):
         cls.db_name = 'python__db_connector__test_display__tables'
         cls.connector.database.create(cls.db_name)
         cls.connector.database.use(cls.db_name)
-
-    def get_output(self, log_capture, record_num):
-        """Helper function to read captured logging output."""
-        return str(log_capture.records[record_num].message).strip()
 
     def test__display__show_tables(self):
         """"""
@@ -403,3 +620,188 @@ class TestMysqlDisplayTable(TestMysqlDatabaseParent):
                 self.connector.tables.describe('category')
             self.assertText(self.get_output(ilog, 1), 'DESCRIBE category;')
             self.assertText(self.get_output(ilog, 2), EXPECTED__TABLE__DESCRIBE__COLS_ID_NAME_DESC)
+
+
+class TestMysqlDisplayRecords(TestMysqlDisplayAbstract):
+    """
+    Tests "MySQL" DB Connector class display logic.
+
+    Specifically tests logic defined in "records" display subclass.
+    """
+    @classmethod
+    def setUpClass(cls):
+        # Run parent setup logic.
+        super().setUpClass()
+
+        # Initialize database for tests.
+        cls.db_name = 'python__db_connector__test_display__records'
+        cls.connector.database.create(cls.db_name)
+        cls.connector.database.use(cls.db_name)
+
+    def test__display__select_records__basic(self):
+        """"""
+        columns = """(
+            id INT NOT NULL AUTO_INCREMENT,
+            name VARCHAR(100),
+            description VARCHAR(100),
+            PRIMARY KEY ( id )
+        )"""
+
+        self.connector.tables.create('category', columns)
+
+        with self.subTest('With no records present'):
+            # Capture logging output.
+            with self.assertLogs(None, 'INFO') as ilog:
+                self.connector.records.select('category')
+            self.assertText(self.get_output(ilog, 0), 'SELECT * FROM category;')
+            self.assertText(self.get_output(ilog, 2), 'Empty Set')
+
+        with self.subTest('With 1 record present'):
+            # Create record.
+            self.connector.records.insert('category', '(1, "tn", "td")')
+
+            # Capture logging output.
+            with self.assertLogs(None, 'INFO') as ilog:
+                self.connector.records.select('category')
+            self.assertText(self.get_output(ilog, 0), 'SELECT * FROM category;')
+            self.assertText(self.get_output(ilog, 8), EXPECTED__RECORD__SELECT__PT_1)
+
+        with self.subTest('With 2 records present'):
+            # Create record.
+            self.connector.records.insert('category', '(2, "t n", "t d")')
+
+            # Capture logging output.
+            with self.assertLogs(None, 'INFO') as ilog:
+                self.connector.records.select('category')
+            self.assertText(self.get_output(ilog, 0), 'SELECT * FROM category;')
+            self.assertText(self.get_output(ilog, 8), EXPECTED__RECORD__SELECT__PT_2)
+
+        with self.subTest('With 3 records present'):
+            # Create record.
+            self.connector.records.insert('category', '(3, "te n", "te d")')
+
+            # Capture logging output.
+            with self.assertLogs(None, 'INFO') as ilog:
+                self.connector.records.select('category')
+            self.assertText(self.get_output(ilog, 0), 'SELECT * FROM category;')
+            self.assertText(self.get_output(ilog, 8), EXPECTED__RECORD__SELECT__PT_3)
+
+        with self.subTest('With 4 records present'):
+            # Create record.
+            self.connector.records.insert('category', '(4, "tes n", "tes d")')
+
+            # Capture logging output.
+            with self.assertLogs(None, 'INFO') as ilog:
+                self.connector.records.select('category')
+            self.assertText(self.get_output(ilog, 0), 'SELECT * FROM category;')
+            self.assertText(self.get_output(ilog, 8), EXPECTED__RECORD__SELECT__PT_4)
+
+        with self.subTest('With 5 records present'):
+            # Create record.
+            self.connector.records.insert('category', '(5, "test n", "test d")')
+
+            # Capture logging output.
+            with self.assertLogs(None, 'INFO') as ilog:
+                self.connector.records.select('category')
+            self.assertText(self.get_output(ilog, 0), 'SELECT * FROM category;')
+            self.assertText(self.get_output(ilog, 8), EXPECTED__RECORD__SELECT__PT_5)
+
+        with self.subTest('With 6 records present'):
+            # Create record.
+            self.connector.records.insert('category', '(6, "test na", "test de")')
+
+            # Capture logging output.
+            with self.assertLogs(None, 'INFO') as ilog:
+                self.connector.records.select('category')
+            self.assertText(self.get_output(ilog, 0), 'SELECT * FROM category;')
+            self.assertText(self.get_output(ilog, 8), EXPECTED__RECORD__SELECT__PT_6)
+
+        with self.subTest('With 7 records present'):
+            # Create record.
+            self.connector.records.insert('category', '(7, "test nam", "test des")')
+
+            # Capture logging output.
+            with self.assertLogs(None, 'INFO') as ilog:
+                self.connector.records.select('category')
+            self.assertText(self.get_output(ilog, 0), 'SELECT * FROM category;')
+            self.assertText(self.get_output(ilog, 8), EXPECTED__RECORD__SELECT__PT_7)
+
+        with self.subTest('With 8 records present'):
+            # Create record.
+            self.connector.records.insert('category', '(8, "test name", "test desc")')
+
+            # Capture logging output.
+            with self.assertLogs(None, 'INFO') as ilog:
+                self.connector.records.select('category')
+            self.assertText(self.get_output(ilog, 0), 'SELECT * FROM category;')
+            self.assertText(self.get_output(ilog, 8), EXPECTED__RECORD__SELECT__PT_8)
+
+        with self.subTest('With 9 records present'):
+            # Create record.
+            self.connector.records.insert('category', '(9, "test name", "test descr")')
+
+            # Capture logging output.
+            with self.assertLogs(None, 'INFO') as ilog:
+                self.connector.records.select('category')
+            self.assertText(self.get_output(ilog, 0), 'SELECT * FROM category;')
+            self.assertText(self.get_output(ilog, 8), EXPECTED__RECORD__SELECT__PT_9)
+
+        with self.subTest('With 10 records present'):
+            # Create record.
+            self.connector.records.insert('category', '(10, "test name", "test descri")')
+
+            # Capture logging output.
+            with self.assertLogs(None, 'INFO') as ilog:
+                self.connector.records.select('category')
+            self.assertText(self.get_output(ilog, 0), 'SELECT * FROM category;')
+            self.assertText(self.get_output(ilog, 8), EXPECTED__RECORD__SELECT__PT_10)
+
+        with self.subTest('With 11 records present'):
+            # Create record.
+            self.connector.records.insert('category', '(101, "test name", "test descrip")')
+
+            # Capture logging output.
+            with self.assertLogs(None, 'INFO') as ilog:
+                self.connector.records.select('category')
+            self.assertText(self.get_output(ilog, 0), 'SELECT * FROM category;')
+            self.assertText(self.get_output(ilog, 8), EXPECTED__RECORD__SELECT__PT_11)
+
+        with self.subTest('With 12 records present'):
+            # Create record.
+            self.connector.records.insert('category', '(1010, "test name", "test descript")')
+
+            # Capture logging output.
+            with self.assertLogs(None, 'INFO') as ilog:
+                self.connector.records.select('category')
+            self.assertText(self.get_output(ilog, 0), 'SELECT * FROM category;')
+            self.assertText(self.get_output(ilog, 8), EXPECTED__RECORD__SELECT__PT_12)
+
+        with self.subTest('With 13 records present'):
+            # Create record.
+            self.connector.records.insert('category', '(10101, "test name", "test descripti")')
+
+            # Capture logging output.
+            with self.assertLogs(None, 'INFO') as ilog:
+                self.connector.records.select('category')
+            self.assertText(self.get_output(ilog, 0), 'SELECT * FROM category;')
+            self.assertText(self.get_output(ilog, 8), EXPECTED__RECORD__SELECT__PT_13)
+
+        with self.subTest('With 14 records present'):
+            # Create record.
+            self.connector.records.insert('category', '(101010, "test name", "test descriptio")')
+
+            # Capture logging output.
+            with self.assertLogs(None, 'INFO') as ilog:
+                self.connector.records.select('category')
+            self.assertText(self.get_output(ilog, 0), 'SELECT * FROM category;')
+            self.assertText(self.get_output(ilog, 8), EXPECTED__RECORD__SELECT__PT_14)
+
+        with self.subTest('With 15 records present'):
+            # Create record.
+            self.connector.records.insert('category', '(1010101, "test name", "test description")')
+
+            # Capture logging output.
+            with self.assertLogs(None, 'INFO') as ilog:
+                self.connector.records.select('category')
+            self.assertText(self.get_output(ilog, 0), 'SELECT * FROM category;')
+            self.assertText(self.get_output(ilog, 8), EXPECTED__RECORD__SELECT__PT_15)
