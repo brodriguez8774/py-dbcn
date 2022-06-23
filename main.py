@@ -30,16 +30,26 @@ def main():
     postgres_connector = PostgresqlDbConnector(sqlite_config['location'], debug=True)
     sqlite_connector = SqliteDbConnector(sqlite_config['location'], debug=True)
 
-    # Manually test logic for mysql connector.
-    # mysql_connector.database._get()
-    mysql_connector.database.show()
-    # mysql_connector.database.use('test_database')
-    # mysql_connector.database.create('this_is_test_aaa')
-    # mysql_connector.database.drop('this_is_test_aaa')
+    columns = """(
+        id INT NOT NULL AUTO_INCREMENT,
+        name VARCHAR(100),
+        description VARCHAR(100),
+        PRIMARY KEY ( id )
+    )"""
 
-    # mysql_connector.tables._get()
-    # mysql_connector.tables.show()
-    # mysql_connector.tables.describe('category')
+    # Manually test logic for mysql connector.
+    mysql_connector.database.show()
+
+    # Create "category" table if not present.
+    tables = mysql_connector.tables.show()
+    if 'category' not in tables:
+        mysql_connector.tables.create('category', columns)
+
+    # Describe category table.
+    mysql_connector.tables.describe('category')
+
+    # Select from category table.
+    mysql_connector.records.select('category')
 
 
 if __name__ == '__main__':
