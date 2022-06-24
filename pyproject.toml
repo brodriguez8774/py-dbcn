@@ -3,7 +3,7 @@ requires = ['setuptools>=40.8.0', 'wheel']
 build-backend = 'setuptools.build_meta:__legacy__'
 
 [project]
-name = "py-dbc"
+name = "py-dbcn"
 version = "0.1.0"
 description = "Connector for Pythonic interaction with multiple database types."
 readme = "readme.md"

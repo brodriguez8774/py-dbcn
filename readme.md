@@ -1,5 +1,5 @@
 # Pythonic Database Connector
-(py-dbc)
+(py-dbcn)
 
 
 ## Description

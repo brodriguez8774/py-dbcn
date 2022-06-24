@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'py-dbc'
+project = 'py-dbcn'
 copyright = '2022, Brandon Rodriguez'
 author = 'Brandon Rodriguez'
 
