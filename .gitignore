@@ -1,41 +1,93 @@
 ###
  # GitIgnore file for Python Language projects.
  # See https://git-scm.com/docs/gitignore for documentation.
+ # See also https://www.gitignore.io for useful ignore values.
  #
  # https://git.brandon-rodriguez.com/other/gitignore
- # Version 1.1.2
+ # Version 1.2.0
  ##
 
 
-# Ignore system files.
+# Ignore OSX system files.
+._*
+.AppleDB
+.AppleDouble
 .DS_Store
+.fseventsd
+.LSOverride
+.Spotlight-V100
+.Trashes
+.VolumeIcon.icns
+Icon
 Thumbs.db
 
 
+# Ignore Linux system files.
+.~*
+.directory
+.fuse_hidden*
+.nfs*
+.Trash-*
+
+
 # Ignore environment settings.
+.cache/
 .env/
 .idea/
 .venv/
 .vs/
 .vscode/
+.cache/
 env/
 idea/
 venv/
 vs/
 vscode/
+.cache
 
 
-# Ignore python cache files.
-*.pyc
+# Ignore Python cache files.
+__pycache__/
+*.py[cod]
+
+
+# Ignore Python setup, packaging, & distribution files.
+*.egg-info/
+.eggs/
+__pypackages__/
+__target__/
+build/
+develop-eggs/
+dist/
+docs/build/
+docs/_build/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+target/
+var/
+wheels/
+*.egg
+*.manifest
+*.so
+*.spec
+.installed.cfg
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
 
 
 # Ignore temporary files.
 [Tt]mp/
 [Tt]emp/
-[Tt]empfiles/
 [Tt]emp_files/
-*.tmp
-*.temp
+[Tt]empfiles/
+[Tt]emporary/
+*.[Tt]mp
+*.[Tt]emp
+*.[Tt]emporary
 
 
 # Ignore logfiles.
@@ -43,6 +95,20 @@ vscode/
 [Ll]ogs/
 *.log
 *.log.*
+*debug.log*
+*err.log*
+*error.log*
+*info.log*
+*warn.log*
+*warning.log*
+
+
+# Ignore UnitTesting and test coverage files.
+.pytest_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
 
 
 # Ignore generated LaTeX files.
