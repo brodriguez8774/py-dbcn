@@ -7,8 +7,8 @@ import unittest
 
 # User Imports.
 from config import mysql_config, sqlite_config
-from src.connectors import MysqlDbConnector, PostgresqlDbConnector, SqliteDbConnector
-from src.connectors.core.validate import BaseValidate
+from py_dbcn.connectors import MysqlDbConnector, PostgresqlDbConnector, SqliteDbConnector
+from py_dbcn.connectors.core.validate import BaseValidate
 
 
 class TestCoreValidate(unittest.TestCase):

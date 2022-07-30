@@ -22,7 +22,7 @@ mkdir "./docs/build/"
 
 
 ## Auto-generate docs source files, from actual Python code in project.
-#sphinx-apidoc -o ./docs/source/api/ ./src/connectors/
+#sphinx-apidoc -o ./docs/source/api/ ./py_dbcn/connectors/
 
 
 ## Remove modules .rst file, because we don't actually care about it.

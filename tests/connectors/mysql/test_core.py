@@ -7,7 +7,7 @@ import unittest
 
 # User Imports.
 from config import mysql_config
-from src.connectors import MysqlDbConnector
+from py_dbcn.connectors import MysqlDbConnector
 
 
 class TestMysqlDatabaseParent(unittest.TestCase):
