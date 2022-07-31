@@ -29,36 +29,36 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
             # Ensure capital letters validate.
             result = self.connector.validate._identifier('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
             self.assertTrue(result[0])
-            self.assertEqual(result[1], '')
+            self.assertText(result[1], '')
 
             # Ensure lowercase characters validate.
             result = self.connector.validate._identifier('abcdefghijklmnopqrstuvwxyz')
             self.assertTrue(result[0])
-            self.assertEqual(result[1], '')
+            self.assertText(result[1], '')
 
             # Ensure integer characters validate.
             result = self.connector.validate._identifier('0123456789')
             self.assertTrue(result[0])
-            self.assertEqual(result[1], '')
+            self.assertText(result[1], '')
 
             # Ensure dollar and underscore validate.
             result = self.connector.validate._identifier('_$')
             self.assertTrue(result[0])
-            self.assertEqual(result[1], '')
+            self.assertText(result[1], '')
 
         with self.subTest('At max length - unquoted'):
             test_str = 'Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-            self.assertEqual(len(test_str), 64)
+            self.assertText(len(test_str), 64)
             result = self.connector.validate._identifier(test_str)
             self.assertTrue(result[0])
-            self.assertEqual(result[1], '')
+            self.assertText(result[1], '')
 
         with self.subTest('At max length - quoted'):
             test_str = '`Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`'
-            self.assertEqual(len(test_str), 66)
+            self.assertText(len(test_str), 66)
             result = self.connector.validate._identifier(test_str)
             self.assertTrue(result[0])
-            self.assertEqual(result[1], '')
+            self.assertText(result[1], '')
 
         with self.subTest(
             '"Permitted characters in quoted identifiers include the full Unicode Basic Multilingual Plane (BMP), '
@@ -73,7 +73,7 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
                 test_str = u'`' + chr(index + 1) + u'`'
                 result = self.connector.validate._identifier(test_str)
                 self.assertTrue(result[0])
-                self.assertEqual(result[1], '')
+                self.assertText(result[1], '')
 
     def test__identifier__failure(self):
         """
@@ -82,38 +82,38 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
         with self.subTest('Identifier is null'):
             result = self.connector.validate._identifier(None)
             self.assertFalse(result[0])
-            self.assertEqual(result[1], 'is None.')
+            self.assertText(result[1], 'is None.')
 
         with self.subTest('Identifier too short - unquoted'):
             # Actually empty.
             result = self.connector.validate._identifier('')
             self.assertFalse(result[0])
-            self.assertEqual(result[1], 'is empty.')
+            self.assertText(result[1], 'is empty.')
 
             # Empty after strip().
             result = self.connector.validate._identifier('   ')
             self.assertFalse(result[0])
-            self.assertEqual(result[1], 'is empty.')
+            self.assertText(result[1], 'is empty.')
 
         with self.subTest('Identifier too short - quoted'):
             # Actually empty.
             result = self.connector.validate._identifier('``')
             self.assertFalse(result[0])
-            self.assertEqual(result[1], 'is empty.')
+            self.assertText(result[1], 'is empty.')
 
         with self.subTest('Identifier too long - unquoted'):
             test_str = 'Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-            self.assertEqual(len(test_str), 65)
+            self.assertText(len(test_str), 65)
             result = self.connector.validate._identifier(test_str)
             self.assertFalse(result[0])
-            self.assertEqual(result[1], 'is longer than 64 characters.')
+            self.assertText(result[1], 'is longer than 64 characters.')
 
         with self.subTest('Identifier too long - quoted'):
             test_str = '`Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`'
-            self.assertEqual(len(test_str), 67)
+            self.assertText(len(test_str), 67)
             result = self.connector.validate._identifier(test_str)
             self.assertFalse(result[0])
-            self.assertEqual(result[1], 'is longer than 64 characters.')
+            self.assertText(result[1], 'is longer than 64 characters.')
 
         with self.subTest('Invalid characters - unquoted'):
             # Check basic "unquoted problem characters".
@@ -121,13 +121,13 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
             for item in test_str:
                 result = self.connector.validate._identifier(item)
                 self.assertFalse(result[0])
-                self.assertEqual(result[1], 'does not match acceptable characters.')
+                self.assertText(result[1], 'does not match acceptable characters.')
 
             # Check project-specific "bad characters".
             for item in self.unallowed_char_list:
                 result = self.connector.validate._identifier(item)
                 self.assertFalse(result[0])
-                self.assertEqual(result[1], 'does not match acceptable characters.')
+                self.assertText(result[1], 'does not match acceptable characters.')
 
             # For now, "extended" range is considered invalid.
             # Not sure if we'll want to enable this at some point?
@@ -143,15 +143,15 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
                 self.assertFalse(result[0])
                 # Message changes based on if value was stripped away or not.
                 if len(test_str.strip()) > 0:
-                    self.assertEqual(result[1], 'does not match acceptable characters.')
+                    self.assertText(result[1], 'does not match acceptable characters.')
                 else:
-                    self.assertEqual(result[1], 'is empty.')
+                    self.assertText(result[1], 'is empty.')
 
         with self.subTest('Invalid characters - quoted'):
             # Check that hex 0 is invalid.
             result = self.connector.validate._identifier(u'`' + chr(0) + u'`')
             self.assertFalse(result[0])
-            self.assertEqual(result[1], 'does not match acceptable characters.')
+            self.assertText(result[1], 'does not match acceptable characters.')
 
             # For now, "extended" range is considered invalid.
             # Not sure if we'll want to enable this at some point?
@@ -164,7 +164,7 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
                 test_str = u'`' + chr(index + 1) + u'`'
                 result = self.connector.validate._identifier(test_str)
                 self.assertFalse(result[0])
-                self.assertEqual(result[1], 'does not match acceptable characters.')
+                self.assertText(result[1], 'does not match acceptable characters.')
 
     def test__database_name__success(self):
         """
@@ -185,12 +185,12 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
 
         with self.subTest('At max length - unquoted'):
             test_str = 'Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-            self.assertEqual(len(test_str), 64)
+            self.assertText(len(test_str), 64)
             self.assertTrue(self.connector.validate.database_name(test_str))
 
         with self.subTest('At max length - quoted'):
             test_str = '`Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`'
-            self.assertEqual(len(test_str), 66)
+            self.assertText(len(test_str), 66)
             self.assertTrue(self.connector.validate.database_name(test_str))
 
         with self.subTest(
@@ -213,7 +213,7 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
         with self.subTest('Identifier is null'):
             with self.assertRaises(TypeError) as err:
                 self.connector.validate.database_name(None)
-            self.assertEqual('Invalid database name. Is None.', str(err.exception))
+            self.assertText('Invalid database name. Is None.', str(err.exception))
 
         with self.subTest('Identifier too short - unquoted'):
             # Actually empty.
@@ -237,7 +237,7 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
 
         with self.subTest('Identifier too long - unquoted'):
             test_str = 'Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-            self.assertEqual(len(test_str), 65)
+            self.assertText(len(test_str), 65)
             with self.assertRaises(ValueError) as err:
                 self.connector.validate.database_name(test_str)
             self.assertIn('Invalid database name of "', str(err.exception))
@@ -245,7 +245,7 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
 
         with self.subTest('Identifier too long - quoted'):
             test_str = '`Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`'
-            self.assertEqual(len(test_str), 67)
+            self.assertText(len(test_str), 67)
             with self.assertRaises(ValueError) as err:
                 self.connector.validate.database_name(test_str)
             self.assertIn('Invalid database name of ', str(err.exception))
@@ -327,12 +327,12 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
 
         with self.subTest('At max length - unquoted'):
             test_str = 'Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-            self.assertEqual(len(test_str), 64)
+            self.assertText(len(test_str), 64)
             self.assertTrue(self.connector.validate.table_name(test_str))
 
         with self.subTest('At max length - quoted'):
             test_str = '`Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`'
-            self.assertEqual(len(test_str), 66)
+            self.assertText(len(test_str), 66)
             self.assertTrue(self.connector.validate.table_name(test_str))
 
         with self.subTest(
@@ -355,7 +355,7 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
         with self.subTest('Identifier is null'):
             with self.assertRaises(TypeError) as err:
                 self.connector.validate.table_name(None)
-            self.assertEqual('Invalid table name. Is None.', str(err.exception))
+            self.assertText('Invalid table name. Is None.', str(err.exception))
 
         with self.subTest('Identifier too short - unquoted'):
             # Actually empty.
@@ -379,7 +379,7 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
 
         with self.subTest('Identifier too long - unquoted'):
             test_str = 'Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-            self.assertEqual(len(test_str), 65)
+            self.assertText(len(test_str), 65)
             with self.assertRaises(ValueError) as err:
                 self.connector.validate.table_name(test_str)
             self.assertIn('Invalid table name of "', str(err.exception))
@@ -387,7 +387,7 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
 
         with self.subTest('Identifier too long - quoted'):
             test_str = '`Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`'
-            self.assertEqual(len(test_str), 67)
+            self.assertText(len(test_str), 67)
             with self.assertRaises(ValueError) as err:
                 self.connector.validate.table_name(test_str)
             self.assertIn('Invalid table name of ', str(err.exception))
@@ -469,12 +469,12 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
 
         with self.subTest('At max length - unquoted'):
             test_str = 'Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-            self.assertEqual(len(test_str), 64)
+            self.assertText(len(test_str), 64)
             self.assertTrue(self.connector.validate.table_column(test_str))
 
         with self.subTest('At max length - quoted'):
             test_str = '`Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`'
-            self.assertEqual(len(test_str), 66)
+            self.assertText(len(test_str), 66)
             self.assertTrue(self.connector.validate.table_column(test_str))
 
         with self.subTest(
@@ -497,7 +497,7 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
         with self.subTest('Identifier is null'):
             with self.assertRaises(TypeError) as err:
                 self.connector.validate.table_column(None)
-            self.assertEqual('Invalid table column. Is None.', str(err.exception))
+            self.assertText('Invalid table column. Is None.', str(err.exception))
 
         with self.subTest('Identifier too short - unquoted'):
             # Actually empty.
@@ -521,7 +521,7 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
 
         with self.subTest('Identifier too long - unquoted'):
             test_str = 'Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-            self.assertEqual(len(test_str), 65)
+            self.assertText(len(test_str), 65)
             with self.assertRaises(ValueError) as err:
                 self.connector.validate.table_column(test_str)
             self.assertIn('Invalid table column of "', str(err.exception))
@@ -529,7 +529,7 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
 
         with self.subTest('Identifier too long - quoted'):
             test_str = '`Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`'
-            self.assertEqual(len(test_str), 67)
+            self.assertText(len(test_str), 67)
             with self.assertRaises(ValueError) as err:
                 self.connector.validate.table_column(test_str)
             self.assertIn('Invalid table column of ', str(err.exception))
