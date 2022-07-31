@@ -9,6 +9,8 @@ Should be inherited by language-specific connectors.
 import copy
 
 # User Imports.
+import re
+
 from py_dbcn.logging import init_logging
 
 
@@ -32,16 +34,68 @@ class BaseValidate:
         # Define provided direct parent object.
         self._parent = parent
 
+    # region Name Validation
+
+    def _identifier(self, name):
+        """Generalized validation for "identifier naming conventions".
+
+        All other "identifiers" should probably be run through this function.
+        See https://dev.mysql.com/doc/refman/8.0/en/identifiers.html
+        """
+        # Check if value is quoted.
+        is_quoted = False
+        if len(name) > 1 and name[0] == name[-1] and name[0] in ['`', '"', "'"]:
+            is_quoted = True
+            max_len = 66
+        else:
+            max_len = 64
+
+        print('name: {0}'.format(name))
+        print('is_quoted: {0}'.format(is_quoted))
+
+        # Check against max possible length.
+        if len(name) > max_len:
+            return (False, 'is longer than 64 characters.')
+
+        # Check acceptable patterns.
+        if is_quoted is False:
+            # Check against "unquoted patterns".
+            '0-9a-zA-Z$_'
+            # Check against "quoted patterns".
+            pattern = re.compile('^([0-9a-zA-Z$_])+$')
+            if not re.match(pattern, name):
+                return (False, 'does not match acceptable characters.')
+        else:
+            # Check against "quoted patterns".
+            pattern = re.compile(u'^([\u0001-\u007F])+$', flags=re.UNICODE)
+            if not re.match(pattern, name):
+                return (False, 'does not match acceptable characters.')
+
+        # Passed all tests.
+        return (True, '')
+
     def database_name(self, name):
         """
         Validates that provided database name uses set of acceptable characters.
         :param name: Potential name of database to validate.
         :return: True if valid | False otherwise.
         """
-        # For now, always return as valid.
-        return True
+        # Check if value is quoted.
+        is_quoted = False
+        if len(name) > 1 and name[0] == name[-1] and name[0] in ['`', '"', "'"]:
+            is_quoted = True
 
-    # region Name Validation
+        # Validate using "general identifier" logic.
+        results = self._identifier(name)
+
+        if results[0] is False:
+            if is_quoted:
+                raise ValueError(u'Invalid database name of {0}. Name {1}'.format(str(name), results[1]))
+            else:
+                raise ValueError(u'Invalid database name of "{0}". Name {1}'.format(str(name), results[1]))
+
+        # Passed checks.
+        return True
 
     def table_name(self, name):
         """
@@ -49,8 +103,47 @@ class BaseValidate:
         :param name: Potential name of table to validate.
         :return: True if valid | False otherwise.
         """
-        # For now, always return as valid.
+        # Check if value is quoted.
+        is_quoted = False
+        if len(name) > 1 and name[0] == name[-1] and name[0] in ['`', '"', "'"]:
+            is_quoted = True
+
+        # Validate using "general identifier" logic.
+        results = self._identifier(name)
+
+        if results[0] is False:
+            if is_quoted:
+                raise ValueError(u'Invalid table name of {0}. Name {1}'.format(str(name), results[1]))
+            else:
+                raise ValueError(u'Invalid table name of "{0}". Name {1}'.format(str(name), results[1]))
+
+        # Passed checks.
         return True
+
+    def table_column(self, name):
+        """
+        Validates that provided table name uses set of acceptable characters.
+        :param name: Potential name of table to validate.
+        :return: True if valid | False otherwise.
+        """
+        # Check if value is quoted.
+        is_quoted = False
+        if len(name) > 1 and name[0] == name[-1] and name[0] in ['`', '"', "'"]:
+            is_quoted = True
+
+        # Validate using "general identifier" logic.
+        results = self._identifier(name)
+
+        if results[0] is False:
+            if is_quoted:
+                raise ValueError(u'Invalid column name of {0}. Name {1}'.format(str(name), results[1]))
+            else:
+                raise ValueError(u'Invalid column name of "{0}". Name {1}'.format(str(name), results[1]))
+
+        # Passed checks.
+        return True
+
+    # endregion Name Validation
 
     def table_columns(self, columns):
         """
@@ -109,8 +202,6 @@ class BaseValidate:
 
         # For now, always return as valid.
         return columns
-
-    # endregion Name Validation
 
     # region Clause Validation
 
