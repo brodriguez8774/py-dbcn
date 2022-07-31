@@ -42,6 +42,11 @@ class BaseValidate:
         All other "identifiers" should probably be run through this function.
         See https://dev.mysql.com/doc/refman/8.0/en/identifiers.html
         """
+        # Run basic sanitation against provided param.
+        if name is None:
+            return (False, 'is None.')
+        name = str(name).strip()
+
         # Check if value is quoted.
         is_quoted = False
         if len(name) > 1 and name[0] == name[-1] and name[0] in ['`', '"', "'"]:
@@ -52,6 +57,13 @@ class BaseValidate:
 
         print('name: {0}'.format(name))
         print('is_quoted: {0}'.format(is_quoted))
+
+        # Check minimum length.
+        if (
+            (is_quoted and len(name) < 3)
+            or len(name) == 0
+        ):
+            return (False, 'is empty.')
 
         # Check against max possible length.
         if len(name) > max_len:
@@ -88,6 +100,11 @@ class BaseValidate:
         :param name: Potential name of database to validate.
         :return: True if valid | False otherwise.
         """
+        # Run basic sanitation against provided param.
+        if name is None:
+            raise TypeError('Invalid database name. Is None.')
+        name = str(name).strip()
+
         # Check if value is quoted.
         is_quoted = False
         if len(name) > 1 and name[0] == name[-1] and name[0] in ['`', '"', "'"]:
@@ -111,6 +128,11 @@ class BaseValidate:
         :param name: Potential name of table to validate.
         :return: True if valid | False otherwise.
         """
+        # Run basic sanitation against provided param.
+        if name is None:
+            raise TypeError('Invalid table name. Is None.')
+        name = str(name).strip()
+
         # Check if value is quoted.
         is_quoted = False
         if len(name) > 1 and name[0] == name[-1] and name[0] in ['`', '"', "'"]:
@@ -134,6 +156,11 @@ class BaseValidate:
         :param name: Potential name of table to validate.
         :return: True if valid | False otherwise.
         """
+        # Run basic sanitation against provided param.
+        if name is None:
+            raise TypeError('Invalid table column. Is None.')
+        name = str(name).strip()
+
         # Check if value is quoted.
         is_quoted = False
         if len(name) > 1 and name[0] == name[-1] and name[0] in ['`', '"', "'"]:
@@ -144,9 +171,9 @@ class BaseValidate:
 
         if results[0] is False:
             if is_quoted:
-                raise ValueError(u'Invalid table column of {0}. Name {1}'.format(str(name), results[1]))
+                raise ValueError(u'Invalid table column of {0}. Column {1}'.format(str(name), results[1]))
             else:
-                raise ValueError(u'Invalid table column of "{0}". Name {1}'.format(str(name), results[1]))
+                raise ValueError(u'Invalid table column of "{0}". Column {1}'.format(str(name), results[1]))
 
         # Passed checks.
         return True

@@ -79,6 +79,28 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
         """
         Test "general identifier" validation, when it should fail.
         """
+        with self.subTest('Identifier is null'):
+            result = self.connector.validate._identifier(None)
+            self.assertFalse(result[0])
+            self.assertEqual(result[1], 'is None.')
+
+        with self.subTest('Identifier too short - unquoted'):
+            # Actually empty.
+            result = self.connector.validate._identifier('')
+            self.assertFalse(result[0])
+            self.assertEqual(result[1], 'is empty.')
+
+            # Empty after strip().
+            result = self.connector.validate._identifier('   ')
+            self.assertFalse(result[0])
+            self.assertEqual(result[1], 'is empty.')
+
+        with self.subTest('Identifier too short - quoted'):
+            # Actually empty.
+            result = self.connector.validate._identifier('``')
+            self.assertFalse(result[0])
+            self.assertEqual(result[1], 'is empty.')
+
         with self.subTest('Identifier too long - unquoted'):
             test_str = 'Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
             self.assertEqual(len(test_str), 65)
@@ -119,7 +141,11 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
                 test_str = u'{0}'.format(chr(index + 1))
                 result = self.connector.validate._identifier(test_str)
                 self.assertFalse(result[0])
-                self.assertEqual(result[1], 'does not match acceptable characters.')
+                # Message changes based on if value was stripped away or not.
+                if len(test_str.strip()) > 0:
+                    self.assertEqual(result[1], 'does not match acceptable characters.')
+                else:
+                    self.assertEqual(result[1], 'is empty.')
 
         with self.subTest('Invalid characters - quoted'):
             # Check that hex 0 is invalid.
@@ -184,6 +210,31 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
         """
         Test "database name" validation, when it should fail.
         """
+        with self.subTest('Identifier is null'):
+            with self.assertRaises(TypeError) as err:
+                self.connector.validate.database_name(None)
+            self.assertEqual('Invalid database name. Is None.', str(err.exception))
+
+        with self.subTest('Identifier too short - unquoted'):
+            # Actually empty.
+            with self.assertRaises(ValueError) as err:
+                self.connector.validate.database_name('')
+            self.assertIn('Invalid database name of ', str(err.exception))
+            self.assertIn('. Name is empty.', str(err.exception))
+
+            # Empty after strip().
+            with self.assertRaises(ValueError) as err:
+                self.connector.validate.database_name('   ')
+            self.assertIn('Invalid database name of ', str(err.exception))
+            self.assertIn('. Name is empty.', str(err.exception))
+
+        with self.subTest('Identifier too short - quoted'):
+            # Actually empty.
+            with self.assertRaises(ValueError) as err:
+                self.connector.validate.database_name('``')
+            self.assertIn('Invalid database name of ', str(err.exception))
+            self.assertIn('. Name is empty.', str(err.exception))
+
         with self.subTest('Identifier too long - unquoted'):
             test_str = 'Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
             self.assertEqual(len(test_str), 65)
@@ -228,8 +279,13 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
                 test_str = u'{0}'.format(chr(index + 1))
                 with self.assertRaises(ValueError) as err:
                     self.connector.validate.database_name(test_str)
-                self.assertIn('Invalid database name of "', str(err.exception))
-                self.assertIn('". Name does not match acceptable characters.', str(err.exception))
+                # Message changes based on if value was stripped away or not.
+                if len(test_str.strip()) > 0:
+                    self.assertIn('Invalid database name of "', str(err.exception))
+                    self.assertIn('". Name does not match acceptable characters.', str(err.exception))
+                else:
+                    self.assertIn('Invalid database name of "', str(err.exception))
+                    self.assertIn('". Name is empty.', str(err.exception))
 
         with self.subTest('Invalid characters - quoted'):
             # Check that hex 0 is invalid.
@@ -296,6 +352,31 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
         """
         Test "table name" validation, when it should fail.
         """
+        with self.subTest('Identifier is null'):
+            with self.assertRaises(TypeError) as err:
+                self.connector.validate.table_name(None)
+            self.assertEqual('Invalid table name. Is None.', str(err.exception))
+
+        with self.subTest('Identifier too short - unquoted'):
+            # Actually empty.
+            with self.assertRaises(ValueError) as err:
+                self.connector.validate.table_name('')
+            self.assertIn('Invalid table name of ', str(err.exception))
+            self.assertIn('. Name is empty.', str(err.exception))
+
+            # Empty after strip().
+            with self.assertRaises(ValueError) as err:
+                self.connector.validate.table_name('   ')
+            self.assertIn('Invalid table name of ', str(err.exception))
+            self.assertIn('. Name is empty.', str(err.exception))
+
+        with self.subTest('Identifier too short - quoted'):
+            # Actually empty.
+            with self.assertRaises(ValueError) as err:
+                self.connector.validate.table_name('``')
+            self.assertIn('Invalid table name of ', str(err.exception))
+            self.assertIn('. Name is empty.', str(err.exception))
+
         with self.subTest('Identifier too long - unquoted'):
             test_str = 'Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
             self.assertEqual(len(test_str), 65)
@@ -340,8 +421,13 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
                 test_str = u'{0}'.format(chr(index + 1))
                 with self.assertRaises(ValueError) as err:
                     self.connector.validate.table_name(test_str)
-                self.assertIn('Invalid table name of "', str(err.exception))
-                self.assertIn('". Name does not match acceptable characters.', str(err.exception))
+                # Message changes based on if value was stripped away or not.
+                if len(test_str.strip()) > 0:
+                    self.assertIn('Invalid table name of "', str(err.exception))
+                    self.assertIn('". Name does not match acceptable characters.', str(err.exception))
+                else:
+                    self.assertIn('Invalid table name of "', str(err.exception))
+                    self.assertIn('". Name is empty.', str(err.exception))
 
         with self.subTest('Invalid characters - quoted'):
             # Check that hex 0 is invalid.
@@ -408,13 +494,38 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
         """
         Test "table column" validation, when it should fail.
         """
+        with self.subTest('Identifier is null'):
+            with self.assertRaises(TypeError) as err:
+                self.connector.validate.table_column(None)
+            self.assertEqual('Invalid table column. Is None.', str(err.exception))
+
+        with self.subTest('Identifier too short - unquoted'):
+            # Actually empty.
+            with self.assertRaises(ValueError) as err:
+                self.connector.validate.table_column('')
+            self.assertIn('Invalid table column of ', str(err.exception))
+            self.assertIn('. Column is empty.', str(err.exception))
+
+            # Empty after strip().
+            with self.assertRaises(ValueError) as err:
+                self.connector.validate.table_column('   ')
+            self.assertIn('Invalid table column of ', str(err.exception))
+            self.assertIn('. Column is empty.', str(err.exception))
+
+        with self.subTest('Identifier too short - quoted'):
+            # Actually empty.
+            with self.assertRaises(ValueError) as err:
+                self.connector.validate.table_column('``')
+            self.assertIn('Invalid table column of', str(err.exception))
+            self.assertIn('. Column is empty.', str(err.exception))
+
         with self.subTest('Identifier too long - unquoted'):
             test_str = 'Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
             self.assertEqual(len(test_str), 65)
             with self.assertRaises(ValueError) as err:
                 self.connector.validate.table_column(test_str)
             self.assertIn('Invalid table column of "', str(err.exception))
-            self.assertIn('". Name is longer than 64 characters.', str(err.exception))
+            self.assertIn('". Column is longer than 64 characters.', str(err.exception))
 
         with self.subTest('Identifier too long - quoted'):
             test_str = '`Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`'
@@ -422,7 +533,7 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
             with self.assertRaises(ValueError) as err:
                 self.connector.validate.table_column(test_str)
             self.assertIn('Invalid table column of ', str(err.exception))
-            self.assertIn('. Name is longer than 64 characters.', str(err.exception))
+            self.assertIn('. Column is longer than 64 characters.', str(err.exception))
 
         with self.subTest('Invalid characters - unquoted'):
             # Check basic "unquoted problem characters".
@@ -431,14 +542,14 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
                 with self.assertRaises(ValueError) as err:
                     self.connector.validate.table_column(item)
                 self.assertIn('Invalid table column of "', str(err.exception))
-                self.assertIn('". Name does not match acceptable characters.', str(err.exception))
+                self.assertIn('". Column does not match acceptable characters.', str(err.exception))
 
             # Check project-specific "bad characters".
             for item in self.unallowed_char_list:
                 with self.assertRaises(ValueError) as err:
                     self.connector.validate.table_column(item)
                 self.assertIn('Invalid table column of "', str(err.exception))
-                self.assertIn('". Name does not match acceptable characters.', str(err.exception))
+                self.assertIn('". Column does not match acceptable characters.', str(err.exception))
 
             # For now, "extended" range is considered invalid.
             # Not sure if we'll want to enable this at some point?
@@ -452,15 +563,20 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
                 test_str = u'{0}'.format(chr(index + 1))
                 with self.assertRaises(ValueError) as err:
                     self.connector.validate.table_column(test_str)
-                self.assertIn('Invalid table column of "', str(err.exception))
-                self.assertIn('". Name does not match acceptable characters.', str(err.exception))
+                # Message changes based on if value was stripped away or not.
+                if len(test_str.strip()) > 0:
+                    self.assertIn('Invalid table column of "', str(err.exception))
+                    self.assertIn('". Column does not match acceptable characters.', str(err.exception))
+                else:
+                    self.assertIn('Invalid table column of "', str(err.exception))
+                    self.assertIn('". Column is empty.', str(err.exception))
 
         with self.subTest('Invalid characters - quoted'):
             # Check that hex 0 is invalid.
             with self.assertRaises(ValueError) as err:
                 self.connector.validate.table_column(u'`' + chr(0) + u'`')
             self.assertIn('Invalid table column of ', str(err.exception))
-            self.assertIn('. Name does not match acceptable characters.', str(err.exception))
+            self.assertIn('. Column does not match acceptable characters.', str(err.exception))
 
             # For now, "extended" range is considered invalid.
             # Not sure if we'll want to enable this at some point?
@@ -474,4 +590,4 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
                 with self.assertRaises(ValueError) as err:
                     self.connector.validate.table_column(test_str)
                 self.assertIn('Invalid table column of ', str(err.exception))
-                self.assertIn('. Name does not match acceptable characters.', str(err.exception))
+                self.assertIn('. Column does not match acceptable characters.', str(err.exception))
