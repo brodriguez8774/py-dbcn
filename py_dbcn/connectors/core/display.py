@@ -220,14 +220,37 @@ class RecordDisplay:
         # Define provided direct parent object.
         self._parent = parent
 
-    def select(self, results, logger, table_name):
+    def select(self, results, logger, table_name, select_clause=None):
         """Display logic for records.select()."""
         if results:
-            # Calculate column header values.
-            table_cols = [
-                x[0]
-                for x in self._base.tables.describe(table_name)
-            ]
+            # Check select clause, which directly affects desired output columns.
+            # First we initialize to a default str.
+            if select_clause is None:
+                select_clause = '*'
+            else:
+                select_clause = str(select_clause).strip()
+            # Handle based on star or specific cols.
+            # TODO: Probably need to tokenize this, to properly compare.
+            if select_clause == '*' or '(*)' in select_clause:
+                # Calculate column header values, using all columns.
+                table_cols = [
+                    x[0]
+                    for x in self._base.tables.describe(table_name)
+                ]
+            else:
+                select_clause = select_clause.split(',')
+                for index in range(len(select_clause)):
+                    clause = select_clause[index].strip()
+                    if len(clause) > 1 and clause[0] == clause[-1] and clause[0] in ['`', '"', "'"]:
+                        clause = clause[1:-1]
+                    select_clause[index] = clause
+
+                # Calculate column header values, filtered by select clause.
+                table_cols = [
+                    x[0]
+                    for x in self._base.tables.describe(table_name)
+                    if x[0] in select_clause
+                ]
             col_len_array = []
             total_col_len = 0
             for table_col in table_cols:
