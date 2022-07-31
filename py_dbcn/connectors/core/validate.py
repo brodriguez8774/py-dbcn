@@ -150,6 +150,9 @@ class BaseValidate:
     def table_column(self, identifier):
         """Validates that provided table column uses set of acceptable characters.
 
+        Differs from validate.table_columns() in that this checks a singular column, and that one checks a set.
+        Aka, validate.table_columns() is a parent method that calls this function.
+
         :param identifier: Potential column of table to validate.
         :return: True if valid | False otherwise.
         """
@@ -180,14 +183,15 @@ class BaseValidate:
     def table_columns(self, columns):
         """Validates that provided column values match expected syntax.
 
+        Differs from validate.table_column() in that this checks a set of columns, and that one checks a singular.
+        Aka, validate.table_column() is a child method that is called by this function.
+
         :param columns: Str or dict of columns to validate.
         :return: True if columns are valid | False otherwise.
         """
         # NOTE: Table column cannot match:
         #   * desc
         #   * ??? Look into further "bad" values.
-
-        orig_columns = copy.deepcopy(columns)
 
         # Handle based on passed type.
         if isinstance(columns, str):
@@ -203,6 +207,7 @@ class BaseValidate:
 
         elif isinstance(columns, dict):
             # Handle for dict.
+            orig_columns = copy.deepcopy(columns)
 
             # Ensure dict has at least one key-value pair.
             if len(columns) == 0:
@@ -212,12 +217,11 @@ class BaseValidate:
             columns = '( '
             for key, value in orig_columns.items():
 
-                # Verify that no bad values exist in dict.
-                key = str(key)
-                value = str(value)
+                # Separately validate provided key and value.
+                key = str(key).strip()
+                value = str(value).strip()
                 if ';' in key:
                     raise ValueError('Invalid character found in key "{0}".'.format(key))
-
                 if ';' in value:
                     raise ValueError('Invalid character found in value "{0}".'.format(value))
 

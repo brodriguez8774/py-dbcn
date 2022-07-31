@@ -23,20 +23,6 @@ class TestCoreValidate(unittest.TestCase):
         # Initialize validator class.
         cls.validate = BaseValidate(None)
 
-    def test_validate_database_name(self):
-        """
-        Tests database name validation logic.
-        """
-        # For now, always returns true.
-        self.assertTrue(self.validate.database_name(None))
-
-    def test_validate_table_name(self):
-        """
-        Tests table name validation logic.
-        """
-        # For now, always returns true.
-        self.assertTrue(self.validate.table_name(None))
-
     def test_validate_columns__invalid_type(self):
         """
         Tests column validation logic, using invalid type.

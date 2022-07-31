@@ -40,7 +40,7 @@ class BaseRecords:
         # Check that provided SELECT clause is valid format.
         if select_clause is None:
             select_clause = '*'
-        if not self._base.validate.table_name(select_clause):
+        if not self._base.validate.select_clause(select_clause):
             raise ValueError('Invalid SELECT clause of "{0}".'.format(select_clause))
 
         # Select record.
