@@ -36,37 +36,34 @@ class BaseValidate:
 
     # region Name Validation
 
-    def _identifier(self, name):
+    def _identifier(self, identifier):
         """Generalized validation for "identifier naming conventions".
 
         All other "identifiers" should probably be run through this function.
         See https://dev.mysql.com/doc/refman/8.0/en/identifiers.html
         """
         # Run basic sanitation against provided param.
-        if name is None:
+        if identifier is None:
             return (False, 'is None.')
-        name = str(name).strip()
+        identifier = str(identifier).strip()
 
         # Check if value is quoted.
         is_quoted = False
-        if len(name) > 1 and name[0] == name[-1] and name[0] in ['`', '"', "'"]:
+        if len(identifier) > 1 and identifier[0] == identifier[-1] and identifier[0] in ['`', '"', "'"]:
             is_quoted = True
             max_len = 66
         else:
             max_len = 64
 
-        print('name: {0}'.format(name))
-        print('is_quoted: {0}'.format(is_quoted))
-
         # Check minimum length.
         if (
-            (is_quoted and len(name) < 3)
-            or len(name) == 0
+            (is_quoted and len(identifier) < 3)
+            or len(identifier) == 0
         ):
             return (False, 'is empty.')
 
         # Check against max possible length.
-        if len(name) > max_len:
+        if len(identifier) > max_len:
             return (False, 'is longer than 64 characters.')
 
         # Check acceptable patterns.
@@ -75,12 +72,12 @@ class BaseValidate:
             '0-9a-zA-Z$_'
             # Check against "quoted patterns".
             pattern = re.compile('^([0-9a-zA-Z$_])+$')
-            if not re.match(pattern, name):
+            if not re.match(pattern, identifier):
                 return (False, 'does not match acceptable characters.')
         else:
             # Check against "quoted patterns".
             pattern = re.compile(u'^([\u0001-\u007F])+$', flags=re.UNICODE)
-            if not re.match(pattern, name):
+            if not re.match(pattern, identifier):
                 return (False, 'does not match acceptable characters.')
 
         # Check for characters that we want to exclude.
@@ -88,92 +85,92 @@ class BaseValidate:
             u'((;)|(\u003B)|(\\\\)|(\\\u005C))',
             flags=re.UNICODE,
         )
-        if forbidden_chars.search(name):
+        if forbidden_chars.search(identifier):
             return (False, 'does not match acceptable characters.')
 
         # Passed all tests.
         return (True, '')
 
-    def database_name(self, name):
-        """
-        Validates that provided database name uses set of acceptable characters.
-        :param name: Potential name of database to validate.
+    def database_name(self, identifier):
+        """Validates that provided database name uses set of acceptable characters.
+
+        :param identifier: Potential name of database to validate.
         :return: True if valid | False otherwise.
         """
         # Run basic sanitation against provided param.
-        if name is None:
+        if identifier is None:
             raise TypeError('Invalid database name. Is None.')
-        name = str(name).strip()
+        identifier = str(identifier).strip()
 
         # Check if value is quoted.
         is_quoted = False
-        if len(name) > 1 and name[0] == name[-1] and name[0] in ['`', '"', "'"]:
+        if len(identifier) > 1 and identifier[0] == identifier[-1] and identifier[0] in ['`', '"', "'"]:
             is_quoted = True
 
         # Validate using "general identifier" logic.
-        results = self._identifier(name)
+        results = self._identifier(identifier)
 
         if results[0] is False:
             if is_quoted:
-                raise ValueError(u'Invalid database name of {0}. Name {1}'.format(str(name), results[1]))
+                raise ValueError(u'Invalid database name of {0}. Name {1}'.format(str(identifier), results[1]))
             else:
-                raise ValueError(u'Invalid database name of "{0}". Name {1}'.format(str(name), results[1]))
+                raise ValueError(u'Invalid database name of "{0}". Name {1}'.format(str(identifier), results[1]))
 
         # Passed checks.
         return True
 
-    def table_name(self, name):
-        """
-        Validates that provided table name uses set of acceptable characters.
-        :param name: Potential name of table to validate.
+    def table_name(self, identifier):
+        """Validates that provided table name uses set of acceptable characters.
+
+        :param identifier: Potential name of table to validate.
         :return: True if valid | False otherwise.
         """
         # Run basic sanitation against provided param.
-        if name is None:
+        if identifier is None:
             raise TypeError('Invalid table name. Is None.')
-        name = str(name).strip()
+        identifier = str(identifier).strip()
 
         # Check if value is quoted.
         is_quoted = False
-        if len(name) > 1 and name[0] == name[-1] and name[0] in ['`', '"', "'"]:
+        if len(identifier) > 1 and identifier[0] == identifier[-1] and identifier[0] in ['`', '"', "'"]:
             is_quoted = True
 
         # Validate using "general identifier" logic.
-        results = self._identifier(name)
+        results = self._identifier(identifier)
 
         if results[0] is False:
             if is_quoted:
-                raise ValueError(u'Invalid table name of {0}. Name {1}'.format(str(name), results[1]))
+                raise ValueError(u'Invalid table name of {0}. Name {1}'.format(str(identifier), results[1]))
             else:
-                raise ValueError(u'Invalid table name of "{0}". Name {1}'.format(str(name), results[1]))
+                raise ValueError(u'Invalid table name of "{0}". Name {1}'.format(str(identifier), results[1]))
 
         # Passed checks.
         return True
 
-    def table_column(self, name):
-        """
-        Validates that provided table name uses set of acceptable characters.
-        :param name: Potential name of table to validate.
+    def table_column(self, identifier):
+        """Validates that provided table column uses set of acceptable characters.
+
+        :param identifier: Potential column of table to validate.
         :return: True if valid | False otherwise.
         """
         # Run basic sanitation against provided param.
-        if name is None:
+        if identifier is None:
             raise TypeError('Invalid table column. Is None.')
-        name = str(name).strip()
+        identifier = str(identifier).strip()
 
         # Check if value is quoted.
         is_quoted = False
-        if len(name) > 1 and name[0] == name[-1] and name[0] in ['`', '"', "'"]:
+        if len(identifier) > 1 and identifier[0] == identifier[-1] and identifier[0] in ['`', '"', "'"]:
             is_quoted = True
 
         # Validate using "general identifier" logic.
-        results = self._identifier(name)
+        results = self._identifier(identifier)
 
         if results[0] is False:
             if is_quoted:
-                raise ValueError(u'Invalid table column of {0}. Column {1}'.format(str(name), results[1]))
+                raise ValueError(u'Invalid table column of {0}. Column {1}'.format(str(identifier), results[1]))
             else:
-                raise ValueError(u'Invalid table column of "{0}". Column {1}'.format(str(name), results[1]))
+                raise ValueError(u'Invalid table column of "{0}". Column {1}'.format(str(identifier), results[1]))
 
         # Passed checks.
         return True
@@ -181,8 +178,8 @@ class BaseValidate:
     # endregion Name Validation
 
     def table_columns(self, columns):
-        """
-        Validates that provided column values match expected syntax.
+        """Validates that provided column values match expected syntax.
+
         :param columns: Str or dict of columns to validate.
         :return: True if columns are valid | False otherwise.
         """
