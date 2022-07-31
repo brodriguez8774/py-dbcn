@@ -52,7 +52,7 @@ class TestMysqlRecords(TestMysqlDatabaseParent):
             self.assertGreaterEqual(len(results), 0)
             self.assertIn(table_name, results)
 
-        with self.subTest('SHOW query when table has records'):
+        with self.subTest('SELECT query when table has records'):
             # Run test query.
             row = (1, 'test_name_1', 'test_desc_1')
             self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row))
@@ -72,6 +72,16 @@ class TestMysqlRecords(TestMysqlDatabaseParent):
             self.assertIn(row, results)
 
         # Works for 0, 1, and 2. Assume works for all further n+1 values.
+
+        with self.subTest('SELECT query when table column uses "reserved keyword"'):
+            # "Group" is considered a MySQL keyword. As long as this doesn't raise an error, it worked.
+            self.connector.tables.add_column(table_name, '`group` VARCHAR(100)')
+            results = self.connector.records.select(table_name)
+
+            # Verify two records returned, now with an extra "group" field that shows null.
+            row = row + (None,)
+            self.assertEqual(len(results), 2)
+            self.assertIn(row, results)
 
     def test__insert__success(self):
         """

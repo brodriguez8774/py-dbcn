@@ -233,7 +233,7 @@ class RecordDisplay:
             for table_col in table_cols:
                 col_len = len(table_col)
                 record_len = self._base.query.execute(
-                    'SELECT MAX(LENGTH({0})) FROM {1};'.format(table_col, table_name)
+                    'SELECT MAX(LENGTH(`{0}`)) FROM {1};'.format(table_col, table_name)
                 )[0][0]
                 length = max(col_len, record_len or 0)
                 col_len_array.append(length)
@@ -255,7 +255,11 @@ class RecordDisplay:
             record_str = ''
             for record in results:
                 for index in range(len(record)):
-                    record_str += ('| {0:<' + '{0}'.format(col_len_array[index]) + '} ').format(record[index])
+                    if record[index] is None:
+                        col_str = 'NULL'
+                    else:
+                        col_str = str(record[index])
+                    record_str += ('| {0:<' + '{0}'.format(col_len_array[index]) + '} ').format(col_str)
                 record_str += '|\n'
 
             # Combine final string.
