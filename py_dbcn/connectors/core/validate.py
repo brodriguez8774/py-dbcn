@@ -71,6 +71,14 @@ class BaseValidate:
             if not re.match(pattern, name):
                 return (False, 'does not match acceptable characters.')
 
+        # Check for characters that we want to exclude.
+        forbidden_chars = re.compile(
+            u'((;)|(\u003B)|(\\\\)|(\\\u005C))',
+            flags=re.UNICODE,
+        )
+        if forbidden_chars.search(name):
+            return (False, 'does not match acceptable characters.')
+
         # Passed all tests.
         return (True, '')
 
@@ -136,9 +144,9 @@ class BaseValidate:
 
         if results[0] is False:
             if is_quoted:
-                raise ValueError(u'Invalid column name of {0}. Name {1}'.format(str(name), results[1]))
+                raise ValueError(u'Invalid table column of {0}. Name {1}'.format(str(name), results[1]))
             else:
-                raise ValueError(u'Invalid column name of "{0}". Name {1}'.format(str(name), results[1]))
+                raise ValueError(u'Invalid table column of "{0}". Name {1}'.format(str(name), results[1]))
 
         # Passed checks.
         return True
@@ -151,7 +159,7 @@ class BaseValidate:
         :param columns: Str or dict of columns to validate.
         :return: True if columns are valid | False otherwise.
         """
-        # NOTE: Column name cannot match:
+        # NOTE: Table column cannot match:
         #   * desc
         #   * ??? Look into further "bad" values.
 

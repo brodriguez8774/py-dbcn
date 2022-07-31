@@ -18,6 +18,9 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
         # Run parent setup logic.
         super().setUpClass()
 
+        cls.unallowed_char_list = [';', '\\']
+        cls.unallowed_unicode_index_list = [59, 92]
+
     def test__identifier__success(self):
         """
         Test "general identifier" validation, when it should succeed.
@@ -61,27 +64,16 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
             '"Permitted characters in quoted identifiers include the full Unicode Basic Multilingual Plane (BMP), '
             'except U+0000"'
         ):
-            test_str = u''
             for index in range(127):
+                # Skip "unacceptable" values.
+                if (index + 1) in self.unallowed_unicode_index_list:
+                    continue
 
-                # Check len of str with new value added.
-                new_test_str = test_str + chr(index + 1)
-                if len(new_test_str) > 64:
-                    # At max acceptable length. Test current value and then reset string.
-                    test_str = u'`' + test_str + u'`'
-                    result = self.connector.validate._identifier(test_str)
-                    self.assertTrue(result[0])
-                    self.assertEqual(result[1], '')
-
-                    test_str = u''
-
-                # Update str with new value.
-                test_str += chr(index + 1)
-
-            test_str = u'`' + test_str + u'`'
-            result = self.connector.validate._identifier(test_str)
-            self.assertTrue(result[0])
-            self.assertEqual(result[1], '')
+                # Test value.
+                test_str = u'`' + chr(index + 1) + u'`'
+                result = self.connector.validate._identifier(test_str)
+                self.assertTrue(result[0])
+                self.assertEqual(result[1], '')
 
     def test__identifier__failure(self):
         """
@@ -102,8 +94,15 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
             self.assertEqual(result[1], 'is longer than 64 characters.')
 
         with self.subTest('Invalid characters - unquoted'):
+            # Check basic "unquoted problem characters".
             test_str = '!@#%^&*()-+=~\'"[]{}<>|\\/:;,.?'
             for item in test_str:
+                result = self.connector.validate._identifier(item)
+                self.assertFalse(result[0])
+                self.assertEqual(result[1], 'does not match acceptable characters.')
+
+            # Check project-specific "bad characters".
+            for item in self.unallowed_char_list:
                 result = self.connector.validate._identifier(item)
                 self.assertFalse(result[0])
                 self.assertEqual(result[1], 'does not match acceptable characters.')
@@ -172,23 +171,14 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
             '"Permitted characters in quoted identifiers include the full Unicode Basic Multilingual Plane (BMP), '
             'except U+0000"'
         ):
-            test_str = u''
             for index in range(127):
+                # Skip "unacceptable" values.
+                if (index + 1) in self.unallowed_unicode_index_list:
+                    continue
 
-                # Check len of str with new value added.
-                new_test_str = test_str + chr(index + 1)
-                if len(new_test_str) > 64:
-                    # At max acceptable length. Test current value and then reset string.
-                    test_str = u'`' + test_str + u'`'
-                    self.assertTrue(self.connector.validate.database_name(test_str))
-
-                    test_str = u''
-
-                # Update str with new value.
-                test_str += chr(index + 1)
-
-            test_str = u'`' + test_str + u'`'
-            self.assertTrue(self.connector.validate.database_name(test_str))
+                # Test value.
+                test_str = u'`' + chr(index + 1) + u'`'
+                self.assertTrue(self.connector.validate.database_name(test_str))
 
     def test__database_name__failure(self):
         """
@@ -211,8 +201,16 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
             self.assertIn('. Name is longer than 64 characters.', str(err.exception))
 
         with self.subTest('Invalid characters - unquoted'):
+            # Check basic "unquoted problem characters".
             test_str = '!@#%^&*()-+=~\'"[]{}<>|\\/:;,.?'
             for item in test_str:
+                with self.assertRaises(ValueError) as err:
+                    self.connector.validate.database_name(item)
+                self.assertIn('Invalid database name of "', str(err.exception))
+                self.assertIn('". Name does not match acceptable characters.', str(err.exception))
+
+            # Check project-specific "bad characters".
+            for item in self.unallowed_char_list:
                 with self.assertRaises(ValueError) as err:
                     self.connector.validate.database_name(item)
                 self.assertIn('Invalid database name of "', str(err.exception))
@@ -285,23 +283,14 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
             '"Permitted characters in quoted identifiers include the full Unicode Basic Multilingual Plane (BMP), '
             'except U+0000"'
         ):
-            test_str = u''
             for index in range(127):
+                # Skip "unacceptable" values.
+                if (index + 1) in self.unallowed_unicode_index_list:
+                    continue
 
-                # Check len of str with new value added.
-                new_test_str = test_str + chr(index + 1)
-                if len(new_test_str) > 64:
-                    # At max acceptable length. Test current value and then reset string.
-                    test_str = u'`' + test_str + u'`'
-                    self.assertTrue(self.connector.validate.table_name(test_str))
-
-                    test_str = u''
-
-                # Update str with new value.
-                test_str += chr(index + 1)
-
-            test_str = u'`' + test_str + u'`'
-            self.assertTrue(self.connector.validate.table_name(test_str))
+                # Test value.
+                test_str = u'`' + chr(index + 1) + u'`'
+                self.assertTrue(self.connector.validate.table_name(test_str))
 
     def test__table_name__failure(self):
         """
@@ -324,8 +313,16 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
             self.assertIn('. Name is longer than 64 characters.', str(err.exception))
 
         with self.subTest('Invalid characters - unquoted'):
+            # Check basic "unquoted problem characters".
             test_str = '!@#%^&*()-+=~\'"[]{}<>|\\/:;,.?'
             for item in test_str:
+                with self.assertRaises(ValueError) as err:
+                    self.connector.validate.table_name(item)
+                self.assertIn('Invalid table name of "', str(err.exception))
+                self.assertIn('". Name does not match acceptable characters.', str(err.exception))
+
+            # Check project-specific "bad characters".
+            for item in self.unallowed_char_list:
                 with self.assertRaises(ValueError) as err:
                     self.connector.validate.table_name(item)
                 self.assertIn('Invalid table name of "', str(err.exception))
@@ -369,7 +366,7 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
 
     def test__table_column__success(self):
         """
-        Test "column name" validation, when it should succeed.
+        Test "table column" validation, when it should succeed.
         """
         with self.subTest('"Permitted characters in unquoted Identifiers"'):
             # Ensure capital letters validate.
@@ -398,34 +395,25 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
             '"Permitted characters in quoted identifiers include the full Unicode Basic Multilingual Plane (BMP), '
             'except U+0000"'
         ):
-            test_str = u''
             for index in range(127):
+                # Skip "unacceptable" values.
+                if (index + 1) in self.unallowed_unicode_index_list:
+                    continue
 
-                # Check len of str with new value added.
-                new_test_str = test_str + chr(index + 1)
-                if len(new_test_str) > 64:
-                    # At max acceptable length. Test current value and then reset string.
-                    test_str = u'`' + test_str + u'`'
-                    self.assertTrue(self.connector.validate.table_column(test_str))
-
-                    test_str = u''
-
-                # Update str with new value.
-                test_str += chr(index + 1)
-
-            test_str = u'`' + test_str + u'`'
-            self.assertTrue(self.connector.validate.table_column(test_str))
+                # Test value.
+                test_str = u'`' + chr(index + 1) + u'`'
+                self.assertTrue(self.connector.validate.table_column(test_str))
 
     def test__table_column__failure(self):
         """
-        Test "column name" validation, when it should fail.
+        Test "table column" validation, when it should fail.
         """
         with self.subTest('Identifier too long - unquoted'):
             test_str = 'Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
             self.assertEqual(len(test_str), 65)
             with self.assertRaises(ValueError) as err:
                 self.connector.validate.table_column(test_str)
-            self.assertIn('Invalid column name of "', str(err.exception))
+            self.assertIn('Invalid table column of "', str(err.exception))
             self.assertIn('". Name is longer than 64 characters.', str(err.exception))
 
         with self.subTest('Identifier too long - quoted'):
@@ -433,15 +421,23 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
             self.assertEqual(len(test_str), 67)
             with self.assertRaises(ValueError) as err:
                 self.connector.validate.table_column(test_str)
-            self.assertIn('Invalid column name of ', str(err.exception))
+            self.assertIn('Invalid table column of ', str(err.exception))
             self.assertIn('. Name is longer than 64 characters.', str(err.exception))
 
         with self.subTest('Invalid characters - unquoted'):
+            # Check basic "unquoted problem characters".
             test_str = '!@#%^&*()-+=~\'"[]{}<>|\\/:;,.?'
             for item in test_str:
                 with self.assertRaises(ValueError) as err:
                     self.connector.validate.table_column(item)
-                self.assertIn('Invalid column name of "', str(err.exception))
+                self.assertIn('Invalid table column of "', str(err.exception))
+                self.assertIn('". Name does not match acceptable characters.', str(err.exception))
+
+            # Check project-specific "bad characters".
+            for item in self.unallowed_char_list:
+                with self.assertRaises(ValueError) as err:
+                    self.connector.validate.table_column(item)
+                self.assertIn('Invalid table column of "', str(err.exception))
                 self.assertIn('". Name does not match acceptable characters.', str(err.exception))
 
             # For now, "extended" range is considered invalid.
@@ -456,14 +452,14 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
                 test_str = u'{0}'.format(chr(index + 1))
                 with self.assertRaises(ValueError) as err:
                     self.connector.validate.table_column(test_str)
-                self.assertIn('Invalid column name of "', str(err.exception))
+                self.assertIn('Invalid table column of "', str(err.exception))
                 self.assertIn('". Name does not match acceptable characters.', str(err.exception))
 
         with self.subTest('Invalid characters - quoted'):
             # Check that hex 0 is invalid.
             with self.assertRaises(ValueError) as err:
                 self.connector.validate.table_column(u'`' + chr(0) + u'`')
-            self.assertIn('Invalid column name of ', str(err.exception))
+            self.assertIn('Invalid table column of ', str(err.exception))
             self.assertIn('. Name does not match acceptable characters.', str(err.exception))
 
             # For now, "extended" range is considered invalid.
@@ -477,5 +473,5 @@ class TestMysqlValidate(TestMysqlDatabaseParent):
                 test_str = u'`' + chr(index + 1) + u'`'
                 with self.assertRaises(ValueError) as err:
                     self.connector.validate.table_column(test_str)
-                self.assertIn('Invalid column name of ', str(err.exception))
+                self.assertIn('Invalid table column of ', str(err.exception))
                 self.assertIn('. Name does not match acceptable characters.', str(err.exception))
