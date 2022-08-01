@@ -48,9 +48,8 @@ class BaseValidate:
         identifier = str(identifier).strip()
 
         # Check if value is quoted.
-        is_quoted = False
-        if len(identifier) > 1 and identifier[0] == identifier[-1] and identifier[0] in ['`', '"', "'"]:
-            is_quoted = True
+        is_quoted = self._is_quoted(identifier)
+        if is_quoted:
             max_len = 66
         else:
             max_len = 64
@@ -103,9 +102,7 @@ class BaseValidate:
         identifier = str(identifier).strip()
 
         # Check if value is quoted.
-        is_quoted = False
-        if len(identifier) > 1 and identifier[0] == identifier[-1] and identifier[0] in ['`', '"', "'"]:
-            is_quoted = True
+        is_quoted = self._is_quoted(identifier)
 
         # Validate using "general identifier" logic.
         results = self._identifier(identifier)
@@ -131,9 +128,7 @@ class BaseValidate:
         identifier = str(identifier).strip()
 
         # Check if value is quoted.
-        is_quoted = False
-        if len(identifier) > 1 and identifier[0] == identifier[-1] and identifier[0] in ['`', '"', "'"]:
-            is_quoted = True
+        is_quoted = self._is_quoted(identifier)
 
         # Validate using "general identifier" logic.
         results = self._identifier(identifier)
@@ -162,9 +157,7 @@ class BaseValidate:
         identifier = str(identifier).strip()
 
         # Check if value is quoted.
-        is_quoted = False
-        if len(identifier) > 1 and identifier[0] == identifier[-1] and identifier[0] in ['`', '"', "'"]:
-            is_quoted = True
+        is_quoted = self._is_quoted(identifier)
 
         # Validate using "general identifier" logic.
         results = self._identifier(identifier)
@@ -247,8 +240,68 @@ class BaseValidate:
         :param clause: SELECT clause to validate.
         :return: True if valid | False otherwise.
         """
-        # For now, always return as valid.
-        return True
+        if isinstance(clause, list) or isinstance(clause, tuple):
+            # Format we want.
+            pass
+        else:
+            # Handle for None type. Default to "all".
+            if clause is None:
+                clause = '*'
+            else:
+                # Handle for all other types.
+                clause = str(clause)
+
+            # Check for outer parens.
+            if (
+                len(clause) > 1
+                and (
+                    (clause[0] == '(' and clause[-1] == ')')
+                    or (clause[0] == '[' and clause[-1] == ']')
+                )
+            ):
+                clause = clause[1:-1]
+
+            # Convert to list.
+            clause = clause.split(',')
+            for index in range(len(clause)):
+                item = clause[index].strip()
+                if item == '*':
+                    clause[index] = item
+                clause[index] = '{0}'.format(item)
+
+        # Handle for "all" star.
+        if len(clause) == 1 and clause[0] == '*':
+            return '*'
+
+        # Validate each item in clause.
+        new_clause = []
+        for item in clause:
+            item = str(item).strip()
+
+            # Error if "all" star. Should not pass this in addition to other values.
+            if item == '*':
+                raise ValueError('SELECT clause provided * with other params. * is only valid alone.')
+
+            # Validate individual identifier.
+            results = self._identifier(item)
+            if results[0] is False:
+                raise ValueError('Invalid SELECT identifier. Identifier {0}'.format(results[1]))
+
+            # If we made it this far, item is valid. Escape with backticks and readd.
+            is_quoted = self._is_quoted(item)
+            if is_quoted:
+                # Was already quoted, but may not be with backticks. Reformat to guaranteed use backticks.
+                item = '`{0}`'.format(item[1:-1])
+            else:
+                # Was not quoted. Add backticks.
+                item = '`{0}`'.format(item)
+            new_clause.append(item)
+
+        # All items in clause were valid. Re-concatenate into single expected str format.
+        clause = ', '.join(new_clause)
+
+        # Return validated and sanitized SELECT clause.
+        return clause
 
     def columns_clause(self, clause):
         """
@@ -287,3 +340,20 @@ class BaseValidate:
         return True
 
     # endregion Clause Validation
+
+    def _is_quoted(self, value):
+        """Checks if provided value is quoted.
+
+        Aka, these are three "quoted" values:   "id", `first_name`, 'last_name'
+        These are three not "quoted" values:    id, first_name, last_name
+        """
+        is_quoted = False
+        if isinstance(value, str):
+            # Only attempt to check if str type.
+            value = value.strip()
+
+            # Must have matching outer quotes, plus at least one inner character.
+            if len(value) > 1 and value[0] == value[-1] and value[0] in ['`', '"', "'"]:
+                is_quoted = True
+
+        return is_quoted
