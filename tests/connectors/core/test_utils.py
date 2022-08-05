@@ -7,7 +7,7 @@ Tests for "utility" logic of "Core" DB Connector class.
 # User Imports.
 
 
-class CoreUtilsTestMixin():
+class CoreUtilsTestMixin:
     """
     Tests "Core" DB Connector class utility logic.
     """
@@ -19,3 +19,4 @@ class CoreUtilsTestMixin():
         However, since this is not inheriting from a given TestCase, calling the literal function
         here would override instead.
         """
+        cls.test_db_name_start = cls.test_db_name_start.format(cls.db_type)

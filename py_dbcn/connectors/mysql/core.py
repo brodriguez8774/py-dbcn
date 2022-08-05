@@ -13,6 +13,7 @@ from .display import MysqlDisplay
 from .query import MysqlQuery
 from .records import MysqlRecords
 from .tables import MysqlTables
+from .utils import MysqlUtils
 from .validate import MysqlValidate
 from py_dbcn.connectors.core import AbstractDbConnector
 from py_dbcn.logging import init_logging
@@ -65,6 +66,12 @@ class MysqlDbConnector(AbstractDbConnector):
         Overridable method to get the related "tables functionality" class.
         """
         return MysqlTables(self)
+
+    def _get_related_utils_class(self):
+        """
+        Overridable method to get the related "utils functionality" class.
+        """
+        return MysqlUtils(self)
 
     def _get_related_validate_class(self):
         """
