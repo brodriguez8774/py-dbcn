@@ -7,9 +7,10 @@ import MySQLdb
 
 # User Imports.
 from .test_core import TestMysqlDatabaseParent
+from tests.connectors.core.test_database import CoreDatabaseTestMixin
 
 
-class TestMysqlDatabase(TestMysqlDatabaseParent):
+class TestMysqlDatabase(TestMysqlDatabaseParent, CoreDatabaseTestMixin):
     """
     Tests "MySQL" DB Connector class database logic.
     """
@@ -18,6 +19,22 @@ class TestMysqlDatabase(TestMysqlDatabaseParent):
         # Run parent setup logic.
         super().setUpClass()
 
+        # Also call CoreTestMixin setup logic.
+        cls.set_up_class()
+
+        # Define database name to use in tests.
+        cls.test_db_name = '{0}test_database'.format(cls.test_db_name_start)
+
+        # Initialize database for tests.
+        cls.connector.database.create(cls.test_db_name)
+        cls.connector.database.use(cls.test_db_name)
+
+        # Check that database has no tables.
+        results = cls.connector.tables.show()
+        if len(results) > 0:
+            for result in results:
+                cls.connector.tables.drop(result)
+
     def test__select(self):
         """
         Test logic for `SELECT;` query.
@@ -25,14 +42,14 @@ class TestMysqlDatabase(TestMysqlDatabaseParent):
         with self.subTest('With default database selected'):
             # Varify default database name is returned.
             result = self.connector.database.select()
-            self.assertEqual(result, 'test_database')
+            self.assertEqual(result, self.test_db_name)
 
             # Verify alias func returns same result.
             result = self.connector.database.current()
-            self.assertEqual(result, 'test_database')
+            self.assertEqual(result, self.test_db_name)
 
         with self.subTest('With select_1 database selected'):
-            db_name = 'python__db_connector__test_database__select_1'
+            db_name = '{0}__select_1'.format(self.test_db_name)
 
             # Verify database exists.
             try:
@@ -51,7 +68,7 @@ class TestMysqlDatabase(TestMysqlDatabaseParent):
             self.assertEqual(result, db_name)
 
         with self.subTest('With select_2 database selected'):
-            db_name = 'python__db_connector__test_database__select_2'
+            db_name = '{0}__select_2'.format(self.test_db_name)
 
             # Verify database exists.
             try:
@@ -73,7 +90,7 @@ class TestMysqlDatabase(TestMysqlDatabaseParent):
         """
         Test logic for `SHOW DATABASES;` query.
         """
-        db_name = 'python__db_connector__test_database__show'
+        db_name = '{0}__show'.format(self.test_db_name)
 
         with self.subTest('SHOW query when database exists'):
             # Verify database exists.
@@ -111,7 +128,7 @@ class TestMysqlDatabase(TestMysqlDatabaseParent):
         """
         Test `CREATE DATABASE` query, when database does not exist.
         """
-        db_name = 'python__db_connector__test_database__create__success'
+        db_name = '{0}__create__success'.format(self.test_db_name)
 
         # Verify database does not yet exist.
         try:
@@ -136,7 +153,7 @@ class TestMysqlDatabase(TestMysqlDatabaseParent):
         """
         Test `CREATE DATABASE` query, when database exists.
         """
-        db_name = 'python__db_connector__test_database__create__failure'
+        db_name = '{0}__create__failure'.format(self.test_db_name)
 
         # Verify database does not yet exist.
         try:
@@ -158,7 +175,7 @@ class TestMysqlDatabase(TestMysqlDatabaseParent):
         """
         Test `USE DATABASE` query, when database exists.
         """
-        db_name = 'python__db_connector__test_database__use__success'
+        db_name = '{0}__use__success'.format(self.test_db_name)
 
         # Verify database exists.
         try:
@@ -186,7 +203,7 @@ class TestMysqlDatabase(TestMysqlDatabaseParent):
         """
         Test `USE DATABASE` query, when database does not exist.
         """
-        db_name = 'python__db_connector__test_database__use__failure'
+        db_name = '{0}__use__failure'.format(self.test_db_name)
 
         # Verify database does not yet exist.
         try:
@@ -207,7 +224,7 @@ class TestMysqlDatabase(TestMysqlDatabaseParent):
         """
         Test `DROP DATABASE` query, when database exists.
         """
-        db_name = 'python__db_connector__test_database__delete__success'
+        db_name = '{0}__delete__success'.format(self.test_db_name)
 
         # Verify database does not yet exist.
         try:
@@ -233,7 +250,7 @@ class TestMysqlDatabase(TestMysqlDatabaseParent):
         """
         Test `DROP DATABASE` query, when database does not exist.
         """
-        db_name = 'python__db_connector__test_database__delete__failure'
+        db_name = '{0}__delete__failure'.format(self.test_db_name)
 
         # Verify database does not yet exist.
         try:

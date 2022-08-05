@@ -6,89 +6,90 @@ Tests for "display" logic of "MySQL" DB Connector class.
 
 # User Imports.
 from .test_core import TestMysqlDatabaseParent
+from tests.connectors.core.test_display import CoreDisplayTestMixin
 
 
 EXPECTED__TABLE__SHOW__DB_LONGER__PT_1 = """
-+------------------------------------------------------+
-| Tables in python__db_connector__test_d__tables__show |
-+------------------------------------------------------+
-| category                                             |
-+------------------------------------------------------+
++--------------------------------------------------------+
+| Tables in pydbcn__MySQL_unittest__test_d__tables__show |
++--------------------------------------------------------+
+| category                                               |
++--------------------------------------------------------+
 """.strip()
 
 
 EXPECTED__TABLE__SHOW__DB_LONGER__PT_2 = """
-+------------------------------------------------------+
-| Tables in python__db_connector__test_d__tables__show |
-+------------------------------------------------------+
-| category                                             |
-| priority                                             |
-+------------------------------------------------------+
++--------------------------------------------------------+
+| Tables in pydbcn__MySQL_unittest__test_d__tables__show |
++--------------------------------------------------------+
+| category                                               |
+| priority                                               |
++--------------------------------------------------------+
 """.strip()
 
 
 EXPECTED__TABLE__SHOW__DB_LONGER__PT_3 = """
-+------------------------------------------------------+
-| Tables in python__db_connector__test_d__tables__show |
-+------------------------------------------------------+
-| a                                                    |
-| category                                             |
-| priority                                             |
-+------------------------------------------------------+
++--------------------------------------------------------+
+| Tables in pydbcn__MySQL_unittest__test_d__tables__show |
++--------------------------------------------------------+
+| a                                                      |
+| category                                               |
+| priority                                               |
++--------------------------------------------------------+
 """.strip()
 
 
 EXPECTED__TABLE__SHOW__EQUAL_LENGTH = """
-+------------------------------------------------------+
-| Tables in python__db_connector__test_d__tables__show |
-+------------------------------------------------------+
-| a                                                    |
-| category                                             |
-| priority                                             |
-| test__testing__this_is__really_long_table_name__test |
-+------------------------------------------------------+
++--------------------------------------------------------+
+| Tables in pydbcn__MySQL_unittest__test_d__tables__show |
++--------------------------------------------------------+
+| a                                                      |
+| category                                               |
+| priority                                               |
+| test__testing__this_is_a_really_long_table_name__test_ |
++--------------------------------------------------------+
 """.strip()
 
 
 EXPECTED__TABLE__SHOW__TABLE_LONGER__PT_1 = """
-+-------------------------------------------------------+
-| Tables in python__db_connector__test_d__tables__show  |
-+-------------------------------------------------------+
-| a                                                     |
-| category                                              |
-| priority                                              |
-| test__testing__this_is__really_long_table_name__test  |
-| test__testing__this_is_a_really_long_table_name__test |
-+-------------------------------------------------------+
++---------------------------------------------------------+
+| Tables in pydbcn__MySQL_unittest__test_d__tables__show  |
++---------------------------------------------------------+
+| a                                                       |
+| category                                                |
+| priority                                                |
+| test__testing__this_is_a_really_long_table_name__test_  |
+| test__testing__this_is_a_really_long_table_name__test__ |
++---------------------------------------------------------+
 """.strip()
 
 
 EXPECTED__TABLE__SHOW__TABLE_LONGER__PT_2 = """
-+-------------------------------------------------------+
-| Tables in python__db_connector__test_d__tables__show  |
-+-------------------------------------------------------+
-| a                                                     |
-| category                                              |
-| priority                                              |
-| test__testing__this_is__really_long_table_name__test  |
-| test__testing__this_is_a_really_long_table_name__test |
-| zzz                                                   |
-+-------------------------------------------------------+
++---------------------------------------------------------+
+| Tables in pydbcn__MySQL_unittest__test_d__tables__show  |
++---------------------------------------------------------+
+| a                                                       |
+| category                                                |
+| priority                                                |
+| test__testing__this_is_a_really_long_table_name__test_  |
+| test__testing__this_is_a_really_long_table_name__test__ |
+| zzz                                                     |
++---------------------------------------------------------+
 """.strip()
 
 
 EXPECTED__TABLE__SHOW__TABLE_LONGER__PT_3 = """
-+----------------------------------------------------------+
-| Tables in python__db_connector__test_d__tables__show     |
-+----------------------------------------------------------+
-| a                                                        |
-| category                                                 |
-| priority                                                 |
-| test__testing__this_is__really_long_table_name__test     |
-| test__testing__this_is_a_really_long_table_name__test    |
-| test__testing__this_is_a_really_long_table_name__testing |
-| zzz                                                      |
-+----------------------------------------------------------+
++------------------------------------------------------------+
+| Tables in pydbcn__MySQL_unittest__test_d__tables__show     |
++------------------------------------------------------------+
+| a                                                          |
+| category                                                   |
+| priority                                                   |
+| test__testing__this_is_a_really_long_table_name__test_     |
+| test__testing__this_is_a_really_long_table_name__test__    |
+| test__testing__this_is_a_really_long_table_name__testing__ |
+| zzz                                                        |
++------------------------------------------------------------+
 """.strip()
 
 
@@ -334,7 +335,7 @@ EXPECTED__RECORD__SELECT__PT_15 = """
 """
 
 
-class TestMysqlDisplayAbstract(TestMysqlDatabaseParent):
+class TestMysqlDisplayAbstract(TestMysqlDatabaseParent, CoreDisplayTestMixin):
     """
     Tests "MySQL" DB Connector class display logic.
     """
@@ -343,10 +344,11 @@ class TestMysqlDisplayAbstract(TestMysqlDatabaseParent):
         # Run parent setup logic.
         super().setUpClass()
 
-        # Initialize database for tests.
-        db_name = 'python__db_connector__test_display'
-        cls.connector.database.create(db_name)
-        cls.connector.database.use(db_name)
+        # Also call CoreTestMixin setup logic.
+        cls.set_up_class()
+
+        # Define database name to use in tests.
+        cls.test_db_name = '{0}test_display'.format(cls.test_db_name_start)
 
     def get_output(self, log_capture, record_num):
         """Helper function to read captured logging output."""
@@ -359,6 +361,21 @@ class TestMysqlDisplayCore(TestMysqlDisplayAbstract):
 
     Specifically tests logic defined in base display class.
     """
+    @classmethod
+    def setUpClass(cls):
+        # Run parent setup logic.
+        super().setUpClass()
+
+        # Initialize database for tests.
+        cls.test_db_name = '{0}__core'.format(cls.test_db_name)
+        cls.connector.database.create(cls.test_db_name)
+        cls.connector.database.use(cls.test_db_name)
+
+        # Check that database has no tables.
+        results = cls.connector.tables.show()
+        if len(results) > 0:
+            for result in results:
+                cls.connector.tables.drop(result)
 
     def test__get_longest(self):
         with self.subTest('With no entry'):
@@ -448,19 +465,59 @@ class TestMysqlDisplayCore(TestMysqlDisplayAbstract):
         with self.subTest('With db_name included'):
             test_list = []
 
-            # Test with direct value.
+            # Test with empty value. Should equal length of database name.
             return_val = self.connector.display._get_longest(test_list)
-            self.assertEqual(return_val, 34)
+            self.assertEqual(return_val, 42)
 
-            # Test with select function.
+            # Test with select function. Aka, verify that it equals length of database name.
             db_name_len = len(self.connector.database.select())
             return_val = self.connector.display._get_longest(test_list)
             self.assertEqual(return_val, db_name_len)
 
             # Test with list being larger.
-            test_list = ['python__db_connector__test_display__plus_ten']
+            test_list = ['{0}__plus_ten'.format(self.test_db_name)]
             return_val = self.connector.display._get_longest(test_list)
-            self.assertEqual(return_val, 44)
+            self.assertEqual(return_val, 52)
+
+            # Test with multiple list values, all smaller.
+            test_list = ['a', 'bb', 'ccc']
+            return_val = self.connector.display._get_longest(test_list)
+            self.assertEqual(return_val, 42)
+
+            # Test with multiple list values, one equal.
+            test_list = [
+                'a',
+                'bb',
+                'd' * 42,
+                'ccc',
+            ]
+            return_val = self.connector.display._get_longest(test_list)
+            self.assertEqual(return_val, 42)
+
+            # Test with multiple list values, one larger.
+            test_list = [
+                'a',
+                'bb',
+                'd' * 42,
+                'e' * 47,
+                'ccc',
+            ]
+            return_val = self.connector.display._get_longest(test_list)
+            self.assertEqual(return_val, 47)
+
+            # Test with multiple list values, multiple larger.
+            test_list = [
+                'a',
+                'h' * 49,
+                'f' * 45,
+                'bb',
+                'd' * 42,
+                'e' * 47,
+                'ccc',
+                'g' * 46,
+            ]
+            return_val = self.connector.display._get_longest(test_list)
+            self.assertEqual(return_val, 49)
 
 
 class TestMysqlDisplayTables(TestMysqlDisplayAbstract):
@@ -475,9 +532,15 @@ class TestMysqlDisplayTables(TestMysqlDisplayAbstract):
         super().setUpClass()
 
         # Initialize database for tests.
-        cls.db_name = 'python__db_connector__test_display__tables'
-        cls.connector.database.create(cls.db_name)
-        cls.connector.database.use(cls.db_name)
+        cls.test_db_name = '{0}__tables'.format(cls.test_db_name)
+        cls.connector.database.create(cls.test_db_name)
+        cls.connector.database.use(cls.test_db_name)
+
+        # Check that database has no tables.
+        results = cls.connector.tables.show()
+        if len(results) > 0:
+            for result in results:
+                cls.connector.tables.drop(result)
 
     def test__display__show_tables(self):
         """"""
@@ -489,7 +552,7 @@ class TestMysqlDisplayTables(TestMysqlDisplayAbstract):
         )"""
 
         # Since this directly tests display of tables, ensure we use a fresh database.
-        db_name = '{0}d__tables__show'.format(self.db_name[0:-15])
+        db_name = '{0}d__tables__show'.format(self.test_db_name[0:-15])
         self.connector.database.create(db_name)
         self.connector.database.use(db_name)
 
@@ -533,7 +596,7 @@ class TestMysqlDisplayTables(TestMysqlDisplayAbstract):
         with self.subTest('Db name and table name equal length'):
             # Create table.
             self.connector.tables.create(
-                'test__testing__this_is__really_long_table_name__test',
+                'test__testing__this_is_a_really_long_table_name__test_',
                 columns,
             )
 
@@ -546,7 +609,7 @@ class TestMysqlDisplayTables(TestMysqlDisplayAbstract):
         with self.subTest('Table name longer - Pt 1'):
             # Create table.
             self.connector.tables.create(
-                'test__testing__this_is_a_really_long_table_name__test',
+                'test__testing__this_is_a_really_long_table_name__test__',
                 columns,
             )
 
@@ -569,7 +632,7 @@ class TestMysqlDisplayTables(TestMysqlDisplayAbstract):
         with self.subTest('Table name longer - Pt 3'):
             # Create table.
             self.connector.tables.create(
-                'test__testing__this_is_a_really_long_table_name__testing',
+                'test__testing__this_is_a_really_long_table_name__testing__',
                 columns,
             )
 
@@ -587,7 +650,7 @@ class TestMysqlDisplayTables(TestMysqlDisplayAbstract):
         )"""
 
         # Since this directly tests display of tables, ensure we use a fresh database.
-        db_name = '{0}d__tables__desc'.format(self.db_name[0:-15])
+        db_name = '{0}d__tables__desc'.format(self.test_db_name[0:-15])
         self.connector.database.create(db_name)
         self.connector.database.use(db_name)
 
@@ -634,9 +697,16 @@ class TestMysqlDisplayRecords(TestMysqlDisplayAbstract):
         super().setUpClass()
 
         # Initialize database for tests.
-        cls.db_name = 'python__db_connector__test_display__records'
-        cls.connector.database.create(cls.db_name)
-        cls.connector.database.use(cls.db_name)
+        cls.test_db_name = '{0}__records'.format(cls.test_db_name)
+        # Initialize database for tests.
+        cls.connector.database.create(cls.test_db_name)
+        cls.connector.database.use(cls.test_db_name)
+
+        # Check that database has no tables.
+        results = cls.connector.tables.show()
+        if len(results) > 0:
+            for result in results:
+                cls.connector.tables.drop(result)
 
     def test__display__select_records__basic(self):
         """"""
