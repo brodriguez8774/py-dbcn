@@ -1,0 +1,21 @@
+"""
+Tests for "utility" logic of "Core" DB Connector class.
+"""
+
+# System Imports.
+
+# User Imports.
+
+
+class CoreUtilsTestMixin():
+    """
+    Tests "Core" DB Connector class utility logic.
+    """
+    @classmethod
+    def set_up_class(cls):
+        """
+        Acts as the equivalent of the UnitTesting "setUpClass()" function.
+
+        However, since this is not inheriting from a given TestCase, calling the literal function
+        here would override instead.
+        """

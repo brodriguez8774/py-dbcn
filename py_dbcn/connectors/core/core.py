@@ -15,6 +15,7 @@ from .display import BaseDisplay
 from .query import BaseQuery
 from .records import BaseRecords
 from .tables import BaseTables
+from .utils import BaseUtils
 from .validate import BaseValidate
 
 
@@ -42,6 +43,7 @@ class AbstractDbConnector(ABC):
         self.query = self._get_related_query_class()
         self.records = self._get_related_records_class()
         self.tables = self._get_related_tables_class()
+        self.utils = self._get_related_utils_class()
         self.validate = self._get_related_validate_class()
 
     def __del__(self):
@@ -82,6 +84,12 @@ class AbstractDbConnector(ABC):
         Overridable method to get the related "tables functionality" class.
         """
         return BaseTables(self)
+
+    def _get_related_utils_class(self):
+        """
+        Overridable method to get the related "utility functionality" class.
+        """
+        return BaseUtils(self)
 
     def _get_related_validate_class(self):
         """
