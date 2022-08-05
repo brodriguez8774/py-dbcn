@@ -6,11 +6,9 @@ Should be inherited by language-specific connectors.
 """
 
 # System Imports.
-import copy
+import copy, re
 
 # User Imports.
-import re
-
 from py_dbcn.logging import init_logging
 
 
@@ -33,6 +31,9 @@ class BaseValidate:
 
         # Define provided direct parent object.
         self._parent = parent
+
+        # Define inheritance variables.
+        self._built_in_function_calls = None
 
     # region Name Validation
 
@@ -63,7 +64,7 @@ class BaseValidate:
 
         # Check against max possible length.
         if len(identifier) > max_len:
-            return (False, 'is longer than 64 characters.')
+            return (False, """is longer than 64 characters.\n Identifier is: {0}""".format(identifier))
 
         # Check acceptable patterns.
         if is_quoted is False:
@@ -72,12 +73,12 @@ class BaseValidate:
             # Check against "quoted patterns".
             pattern = re.compile('^([0-9a-zA-Z$_])+$')
             if not re.match(pattern, identifier):
-                return (False, 'does not match acceptable characters.')
+                return (False, """does not match acceptable characters.\n Identifier is: {0}""".format(identifier))
         else:
             # Check against "quoted patterns".
             pattern = re.compile(u'^([\u0001-\u007F])+$', flags=re.UNICODE)
             if not re.match(pattern, identifier):
-                return (False, 'does not match acceptable characters.')
+                return (False, """does not match acceptable characters.\n Identifier is: {0}""".format(identifier))
 
         # Check for characters that we want to exclude.
         forbidden_chars = re.compile(
@@ -85,7 +86,7 @@ class BaseValidate:
             flags=re.UNICODE,
         )
         if forbidden_chars.search(identifier):
-            return (False, 'does not match acceptable characters.')
+            return (False, """does not match acceptable characters.\n Identifier is: {0}""".format(identifier))
 
         # Passed all tests.
         return (True, '')
@@ -273,28 +274,59 @@ class BaseValidate:
         if len(clause) == 1 and clause[0] == '*':
             return '*'
 
-        # Validate each item in clause.
+        # Validate each item in clause, now that it's an array.
         new_clause = []
         for item in clause:
+            found_functions = False
             item = str(item).strip()
 
+            # Strip out function values.
+            # First check against regex matches.
+            func_call_regex = (r'\(*|'.join(self._built_in_function_calls))
+
+            matches = re.match(func_call_regex, item, flags=re.IGNORECASE)
+
+            # Proceed if at least one match is found.
+            stripped_left = ''
+            stripped_right = ''
+            if matches:
+                index = 0
+                while index < len(self._built_in_function_calls):
+                    func_call = self._built_in_function_calls[index]
+                    if re.match(r'^{0}\('.format(func_call), item, flags=re.IGNORECASE) and item[-1] == ')':
+                        # Found a match. Update identifier and check for further matches.
+                        found_functions = True
+                        length = len(func_call) + 1
+                        stripped_left += item[:length]
+                        stripped_right += ')'
+                        item = item[length:-1].strip()
+                    index += 1
+
             # Error if "all" star. Should not pass this in addition to other values.
-            if item == '*':
+            if item == '*' and not found_functions:
                 raise ValueError('SELECT clause provided * with other params. * is only valid alone.')
 
             # Validate individual identifier.
-            results = self._identifier(item)
-            if results[0] is False:
-                raise ValueError('Invalid SELECT identifier. Identifier {0}'.format(results[1]))
+            if item != '*':
+                results = self._identifier(item)
+                if results[0] is False:
+                    raise ValueError('Invalid SELECT identifier. Identifier {0}'.format(results[1]))
 
             # If we made it this far, item is valid. Escape with backticks and readd.
             is_quoted = self._is_quoted(item)
             if is_quoted:
                 # Was already quoted, but may not be with backticks. Reformat to guaranteed use backticks.
                 item = '`{0}`'.format(item[1:-1])
+            elif item == '*':
+                pass
             else:
                 # Was not quoted. Add backticks.
                 item = '`{0}`'.format(item)
+
+            # Re-add function values.
+            item = stripped_left.upper() + item + stripped_right
+
+            # Append updated value to clause.
             new_clause.append(item)
 
         # All items in clause were valid. Re-concatenate into single expected str format.

@@ -108,14 +108,14 @@ class CoreValidateTestMixin():
             self.assertText(len(test_str), 65)
             result = self.connector.validate._identifier(test_str)
             self.assertFalse(result[0])
-            self.assertText(result[1], 'is longer than 64 characters.')
+            self.assertText(result[1], 'is longer than 64 characters.\n Identifier is: {0}'.format(test_str))
 
         with self.subTest('Identifier too long - quoted'):
             test_str = '`Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`'
             self.assertText(len(test_str), 67)
             result = self.connector.validate._identifier(test_str)
             self.assertFalse(result[0])
-            self.assertText(result[1], 'is longer than 64 characters.')
+            self.assertText(result[1], 'is longer than 64 characters.\n Identifier is: {0}'.format(test_str))
 
         with self.subTest('Invalid characters - unquoted'):
             # Check basic "unquoted problem characters".
@@ -123,13 +123,19 @@ class CoreValidateTestMixin():
             for item in test_str:
                 result = self.connector.validate._identifier(item)
                 self.assertFalse(result[0])
-                self.assertText(result[1], 'does not match acceptable characters.')
+                self.assertText(
+                    result[1],
+                    'does not match acceptable characters.\n Identifier is: {0}'.format(item),
+                )
 
             # Check project-specific "bad characters".
             for item in self.unallowed_char_list:
                 result = self.connector.validate._identifier(item)
                 self.assertFalse(result[0])
-                self.assertText(result[1], 'does not match acceptable characters.')
+                self.assertText(
+                    result[1],
+                    'does not match acceptable characters.\n Identifier is: {0}'.format(item),
+                )
 
             # For now, "extended" range is considered invalid.
             # Not sure if we'll want to enable this at some point?
@@ -145,7 +151,7 @@ class CoreValidateTestMixin():
                 self.assertFalse(result[0])
                 # Message changes based on if value was stripped away or not.
                 if len(test_str.strip()) > 0:
-                    self.assertText(result[1], 'does not match acceptable characters.')
+                    self.assertText(result[1], 'does not match acceptable characters.\n Identifier is: {0}'.format(test_str))
                 else:
                     self.assertText(result[1], 'is empty.')
 
@@ -153,7 +159,7 @@ class CoreValidateTestMixin():
             # Check that hex 0 is invalid.
             result = self.connector.validate._identifier(u'`' + chr(0) + u'`')
             self.assertFalse(result[0])
-            self.assertText(result[1], 'does not match acceptable characters.')
+            self.assertIn('does not match acceptable characters.\n Identifier is: ', result[1])
 
             # For now, "extended" range is considered invalid.
             # Not sure if we'll want to enable this at some point?
@@ -166,7 +172,7 @@ class CoreValidateTestMixin():
                 test_str = u'`' + chr(index + 1) + u'`'
                 result = self.connector.validate._identifier(test_str)
                 self.assertFalse(result[0])
-                self.assertText(result[1], 'does not match acceptable characters.')
+                self.assertText(result[1], 'does not match acceptable characters.\n Identifier is: {0}'.format(test_str))
 
     def test__database_name__success(self):
         """
@@ -893,6 +899,15 @@ class CoreValidateTestMixin():
             result = self.connector.validate.sanitize_select_clause((1, True))
             self.assertEqual(result, '`1`, `True`')
 
+        with self.subTest('Values with function calls'):
+            # Uppercase.
+            result = self.connector.validate.sanitize_select_clause('COUNT(*)')
+            self.assertEqual(result, 'COUNT(*)')
+
+            # Lowercase.
+            result = self.connector.validate.sanitize_select_clause('count(*)')
+            self.assertEqual(result, 'COUNT(*)')
+
     def test__sanitize_select_clause__failure(self):
         """"""
         # Param "*" provided with other values.
@@ -901,18 +916,56 @@ class CoreValidateTestMixin():
         self.assertEqual('SELECT clause provided * with other params. * is only valid alone.', str(err.exception))
 
         # Mistmatching quotes - double then single.
+        identifier = """\"id'"""
         with self.assertRaises(ValueError) as err:
-            self.connector.validate.sanitize_select_clause(""""id'""")
+            self.connector.validate.sanitize_select_clause(identifier)
         self.assertEqual(
-            'Invalid SELECT identifier. Identifier does not match acceptable characters.',
+            'Invalid SELECT identifier. Identifier does not match acceptable characters.\n Identifier is: "id\'',
             str(err.exception),
         )
 
         # Mistmatching quotes - single then double.
+        identifier = """'id\""""
         with self.assertRaises(ValueError) as err:
-            self.connector.validate.sanitize_select_clause("""'id" """)
+            self.connector.validate.sanitize_select_clause(identifier)
         self.assertEqual(
-            'Invalid SELECT identifier. Identifier does not match acceptable characters.',
+            'Invalid SELECT identifier. Identifier does not match acceptable characters.\n Identifier is: \'id"',
+            str(err.exception),
+        )
+
+        # Mistmatching quotes - backtick then single.
+        identifier = "`id'"
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_select_clause(identifier)
+        self.assertEqual(
+            'Invalid SELECT identifier. Identifier does not match acceptable characters.\n Identifier is: `id\'',
+            str(err.exception),
+        )
+
+        # Mistmatching quotes - single then backtick.
+        identifier = "'id`"
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_select_clause(identifier)
+        self.assertEqual(
+            'Invalid SELECT identifier. Identifier does not match acceptable characters.\n Identifier is: \'id`',
+            str(err.exception),
+        )
+
+        # Mistmatching quotes - double then backtick.
+        identifier = '"id`'
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_select_clause(identifier)
+        self.assertEqual(
+            'Invalid SELECT identifier. Identifier does not match acceptable characters.\n Identifier is: "id`',
+            str(err.exception),
+        )
+
+        # Mistmatching quotes - backtick then double.
+        identifier = '`id"'
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_select_clause(identifier)
+        self.assertEqual(
+            'Invalid SELECT identifier. Identifier does not match acceptable characters.\n Identifier is: `id"',
             str(err.exception),
         )
 
