@@ -3,6 +3,7 @@ Initialization of "core" logic of "MySQL" DB Connector class.
 """
 
 # System Imports.
+import MySQLdb
 
 # User Imports.
 from config import mysql_config
@@ -29,3 +30,4 @@ class TestMysqlDatabaseParent(CoreTestParent):
             debug=True,
         )
         cls.db_type = 'MySQL'
+        cls.db_error_handler = MySQLdb

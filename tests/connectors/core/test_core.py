@@ -29,6 +29,7 @@ class CoreTestParent(unittest.TestCase):
         cls.db_type = None
         cls.test_db_name_start = 'pydbcn__{0}_unittest__'
         cls.test_db_name = None
+        cls.db_error_handler = None
 
     def setUp(self):
         # Run parent setup logic.
@@ -68,8 +69,11 @@ class CoreTestParent(unittest.TestCase):
                 'To help avoid potential naming conflicts with pre-existing local databases, please update the name.'
             )
 
-        # Generate database naming convention.
-        self.db_name_start = db_name_start.format(str(self.db_type[:5]).lower())
+        if self.db_error_handler is None:
+            raise ValueError(
+                'To properly handle expected database query errors (for testing), please set db_error_handler as the '
+                'database error management class.'
+            )
 
     @classmethod
     def tearDownClass(cls):
@@ -102,3 +106,7 @@ class CoreTestParent(unittest.TestCase):
 
             # Raise original error.
             raise AssertionError(err)
+
+    def get_logging_output(self, log_capture, record_num):
+        """Helper function to read captured logging output."""
+        return str(log_capture.records[record_num].message).strip()
