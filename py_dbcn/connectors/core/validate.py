@@ -234,7 +234,7 @@ class BaseValidate:
 
     # region Clause Validation
 
-    def select_clause(self, clause):
+    def sanitize_select_clause(self, clause):
         """
         Validates that provided clause follows acceptable format.
         :param clause: SELECT clause to validate.

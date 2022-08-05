@@ -38,10 +38,7 @@ class BaseRecords:
             raise ValueError('Invalid table name of "{0}".'.format(table_name))
 
         # Check that provided SELECT clause is valid format.
-        if select_clause is None:
-            select_clause = '*'
-        if not self._base.validate.select_clause(select_clause):
-            raise ValueError('Invalid SELECT clause of "{0}".'.format(select_clause))
+        select_clause = self._base.validate.sanitize_select_clause(select_clause)
 
         # Select record.
         query = 'SELECT {0} FROM {1};'.format(select_clause, table_name)
