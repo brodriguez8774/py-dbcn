@@ -33,6 +33,7 @@ flake8 = "*"                    # Wrapper for autopep8 that allows extra configu
 
 # Testing/Pytest dependencies.
 coverage = "*"                  # Outputs testing coverage data.
+freezegun = "*"                 # Allows "freezing" tests to specific datetimes, for consistent checking and output.
 pytest = "*"                    # Base Pytest package. Current preferred testing method.
 pytest-xdist = "*"              # Additional Pytest features, such as multithreading and looping.
 
