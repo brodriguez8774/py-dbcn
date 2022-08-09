@@ -28,6 +28,7 @@ class PostgresqlDatabase(BaseDatabase):
 
         # Initialize variables.
         self._show_databases_query = 'SELECT datname FROM pg_database;'
+        self._current_database_query = 'SELECT current_database();'
 
     def use(self, db_name):
         """

@@ -27,3 +27,4 @@ class MysqlDatabase(BaseDatabase):
 
         # Initialize variables.
         self._show_databases_query = 'SHOW DATABASES;'
+        self._current_database_query = 'SELECT DATABASE();'

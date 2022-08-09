@@ -33,11 +33,15 @@ class BaseDatabase:
 
         # Initialize required class query variables.
         self._show_databases_query = None
+        self._current_database_query = None
 
     def select(self):
         """Returns name of currently selected database."""
+        if not self._current_database_query:
+            raise ValueError('SELECT CURRENT DATABASE query is not defined.')
+
         return (self._base.query.execute(
-            'SELECT DATABASE();',
+            self._current_database_query,
             display_query=False,
         )[0][0]).strip()
 
