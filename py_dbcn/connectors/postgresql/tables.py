@@ -24,3 +24,19 @@ class PostgresqlTables(BaseTables):
         super().__init__(parent, *args, **kwargs)
 
         logger.debug('Generating related (PostgreSQL) Tables class.')
+
+        # Initialize variables.
+        # StackOverflow suggested each of these in different answers.
+        # Unsure of which one is better/worse, and what the differences mean.
+        self._show_tables_query = (
+            "SELECT table_name FROM information_schema.tables "
+            "WHERE table_schema = 'public';"
+
+            # "SELECT table_schema || '.' || table_name "
+            # "FROM information_schema.tables "
+            # "WHERE table_type = 'BASE TABLE' "
+            # "AND table_schema NOT IN ('pg_catalog', 'information_schema');"
+
+            # "SELECT * FROM pg_catalog.pg_tables "
+            # "WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';"
+        )

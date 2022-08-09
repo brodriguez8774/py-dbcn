@@ -5,6 +5,7 @@ Contains database connection logic specific to PostgreSQL databases.
 """
 
 # System Imports.
+import psycopg2
 
 # User Imports.
 from .database import PostgresqlDatabase
@@ -25,13 +26,47 @@ class PostgresqlDbConnector(AbstractDbConnector):
     """
     Database connector logic for PostgreSQL databases.
     """
-    def __init__(self, *args, debug=False, **kwargs):
+    def __init__(self, *args, **kwargs):
+
         # Call parent logic.
-        super().__init__(*args, debug=debug, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Initialize database connection.
-        # self.connection = MySQLdb.connect(host=db_host, port=db_port, user=db_user, password=db_pass, db=db_name)
+        self._config.db_type = 'PostgreSQL'
+        self.create_connection()
+
+    def create_connection(self, db_name=None):
+        """Attempts to create database connection, using config values."""
+        if db_name is None or str(db_name).strip() == '':
+            # Empty value provided. Fallback to config value.
+            db_name = self._config.db_name
+        else:
+            # Update selected db in config.
+            self._config.db_name = db_name
+
+        self._connection = psycopg2.connect(
+            host=self._config.db_host,
+            port=self._config.db_port,
+            user=self._config.db_user,
+            password=self._config.db_pass,
+            dbname=db_name,
+        )
+
+        # Set to correct transaction errors.
+        # Unsure if we want this set for all queries, but it seems to work at least for now.
+        # https://stackoverflow.com/a/68112827
+        self._connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+
         logger.info('Created PostgreSQL database connection.')
+
+    def close_connection(self):
+        """Attempts to close database connection, if open."""
+        try:
+            self._connection.close()
+        except:
+            pass
+
+        logger.info('Closed MySQL database connection.')
 
     def _get_related_database_class(self):
         """

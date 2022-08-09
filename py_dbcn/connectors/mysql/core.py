@@ -27,15 +27,41 @@ class MysqlDbConnector(AbstractDbConnector):
     """
     Database connector logic for MySQL databases.
     """
-    def __init__(self, db_host, db_port, db_user, db_pass, db_name, *args, debug=False, **kwargs):
-        db_port = int(db_port)
-
+    def __init__(self, *args, **kwargs):
         # Call parent logic.
-        super().__init__(*args, debug=debug, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Initialize database connection.
-        self._connection = MySQLdb.connect(host=db_host, port=db_port, user=db_user, password=db_pass, db=db_name)
+        self._config.db_type = 'MySQL'
+        self.create_connection()
+
+    def create_connection(self, db_name=None):
+        """Attempts to create database connection, using config values."""
+        if db_name is None or str(db_name).strip() == '':
+            # Empty value provided. Fallback to config value.
+            db_name = self._config.db_name
+        else:
+            # Update selected db in config.
+            self._config.db_name = db_name
+
+        self._connection = MySQLdb.connect(
+            host=self._config.db_host,
+            port=self._config.db_port,
+            user=self._config.db_user,
+            password=self._config.db_pass,
+            db=db_name,
+        )
+
         logger.info('Created MySQL database connection.')
+
+    def close_connection(self):
+        """Attempts to close database connection, if open."""
+        try:
+            self._connection.close()
+        except:
+            pass
+
+        logger.info('Closed MySQL database connection.')
 
     def _get_related_database_class(self):
         """

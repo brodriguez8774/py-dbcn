@@ -31,14 +31,19 @@ class BaseTables:
         # Define provided direct parent object.
         self._parent = parent
 
+        # Initialize required class query variables.
+        self._show_tables_query = None
+
     def _get(self, show=False):
         """
         Gets list of all currently-available tables in database.
         :param show: Bool indicating if results should be printed to console or not. Used for "SHOW TABLES" query.
         """
+        if not self._show_tables_query:
+            raise ValueError('SHOW TABLES query is not defined.')
+
         # Generate and execute query.
-        query = 'SHOW TABLES;'
-        results = self._base.query.execute(query)
+        results = self._base.query.execute(self._show_tables_query)
 
         # Convert to more friendly format.
         formatted_results = []

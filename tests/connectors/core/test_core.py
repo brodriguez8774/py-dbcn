@@ -22,8 +22,6 @@ class CoreTestParent(unittest.TestCase):
         # Run parent setup logic.
         super().setUpClass()
 
-        cls._implemented_db_types = ['MySQL']
-
         # Child inheriting class must initialize their own connector and variables.
         cls.connector = None
         cls.db_type = None

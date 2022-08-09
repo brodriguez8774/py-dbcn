@@ -31,11 +31,28 @@ class AbstractDbConnector(ABC):
     and then be gradually moved to specific connectors as needed.)
     """
     @abstractmethod
-    def __init__(self, *args, debug=False, **kwargs):
+    def __init__(self, db_host, db_port, db_user, db_pass, db_name, *args, debug=False, **kwargs):
         logger.debug('Generating (core) Connector class.')
+        db_port = int(db_port)
 
         self._connection = None
         self._debug = debug
+
+        # Define class to hold config values.
+        class Config:
+            pass
+
+        # Initialize config.
+        self._config = Config()
+        # Values for connecting.
+        self._config.db_host = db_host
+        self._config.db_port = db_port
+        self._config.db_user = db_user
+        self._config.db_pass = db_pass
+        self._config.db_name = db_name
+        # Values for managing connector state.
+        self._config.db_type = None
+        self._config._implemented_db_types = ['MySQL', 'PostgreSQL']
 
         # Create references to related subclasses.
         self.database = self._get_related_database_class()
@@ -50,10 +67,20 @@ class AbstractDbConnector(ABC):
         """
         Close database connection on exit.
         """
+        self.close_connection()
+
+    def create_connection(self, db_name=None):
+        """Attempts to create database connection, using config values."""
+        raise NotImplementedError('Please override the connection.create_connection() function.')
+
+    def close_connection(self):
+        """Attempts to close database connection, if open."""
         try:
             self._connection.close()
         except:
             pass
+
+        logger.info('Closed {0} database connection.'.format(self.db_type))
 
     def _get_related_database_class(self):
         """

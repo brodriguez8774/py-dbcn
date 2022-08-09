@@ -31,6 +31,9 @@ class BaseDatabase:
         # Define provided direct parent object.
         self._parent = parent
 
+        # Initialize required class query variables.
+        self._show_databases_query = None
+
     def select(self):
         """Returns name of currently selected database."""
         return (self._base.query.execute(
@@ -50,9 +53,11 @@ class BaseDatabase:
         Gets list of all currently-available databases.
         :param show: Bool indicating if results should be printed to console or not. Used for "SHOW DATABASES" query.
         """
+        if not self._show_databases_query:
+            raise ValueError('SHOW DATABASES query is not defined.')
+
         # Generate and execute query.
-        query = 'SHOW DATABASES;'
-        results = self._base.query.execute(query)
+        results = self._base.query.execute(self._show_databases_query)
 
         # Convert to more friendly format.
         formatted_results = []
@@ -84,12 +89,13 @@ class BaseDatabase:
         available_databases = self._get()
 
         # Check if provided database matches value in list.
-        if db_name not in available_databases:
+        if db_name.casefold() not in (name.casefold() for name in available_databases):
+            # Database does not exist. Raise error.
             raise ValueError(
                 'Could not find database "{0}". Valid options are {1}.'.format(db_name, available_databases)
             )
 
-        # Generate and execute query.
+        # Switch active database.
         query = 'USE {0};'.format(db_name)
         self._base.query.execute(query)
         logger.results('Database changed to "{0}".'.format(db_name))
@@ -109,7 +115,9 @@ class BaseDatabase:
         # Check if provided database matches value in list.
         if db_name in available_databases:
             # Database already exists. Raise error.
-            raise ValueError('Database with name "{0}" already exists.'.format(db_name))
+            raise ValueError(
+                'Could not find database "{0}". Valid options are {1}.'.format(db_name, available_databases)
+            )
 
         # Create new database.
         query = 'CREATE DATABASE {0};'.format(db_name)

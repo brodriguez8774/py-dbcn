@@ -24,3 +24,7 @@ class MysqlQuery(BaseQuery):
         super().__init__(parent, *args, **kwargs)
 
         logger.debug('Generating related (MySQL) Query class.')
+
+    def _fetch_results(self, cursor):
+        """Helper function to fetch query results, based on database type."""
+        return cursor.fetchall()

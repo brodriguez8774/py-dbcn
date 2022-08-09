@@ -24,3 +24,7 @@ class MysqlTables(BaseTables):
         super().__init__(parent, *args, **kwargs)
 
         logger.debug('Generating related (MySQL) Tables class.')
+
+        # Initialize variables.
+        self._show_tables_query = 'SHOW TABLES;'
+

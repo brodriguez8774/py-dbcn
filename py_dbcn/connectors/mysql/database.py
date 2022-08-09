@@ -24,3 +24,6 @@ class MysqlDatabase(BaseDatabase):
         super().__init__(parent, *args, **kwargs)
 
         logger.debug('Generating related (MySQL) Database class.')
+
+        # Initialize variables.
+        self._show_databases_query = 'SHOW DATABASES;'

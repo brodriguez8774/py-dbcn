@@ -32,7 +32,7 @@ class BaseQuery:
         self._parent = parent
 
     def execute(self, query, display_query=True):
-        """"""
+        """Core function to execute database queries."""
         if display_query:
             logger.query(query)
 
@@ -41,7 +41,7 @@ class BaseQuery:
         cursor.execute(query)
 
         # Get results.
-        results = cursor.fetchall()
+        results = self._fetch_results(cursor)
 
         # Close connection.
         self._base._connection.commit()
@@ -52,3 +52,6 @@ class BaseQuery:
             results = []
         return results
 
+    def _fetch_results(self, cursor):
+        """Helper function to fetch query results, based on database type."""
+        raise NotImplementedError('Please override the connection.query._fetch_results() function.')

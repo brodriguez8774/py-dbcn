@@ -13,7 +13,7 @@ from tests.connectors.core.test_core import CoreTestParent
 
 class TestMysqlDatabaseParent(CoreTestParent):
     """
-    Initialization of "MySQL" DB Connector class database logic.
+    Initialization of "MySQL" DB Connector parent class.
     """
     @classmethod
     def setUpClass(cls):
@@ -29,5 +29,6 @@ class TestMysqlDatabaseParent(CoreTestParent):
             mysql_config['name'],
             debug=True,
         )
-        cls.db_type = 'MySQL'
+        cls.db_type = cls.connector._config.db_type
+        cls._implemented_db_types = cls.connector._config._implemented_db_types
         cls.db_error_handler = MySQLdb
