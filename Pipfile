@@ -19,8 +19,9 @@ python_version = "3.9"
  # General packages, installed via `pipenv sync`.
  ##
 [packages]
-mysqlclient = "*"     # For connecting to mysql.
-pytz = "*"            # For datetime shenanigans.
+mysqlclient = "*"       # For connecting to mysql.
+psycopg2-binary = "*"   # For connecting to PostgreSQL.
+pytz = "*"              # For datetime shenanigans.
 
 
 ###
