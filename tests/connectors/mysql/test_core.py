@@ -2,15 +2,26 @@
 Initialization of "core" logic of "MySQL" DB Connector class.
 """
 
-# System Imports.
-import MySQLdb
-
-# User Imports.
-from config import mysql_config
-from py_dbcn.connectors import MysqlDbConnector
+# Standard Imports.
+import unittest
 from tests.connectors.core.test_core import CoreTestParent
 
 
+# Skip all imports if MYSQL_PRESENT is not present on system.
+from py_dbcn.constants import MYSQL_PRESENT
+
+
+# MySQL Imports.
+if MYSQL_PRESENT:
+    # System Imports.
+    import MySQLdb
+
+    # User Imports.
+    from config import mysql_config
+    from py_dbcn.connectors import MysqlDbConnector
+
+
+@unittest.skipUnless(MYSQL_PRESENT, 'Failed to import MySQL. Assuming not installed. Skipping tests.')
 class TestMysqlDatabaseParent(CoreTestParent):
     """
     Initialization of "MySQL" DB Connector parent class.

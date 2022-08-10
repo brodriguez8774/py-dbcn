@@ -2,15 +2,26 @@
 Initialization of "core" logic of "PostgreSQL" DB Connector class.
 """
 
-# System Imports.
-import psycopg2
-
-# User Imports.
-from config import postgresql_config
-from py_dbcn.connectors import PostgresqlDbConnector
+# Standard Imports.
+import unittest
 from tests.connectors.core.test_core import CoreTestParent
 
 
+# Skip all imports if PostgreSQL is not present on system.
+from py_dbcn.constants import POSTGRESQL_PRESENT
+
+
+# PostgreSQL Imports.
+if POSTGRESQL_PRESENT:
+    # System Imports.
+    import psycopg2
+
+    # User Imports.
+    from config import postgresql_config
+    from py_dbcn.connectors import PostgresqlDbConnector
+
+
+@unittest.skipUnless(POSTGRESQL_PRESENT, 'Failed to import PostgreSQL. Assuming not installed. Skipping tests.')
 class TestPostgresqlDatabaseParent(CoreTestParent):
     """
     Initialization of "PostgreSQL" DB Connector parent class.
