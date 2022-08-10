@@ -7,6 +7,7 @@ various specific database test classes. This ensures that all databases types ru
 """
 
 # System Imports.
+import datetime
 
 # User Imports.
 
@@ -27,13 +28,13 @@ class CoreRecordsTestMixin:
 
     def test__select__success(self):
         """
-        Test `SELECT` query when table does not exist.
+        Test `SELECT` query.
         """
         table_name = 'test_queries__select__success'
 
         # Verify table exists.
         try:
-            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query))
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query__basic))
         except self.db_error_handler.OperationalError:
             # Table already exists, as we want.
             pass
@@ -77,15 +78,15 @@ class CoreRecordsTestMixin:
             self.assertEqual(len(results), 2)
             self.assertIn(row, results)
 
-    def test__insert__success(self):
+    def test__insert__basic__success(self):
         """
-        Test `INSERT` query when table does not exist.
+        Test `INSERT` query with basic values.
         """
-        table_name = 'test_queries__insert__success'
+        table_name = 'test_queries__insert__basic__success'
 
         # Verify table exists.
         try:
-            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query))
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query__basic))
         except self.db_error_handler.OperationalError:
             # Table already exists, as we want.
             pass
@@ -114,15 +115,77 @@ class CoreRecordsTestMixin:
 
         # Works for 0, 1, and 2. Assume works for all further n+1 values.
 
-    def test__update__success(self):
+    def test__insert__datetime__success(self):
         """
-        Test `UPDATE` query when table does not exist.
+        Test `INSERT` query with datetime values.
         """
-        table_name = 'test_queries__update__success'
+        table_name = 'test_queries__insert__datetime__success'
 
         # Verify table exists.
         try:
-            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query))
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query__datetime))
+        except self.db_error_handler.OperationalError:
+            # Table already exists, as we want.
+            pass
+
+        # Verify starting state.
+        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+        self.assertEqual(len(results), 0)
+
+        # Generate datetime objects.
+        test_datetime__2020 = datetime.datetime(
+            year=2020,
+            month=6,
+            day=15,
+            hour=7,
+            minute=12,
+            second=52,
+            microsecond=29,
+        )
+        test_date__2020 = test_datetime__2020.date()
+        test_datetime_str__2020 = test_datetime__2020.strftime('%Y-%m-%d %H:%M:%S')
+        test_date_str__2020 = test_date__2020.strftime('%Y-%m-%d')
+
+        # Run test query, using string values.
+        row_1 = (1, test_datetime_str__2020, test_date_str__2020)
+        self.connector.records.insert(table_name, row_1)
+        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+
+        # Verify record returned.
+        self.assertEqual(len(results), 1)
+        self.assertIn((1, test_datetime__2020.replace(microsecond=0), test_date__2020), results)
+
+        # Generate new datetime objects.
+        test_datetime__2021 = datetime.datetime(
+            year=2021,
+            month=5,
+            day=14,
+            hour=6,
+            minute=13,
+            second=51,
+            microsecond=29,
+        )
+        test_date__2021 = test_datetime__2021.date()
+
+        # Run test query, using literal date objects.
+        row_2 = (2, test_datetime__2021, test_date__2021)
+        self.connector.records.insert(table_name, row_2)
+        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+
+        # Verify two records returned.
+        self.assertEqual(len(results), 2)
+        self.assertIn((1, test_datetime__2020.replace(microsecond=0), test_date__2020), results)
+        self.assertIn((2, test_datetime__2021.replace(microsecond=0), test_date__2021), results)
+
+    def test__update__basic__success(self):
+        """
+        Test `UPDATE` query.
+        """
+        table_name = 'test_queries__update__basic__success'
+
+        # Verify table exists.
+        try:
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query__basic))
         except self.db_error_handler.OperationalError:
             # Table already exists, as we want.
             pass
@@ -182,16 +245,130 @@ class CoreRecordsTestMixin:
         with self.subTest('Without WHERE clause'):
             pass
             # raise NotImplementedError()
+        # self.assertTrue(False)
+
+    def test__update__datetime__success(self):
+        """
+        Test `UPDATE` query.
+        """
+        table_name = 'test_queries__update__datetime__success'
+
+        # Verify table exists.
+        try:
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query__datetime))
+        except self.db_error_handler.OperationalError:
+            # Table already exists, as we want.
+            pass
+
+        # Generate datetime objects.
+        test_datetime__2020 = datetime.datetime(
+            year=2020,
+            month=6,
+            day=15,
+            hour=7,
+            minute=12,
+            second=52,
+            microsecond=29,
+        )
+        test_date__2020 = test_datetime__2020.date()
+        test_datetime__2021 = datetime.datetime(
+            year=2021,
+            month=7,
+            day=16,
+            hour=8,
+            minute=13,
+            second=53,
+            microsecond=29,
+        )
+        test_date__2021 = test_datetime__2021.date()
+        test_datetime__2022 = datetime.datetime(
+            year=2022,
+            month=8,
+            day=17,
+            hour=9,
+            minute=14,
+            second=54,
+            microsecond=29,
+        )
+        test_date__2022 = test_datetime__2022.date()
+
+        # Initialize state.
+        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+        self.assertEqual(len(results), 0)
+        row_1 = (1, test_datetime__2020, test_date__2020)
+        self.connector.records.insert(table_name, row_1)
+        row_1 = (1, test_datetime__2020.replace(microsecond=0), test_date__2020)
+        row_2 = (2, test_datetime__2021, test_date__2021)
+        self.connector.records.insert(table_name, row_2)
+        row_2 = (2, test_datetime__2021.replace(microsecond=0), test_date__2021)
+        row_3 = (3, test_datetime__2022, test_date__2022)
+        self.connector.records.insert(table_name, row_3)
+        row_3 = (3, test_datetime__2022.replace(microsecond=0), test_date__2022)
+        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+        self.assertEqual(len(results), 3)
+        self.assertIn(row_1, results)
+        self.assertIn(row_2, results)
+        self.assertIn(row_3, results)
+
+        with self.subTest('With WHERE clause'):
+            # Update datetime values.
+            updated_test_datetime__2021 = test_datetime__2021 + datetime.timedelta(days=5)
+            updated_test_date__2021 = updated_test_datetime__2021.date()
+            updated_test_datetime_str__2021 = updated_test_datetime__2021.strftime('%Y-%m-%d %H:%M:%S')
+            updated_test_date_str__2021 = updated_test_date__2021.strftime('%Y-%m-%d')
+
+            # Update row 2 and verify change. Use datetime str.
+            self.connector.records.update(
+                table_name,
+                (
+                    'test_datetime = "{0}", '.format(updated_test_datetime_str__2021) +
+                    'test_date = "{0}"'.format(updated_test_date_str__2021)
+                ),
+                'id = 2',
+            )
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            row_2 = (2, updated_test_datetime__2021.replace(microsecond=0), updated_test_date__2021)
+            old_row_2 = (2, test_datetime__2021.replace(microsecond=0), test_date__2021)
+            self.assertEqual(len(results), 3)
+            self.assertIn(row_1, results)
+            self.assertIn(row_2, results)
+            self.assertIn(row_3, results)
+            self.assertNotIn(old_row_2, results)
+
+            # Update datetime values.
+            updated_test_datetime__2022 = test_datetime__2022 - datetime.timedelta(days=5)
+            updated_test_date__2022 = updated_test_datetime__2022.date()
+
+            # Update row 3 and verify change. Use datetime objects.
+            # TODO: This isn't very useful when placed directly after above assertions.
+            #   Is basically just checking for str format again. Rework after where clause is handled better.
+            self.connector.records.update(
+                table_name,
+                (
+                    'test_datetime = "{0}", '.format(updated_test_datetime__2022) +
+                    'test_date = "{0}"'.format(updated_test_date__2022)
+                ),
+                'id = 3',
+            )
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            row_3 = (3, updated_test_datetime__2022.replace(microsecond=0), updated_test_date__2022)
+            old_row_3 = (3, test_datetime__2022.replace(microsecond=0), test_date__2022)
+            self.assertEqual(len(results), 3)
+            self.assertIn(row_1, results)
+            self.assertIn(row_2, results)
+            self.assertIn(row_3, results)
+            self.assertNotIn(old_row_2, results)
+            self.assertNotIn(old_row_3, results)
 
     def test__delete__success(self):
         """
-        Test `DELETE` query when table does not exist.
+        Test `DELETE` query.
         """
         table_name = 'test_queries__delete__success'
 
         # Verify table exists.
         try:
-            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query))
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query__basic))
         except self.db_error_handler.OperationalError:
             # Table already exists, as we want.
             pass

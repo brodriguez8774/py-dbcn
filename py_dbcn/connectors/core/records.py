@@ -6,6 +6,7 @@ Should be inherited by language-specific connectors.
 """
 
 # System Imports.
+import datetime
 
 # User Imports.
 from py_dbcn.logging import init_logging
@@ -65,6 +66,25 @@ class BaseRecords:
         if not self._base.validate.values_clause(values_clause):
             raise ValueError('Invalid VALUES clause of "{0}".'.format(values_clause))
 
+        # Check for values that might need formatting.
+        # For example, if we find date/datetime objects, we automatically convert to a str value that won't error.
+        if isinstance(values_clause, list) or isinstance(values_clause, tuple):
+            updated_values_clause = ()
+            for item in values_clause:
+
+                if isinstance(item, datetime.datetime):
+                    # Is a datetime object. Convert to string.
+                    item = item.strftime('%Y-%m-%d %H:%M:%S')
+                elif isinstance(item, datetime.date):
+                    # Is a date object. Convert to string.
+                    item = item.strftime('%Y-%m-%d')
+
+                # Add item to updated clause.
+                updated_values_clause += (item,)
+
+            # Replace original clause.
+            values_clause = updated_values_clause
+
         # Insert record.
         query = """
         INSERT INTO {0}{1}
@@ -89,6 +109,25 @@ class BaseRecords:
         # Check that provided WHERE clause is valid format.
         if not self._base.validate.columns_clause(where_clause):
             raise ValueError('Invalid WHERE clause of "{0}".'.format(where_clause))
+
+        # Check for values that might need formatting.
+        # For example, if we find date/datetime objects, we automatically convert to a str value that won't error.
+        if isinstance(values_clause, list) or isinstance(values_clause, tuple):
+            updated_values_clause = ()
+            for item in values_clause:
+
+                if isinstance(item, datetime.datetime):
+                    # Is a datetime object. Convert to string.
+                    item = item.strftime('%Y-%m-%d %H:%M:%S')
+                elif isinstance(item, datetime.date):
+                    # Is a date object. Convert to string.
+                    item = item.strftime('%Y-%m-%d')
+
+                # Add item to updated clause.
+                updated_values_clause += (item,)
+
+            # Replace original clause.
+            values_clause = updated_values_clause
 
         # Update record.
         query = """
