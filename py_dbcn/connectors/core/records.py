@@ -32,7 +32,8 @@ class BaseRecords:
         # Define provided direct parent object.
         self._parent = parent
 
-    def select(self, table_name, select_clause=None, display_query=True):
+
+    def select(self, table_name, select_clause=None, where_clause=None, display_query=True):
         """Selects records from provided table.
 
         :param table_name: Name of table to select from.
@@ -46,8 +47,18 @@ class BaseRecords:
         # Check that provided SELECT clause is valid format.
         select_clause = self._base.validate.sanitize_select_clause(select_clause)
 
+        # Check that provided WHERE clause is valid format.
+        if where_clause is None:
+            where_clause = ''
+        where_clause = str(where_clause).strip()
+        where_clause = where_clause.casefold().lstrip('WHERE ')
+        if len(where_clause) > 1:
+            where_clause = '\nWHERE ({0})'.format(where_clause)
+        if not self._base.validate.where_clause(where_clause):
+            raise ValueError('Invalid WHERE clause of "{0}".'.format(where_clause))
+
         # Select record.
-        query = 'SELECT {0} FROM {1};'.format(select_clause, table_name)
+        query = 'SELECT {0} FROM {1}{2};'.format(select_clause, table_name, where_clause)
         results = self._base.query.execute(query, display_query=display_query)
         logger.query('{0}'.format(query))
         self._base.display.records.select(results, logger, table_name, select_clause)
