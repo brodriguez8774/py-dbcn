@@ -33,7 +33,7 @@ class BaseValidate:
         self._parent = parent
 
         # Define inheritance variables.
-        self._built_in_function_calls = None
+        self._reserved_function_names = None
 
     # region Name Validation
 
@@ -241,6 +241,9 @@ class BaseValidate:
         :param clause: SELECT clause to validate.
         :return: True if valid | False otherwise.
         """
+        if not self._reserved_function_names:
+            raise ValueError('Reserved keyword list is not defined.')
+
         if isinstance(clause, list) or isinstance(clause, tuple):
             # Format we want.
             pass
@@ -282,7 +285,7 @@ class BaseValidate:
 
             # Strip out function values.
             # First check against regex matches.
-            func_call_regex = (r'\(*|'.join(self._built_in_function_calls))
+            func_call_regex = (r'\(*|'.join(self._reserved_function_names))
 
             matches = re.match(func_call_regex, item, flags=re.IGNORECASE)
 
@@ -291,8 +294,8 @@ class BaseValidate:
             stripped_right = ''
             if matches:
                 index = 0
-                while index < len(self._built_in_function_calls):
-                    func_call = self._built_in_function_calls[index]
+                while index < len(self._reserved_function_names):
+                    func_call = self._reserved_function_names[index]
                     if re.match(r'^{0}\('.format(func_call), item, flags=re.IGNORECASE) and item[-1] == ')':
                         # Found a match. Update identifier and check for further matches.
                         found_functions = True
