@@ -33,6 +33,7 @@ class BaseTables:
 
         # Initialize required class query variables.
         self._show_tables_query = None
+        self._describe_table_query = None
 
     def _get(self, show=False):
         """
@@ -67,6 +68,9 @@ class BaseTables:
         """
         Describes given table in database.
         """
+        if not self._describe_table_query:
+            raise ValueError('DESCRIBE TABLE query is not defined.')
+
         # Get list of valid tables.
         available_tables = self._get()
 
@@ -77,11 +81,15 @@ class BaseTables:
             )
 
         # Generate and execute query.
-        query = 'DESCRIBE {0};'.format(table_name)
+        query = self._describe_table_query.format(table_name)
         results = self._base.query.execute(query)
         self._base.display.tables.describe(results, logger)
 
         return results
+
+        # pydbcn__postgresql_unittest__test_tables,public,test_tables__count,
+        # column_name,  data_type,  is_nullable,    column_default,
+        # (field),
 
     def create(self, table_name, table_columns):
         """

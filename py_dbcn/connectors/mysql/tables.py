@@ -27,4 +27,5 @@ class MysqlTables(BaseTables):
 
         # Initialize variables.
         self._show_tables_query = 'SHOW TABLES;'
+        self._describe_table_query = 'DESCRIBE {0};'
 

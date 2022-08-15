@@ -34,7 +34,11 @@ class TestMysqlTables(TestMysqlDatabaseParent, CoreTablesTestMixin):
             for result in results:
                 cls.connector.tables.drop(result)
 
-        # Define default table columns.
+        # Define database-specific query values.
+        cls._basic_table_columns = """
+            id INT(11) NOT NULL AUTO_INCREMENT,
+            PRIMARY KEY (id)
+        """
         cls._columns_query = """(
             id INT NOT NULL AUTO_INCREMENT,
             name VARCHAR(100),

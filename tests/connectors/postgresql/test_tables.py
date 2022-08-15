@@ -3,14 +3,13 @@ Tests for "tables" logic of "PostgreSQL" DB Connector class.
 """
 
 # System Imports.
-import unittest
 
 # User Imports.
-from config import mysql_config, sqlite_config
-from py_dbcn.connectors import MysqlDbConnector, PostgresqlDbConnector, SqliteDbConnector
+from .test_core import TestPostgresqlDatabaseParent
+from tests.connectors.core.test_tables import CoreTablesTestMixin
 
 
-class TestPostgresqlTables(unittest.TestCase):
+class TestPostgresqlTables(TestPostgresqlDatabaseParent, CoreTablesTestMixin):
     """
     Tests "PostgreSQL" DB Connector class table logic.
     """
@@ -18,3 +17,29 @@ class TestPostgresqlTables(unittest.TestCase):
     def setUpClass(cls):
         # Run parent setup logic.
         super().setUpClass()
+
+        # Also call CoreTestMixin setup logic.
+        cls.set_up_class()
+
+        # Define database name to use in tests.
+        cls.test_db_name = '{0}test_tables'.format(cls.test_db_name_start)
+
+        # Initialize database for tests.
+        cls.connector.database.create(cls.test_db_name)
+        cls.connector.database.use(cls.test_db_name)
+
+        # Check that database has no tables.
+        results = cls.connector.tables.show()
+        if len(results) > 0:
+            for result in results:
+                cls.connector.tables.drop(result)
+
+        # Define database-specific query values.
+        cls._basic_table_columns = """
+            id serial PRIMARY KEY
+        """
+        cls._columns_query = """(
+            id serial PRIMARY KEY,
+            name VARCHAR(100),
+            description VARCHAR(100)
+        )"""

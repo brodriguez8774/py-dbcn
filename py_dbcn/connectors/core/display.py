@@ -124,42 +124,42 @@ class TableDisplay:
             if value is None:
                 value = 'NULL'
             field_col_values.append(value)
-            field_col_max_len = max(field_col_max_len, len(value))
+            field_col_max_len = max(field_col_max_len, len(str(value)))
 
             # Handle col 2.
             value = record[1]
             if value is None:
                 value = 'NULL'
             type_col_values.append(value)
-            type_col_max_len = max(type_col_max_len, len(value))
+            type_col_max_len = max(type_col_max_len, len(str(value)))
 
             # Handle col 3.
             value = record[2]
             if value is None:
                 value = 'NULL'
             null_col_values.append(value)
-            null_col_max_len = max(null_col_max_len, len(value))
+            null_col_max_len = max(null_col_max_len, len(str(value)))
 
             # Handle col 4.
             value = record[3]
             if value is None:
                 value = 'NULL'
             key_col_values.append(value)
-            key_col_max_len = max(key_col_max_len, len(value))
+            key_col_max_len = max(key_col_max_len, len(str(value)))
 
             # Handle col 5.
             value = record[4]
             if value is None:
                 value = 'NULL'
             default_col_values.append(value)
-            default_col_max_len = max(default_col_max_len, len(value))
+            default_col_max_len = max(default_col_max_len, len(str(value)))
 
             # Handle col 6.
             value = record[5]
             if value is None:
                 value = 'NULL'
             extra_col_values.append(value)
-            extra_col_max_len = max(extra_col_max_len, len(value))
+            extra_col_max_len = max(extra_col_max_len, len(str(value)))
 
         # Generate strings to print out.
         divider = '{0}{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}\n'.format(
@@ -222,6 +222,9 @@ class RecordDisplay:
 
     def select(self, results, logger, table_name, select_clause=None):
         """Display logic for records.select()."""
+        if not self._base.validate._quote_column_format:
+            raise ValueError('Column quote format is not defined.')
+
         if results:
             # Check select clause, which directly affects desired output columns.
             # First we initialize to a default str.
@@ -256,7 +259,11 @@ class RecordDisplay:
             for table_col in table_cols:
                 col_len = len(table_col)
                 record_len = self._base.query.execute(
-                    'SELECT MAX(LENGTH(`{0}`)) FROM {1};'.format(table_col, table_name)
+                    'SELECT MAX(LENGTH({2}{0}{2})) FROM {1};'.format(
+                        table_col,
+                        table_name,
+                        self._base.validate._quote_column_format,
+                    )
                 )[0][0]
                 length = max(col_len, record_len or 0)
                 col_len_array.append(length)

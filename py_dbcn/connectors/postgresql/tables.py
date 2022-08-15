@@ -40,3 +40,7 @@ class PostgresqlTables(BaseTables):
             # "SELECT * FROM pg_catalog.pg_tables "
             # "WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';"
         )
+        self._describe_table_query = (
+            "SELECT * FROM information_schema.columns "
+            "WHERE (table_schema = 'public' AND table_name = '{0}');"
+        )

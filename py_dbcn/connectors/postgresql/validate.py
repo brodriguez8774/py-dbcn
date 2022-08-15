@@ -82,5 +82,8 @@ class PostgresqlValidate(BaseValidate):
             'VAR_SAMP',
             'YEAR',
         ]
+        self._quote_column_format = """'"""
+        self._quote_identifier_format = """\""""
+        self._quote_str_literal_format = """'"""
 
         logger.debug('Generating related (PostgreSQL) Validate class.')

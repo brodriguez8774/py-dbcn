@@ -34,6 +34,9 @@ class BaseValidate:
 
         # Define inheritance variables.
         self._reserved_function_names = None
+        self._quote_column_format = None
+        self._quote_str_literal_format = None
+        self._quote_identifier_format = None
 
     # region Name Validation
 
@@ -43,6 +46,9 @@ class BaseValidate:
         All other "identifiers" should probably be run through this function.
         See https://dev.mysql.com/doc/refman/8.0/en/identifiers.html
         """
+        if not self._quote_identifier_format:
+            raise ValueError('"Value quote" format is not defined. Should be one of [\', ", `].')
+
         # Run basic sanitation against provided param.
         if identifier is None:
             return (False, 'is None.')
@@ -318,13 +324,13 @@ class BaseValidate:
             # If we made it this far, item is valid. Escape with backticks and readd.
             is_quoted = self._is_quoted(item)
             if is_quoted:
-                # Was already quoted, but may not be with backticks. Reformat to guaranteed use backticks.
-                item = '`{0}`'.format(item[1:-1])
+                # Was already quoted, but may not be with expected format. Reformat to guaranteed use expected format.
+                item = '{1}{0}{1}'.format(item[1:-1], self._quote_identifier_format)
             elif item == '*':
                 pass
             else:
-                # Was not quoted. Add backticks.
-                item = '`{0}`'.format(item)
+                # Was not quoted. Add quotes.
+                item = '{1}{0}{1}'.format(item, self._quote_identifier_format)
 
             # Re-add function values.
             item = stripped_left.upper() + item + stripped_right
