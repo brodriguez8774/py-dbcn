@@ -35,33 +35,40 @@ class BaseDatabase:
         self._show_databases_query = None
         self._current_database_query = None
 
-    def select(self):
-        """Returns name of currently selected database."""
+    def select(self, display_query=True):
+        """Returns name of currently selected database.
+
+        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
+        """
         if not self._current_database_query:
             raise ValueError('SELECT CURRENT DATABASE query is not defined.')
 
-        return (self._base.query.execute(
+        results = self._base.query.execute(
             self._current_database_query,
-            display_query=False,
-        )[0][0]).strip()
+            display_query=display_query,
+        )[0][0].strip()
 
-    def current(self):
+        return results
+
+    def current(self, display_query=True):
         """Returns name of currently selected database.
 
         Alias for select().
+        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
         """
-        return self.select()
+        return self.select(display_query=display_query)
 
-    def _get(self, show=False):
-        """
-        Gets list of all currently-available databases.
+    def _get(self, display_query=False, show=False):
+        """Gets list of all currently-available databases.
+
+        :param display_query: Optional bool indicating if query should output to console or not. Defaults to False.
         :param show: Bool indicating if results should be printed to console or not. Used for "SHOW DATABASES" query.
         """
         if not self._show_databases_query:
             raise ValueError('SHOW DATABASES query is not defined.')
 
         # Generate and execute query.
-        results = self._base.query.execute(self._show_databases_query)
+        results = self._base.query.execute(self._show_databases_query, display_query=display_query)
 
         # Convert to more friendly format.
         formatted_results = []
@@ -75,15 +82,18 @@ class BaseDatabase:
         # Return data.
         return results
 
-    def show(self):
-        """
-        Displays all databases available for selection.
-        """
-        return self._get(show=True)
+    def show(self, display_query=True):
+        """Displays all databases available for selection.
 
-    def use(self, db_name):
+        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
         """
-        Selects given database for use.
+        return self._get(display_query=display_query, show=True)
+
+    def use(self, db_name, display_query=True):
+        """Selects given database for use.
+
+        :param db_name: Name of db to use.
+        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
         """
         # First, check that provided name is valid format.
         if not self._base.validate.database_name(db_name):
@@ -101,13 +111,14 @@ class BaseDatabase:
 
         # Switch active database.
         query = 'USE {0};'.format(db_name)
-        self._base.query.execute(query)
+        self._base.query.execute(query, display_query=display_query)
         logger.results('Database changed to "{0}".'.format(db_name))
 
-    def create(self, db_name):
-        """
-        Creates new database with provided name.
+    def create(self, db_name, display_query=True):
+        """Creates new database with provided name.
+
         :param db_name: Desired name of new database.
+        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
         """
         # First, check that provided name is valid format.
         if not self._base.validate.database_name(db_name):
@@ -125,13 +136,14 @@ class BaseDatabase:
 
         # Create new database.
         query = 'CREATE DATABASE {0};'.format(db_name)
-        self._base.query.execute(query)
+        self._base.query.execute(query, display_query=display_query)
         logger.results('Created database "{0}".'.format(db_name))
 
-    def drop(self, db_name):
-        """
-        Deletes database with provided name.
+    def drop(self, db_name, display_query=True):
+        """Deletes database with provided name.
+
         :param db_name: Name of database to delete.
+        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
         """
         # First, check that provided name is valid format.
         if not self._base.validate.database_name(db_name):
@@ -147,11 +159,13 @@ class BaseDatabase:
 
         # Remove database.
         query = 'DROP DATABASE {0};'.format(db_name)
-        self._base.query.execute(query)
+        self._base.query.execute(query, display_query=display_query)
         logger.results('Dropped database "{0}".'.format(db_name))
 
-    def delete(self, db_name):
+    def delete(self, db_name, display_query=True):
+        """Alias for database "drop" function.
+
+        :param db_name: Name of database to delete.
+        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
         """
-        Alias for database "drop" function.
-        """
-        self.drop(db_name)
+        self.drop(db_name, display_query=display_query)

@@ -32,8 +32,13 @@ class BaseRecords:
         # Define provided direct parent object.
         self._parent = parent
 
-    def select(self, table_name, select_clause=None):
-        """"""
+    def select(self, table_name, select_clause=None, display_query=True):
+        """Selects records from provided table.
+
+        :param table_name: Name of table to select from.
+        :param select_clause: Clause to choose selected columns.
+        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
+        """
         # Check that provided table name is valid format.
         if not self._base.validate.table_name(table_name):
             raise ValueError('Invalid table name of "{0}".'.format(table_name))
@@ -43,14 +48,20 @@ class BaseRecords:
 
         # Select record.
         query = 'SELECT {0} FROM {1};'.format(select_clause, table_name)
-        results = self._base.query.execute(query)
+        results = self._base.query.execute(query, display_query=display_query)
         logger.query('{0}'.format(query))
         self._base.display.records.select(results, logger, table_name, select_clause)
 
         return results
 
-    def insert(self, table_name, values_clause, columns_clause=None):
-        """"""
+    def insert(self, table_name, values_clause, columns_clause=None, display_query=True):
+        """Inserts record(s) into provided table.
+
+        :param table_name: Name of table to insert into.
+        :param values_clause: Clause to specify values to insert.
+        :param columns_clause: Clause to specify columns to insert into.
+        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
+        """
         # Check that provided table name is valid format.
         if not self._base.validate.table_name(table_name):
             raise ValueError('Invalid table name of "{0}".'.format(table_name))
@@ -90,14 +101,20 @@ class BaseRecords:
         INSERT INTO {0}{1}
         VALUES {2};
         """.format(table_name, columns_clause, values_clause)
-        results = self._base.query.execute(query)
+        results = self._base.query.execute(query, display_query=display_query)
         logger.query('{0}'.format(query))
         logger.results('{0}'.format(results))
 
         return results
 
-    def update(self, table_name, values_clause, where_clause):
-        """"""
+    def update(self, table_name, values_clause, where_clause, display_query=True):
+        """Updates record in provided table.
+
+        :param table_name: Name of table to insert into.
+        :param values_clause: Clause to specify values to insert.
+        :param where_clause: Clause to limit update scope.
+        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
+        """
         # Check that provided table name is valid format.
         if not self._base.validate.table_name(table_name):
             raise ValueError('Invalid table name of "{0}".'.format(table_name))
@@ -135,14 +152,19 @@ class BaseRecords:
         SET {1}
         WHERE {2};
         """.format(table_name, values_clause, where_clause)
-        results = self._base.query.execute(query)
+        results = self._base.query.execute(query, display_query=display_query)
         logger.query('{0}'.format(query))
         logger.results('{0}'.format(results))
 
         return results
 
-    def delete(self, table_name, where_clause):
-        """"""
+    def delete(self, table_name, where_clause, display_query=True):
+        """Deletes record(s) in given table.
+
+        :param table_name: Name of table to insert into.
+        :param where_clause: Clause to limit delete scope.
+        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
+        """
         # Check that provided table name is valid format.
         if not self._base.validate.table_name(table_name):
             raise ValueError('Invalid table name of "{0}".'.format(table_name))
@@ -153,7 +175,7 @@ class BaseRecords:
 
         # Delete record.
         query = 'DELETE FROM {0} WHERE {1};'.format(table_name, where_clause)
-        results = self._base.query.execute(query)
+        results = self._base.query.execute(query, display_query=display_query)
         logger.query('{0}'.format(query))
         logger.results('{0}'.format(results))
 

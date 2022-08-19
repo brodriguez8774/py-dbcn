@@ -32,7 +32,11 @@ class BaseQuery:
         self._parent = parent
 
     def execute(self, query, display_query=True):
-        """Core function to execute database queries."""
+        """Core function to execute database queries.
+
+        :param query: Query to execute.
+        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
+        """
         if display_query:
             logger.query(query)
 
