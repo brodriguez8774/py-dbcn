@@ -52,7 +52,7 @@ class BaseDisplay:
         # Optionally compare against database name as well.
         curr_database = ''
         if include_db_name:
-            curr_database = self._base.database.current()
+            curr_database = self._base.database.current(display_query=False)
 
         # Return max of all.
         return max(max_count, len(curr_database))
@@ -82,7 +82,7 @@ class TableDisplay:
         """Display logic for tables._get()."""
         if results:
             # Calculate base values.
-            db_name = self._base.database.select()
+            db_name = self._base.database.select(display_query=False)
             inner_row_len = self._parent._get_longest(results)
             if len(db_name) >= inner_row_len - 9:
                 header_text_len = inner_row_len
@@ -247,7 +247,7 @@ class RecordDisplay:
                 # Calculate column header values, using all columns.
                 table_cols = [
                     x[0]
-                    for x in self._base.tables.describe(table_name)
+                    for x in self._base.tables.describe(table_name, display_query=False)
                 ]
             else:
                 select_clause = select_clause.split(',')
@@ -260,7 +260,7 @@ class RecordDisplay:
                 # Calculate column header values, filtered by select clause.
                 table_cols = [
                     x[0]
-                    for x in self._base.tables.describe(table_name)
+                    for x in self._base.tables.describe(table_name, display_query=False)
                     if x[0] in select_clause
                 ]
             col_len_array = []
