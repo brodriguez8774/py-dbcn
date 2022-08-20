@@ -159,11 +159,13 @@ class BaseRecords:
             # Replace original clause.
             values_clause = updated_values_clause
 
+        if len(where_clause) > 0:
+            where_clause = ' WHERE {0}'.format(where_clause)
+
         # Update record.
         query = """
         UPDATE {0}
-        SET {1}
-        WHERE {2};
+        SET {1}{2};
         """.format(table_name, values_clause, where_clause)
         results = self._base.query.execute(query, display_query=display_query)
         if display_results:
@@ -187,8 +189,11 @@ class BaseRecords:
         if not self._base.validate.columns_clause(where_clause):
             raise ValueError('Invalid WHERE clause of "{0}".'.format(where_clause))
 
+        if len(where_clause) > 0:
+            where_clause = ' WHERE {0}'.format(where_clause)
+
         # Delete record.
-        query = 'DELETE FROM {0} WHERE {1};'.format(table_name, where_clause)
+        query = 'DELETE FROM {0}{1};'.format(table_name, where_clause)
         results = self._base.query.execute(query, display_query=display_query)
         if display_results:
             self._base.display.results('{0}'.format(results))

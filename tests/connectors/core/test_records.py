@@ -41,32 +41,51 @@ class CoreRecordsTestMixin:
 
         with self.subTest('SELECT query when table has no records'):
             # Run test query.
-            results = self.connector.tables.show()
+            results = self.connector.records.select(table_name)
 
             # Verify no records returned.
-            self.assertGreaterEqual(len(results), 0)
-            self.assertIn(table_name, results)
+            self.assertEqual(len(results), 0)
 
-        with self.subTest('SELECT query when table has records'):
+        with self.subTest('SELECT query when table has one record'):
+            # Insert record.
+            row_1 = (1, 'test_name_1', 'test_desc_1')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_1))
+
             # Run test query.
-            row = (1, 'test_name_1', 'test_desc_1')
-            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row))
             results = self.connector.records.select(table_name)
 
             # Verify one record returned.
             self.assertEqual(len(results), 1)
-            self.assertIn(row, results)
+            self.assertIn(row_1, results)
+
+        with self.subTest('SELECT query when table has two records'):
+            # Insert record.
+            row_2 = (2, 'test_name_2', 'test_desc_2')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_2))
 
             # Run test query.
-            row = (2, 'test_name_2', 'test_desc_2')
-            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row))
             results = self.connector.records.select(table_name)
 
             # Verify two records returned.
             self.assertEqual(len(results), 2)
-            self.assertIn(row, results)
+            self.assertIn(row_1, results)
+            self.assertIn(row_2, results)
 
         # Works for 0, 1, and 2. Assume works for all further n+1 values.
+
+        with self.subTest('SELECT query when table record has spaces'):
+            # Insert record.
+            row_3 = (3, 'test name 3', 'test desc 3')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_3))
+
+            # Run test query.
+            results = self.connector.records.select(table_name)
+
+            # Verify two records returned.
+            self.assertEqual(len(results), 3)
+            self.assertIn(row_1, results)
+            self.assertIn(row_2, results)
+            self.assertIn(row_3, results)
 
         with self.subTest('SELECT query when table column uses "reserved keyword"'):
             # "Group" is considered a MySQL keyword. As long as this doesn't raise an error, it worked.
@@ -74,9 +93,86 @@ class CoreRecordsTestMixin:
             results = self.connector.records.select(table_name)
 
             # Verify two records returned, now with an extra "group" field that shows null.
-            row = row + (None,)
+            row_1 = row_1 + (None,)
+            row_2 = row_2 + (None,)
+            row_3 = row_3 + (None,)
+            self.assertEqual(len(results), 3)
+            self.assertIn(row_1, results)
+            self.assertIn(row_2, results)
+            self.assertIn(row_3, results)
+
+    def test__select__with_where__success(self):
+        """
+        Test `SELECT` query when using where clauses.
+        """
+        table_name = 'test_queries__select__where__success'
+
+        # Verify table exists.
+        try:
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query__basic))
+        except self.db_error_handler.OperationalError:
+            # Table already exists, as we want.
+            pass
+
+        with self.subTest('SELECT with WHERE when table has no records'):
+            # Run test query.
+            results = self.connector.records.select(table_name, where_clause='description = "test aaa"')
+
+            # Verify no records returned.
+            self.assertEqual(len(results), 0)
+
+        with self.subTest('SELECT with WHERE when table has one unrelated record'):
+            # Insert record.
+            row_1 = (1, 'test_name_1', 'test_desc_1')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_1))
+
+            # Run test query.
+            results = self.connector.records.select(table_name, where_clause='description = "test aaa"')
+
+            # Verify no records returned.
+            self.assertEqual(len(results), 0)
+
+        with self.subTest('SELECT with WHERE when table has one unrelated record and one related'):
+            # Insert record.
+            row_2 = (2, 'test_name_2', 'test aaa')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_2))
+
+            # Run test query.
+            results = self.connector.records.select(table_name, where_clause='description = "test aaa"')
+
+            # Verify no records returned.
+            self.assertEqual(len(results), 1)
+            self.assertIn(row_2, results)
+            self.assertNotIn(row_1, results)
+
+        with self.subTest('SELECT with WHERE when table has two unrelated records and one related'):
+            # Insert record.
+            row_3 = (3, 'test aaa', 'test_desc_3')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_3))
+
+            # Run test query.
+            results = self.connector.records.select(table_name, where_clause='description = "test aaa"')
+
+            # Verify no records returned.
+            self.assertEqual(len(results), 1)
+            self.assertIn(row_2, results)
+            self.assertNotIn(row_1, results)
+            self.assertNotIn(row_3, results)
+
+        with self.subTest('SELECT with WHERE when table has two unrelated records and two related'):
+            # Insert record.
+            row_4 = (4, 'test_name_4', 'test aaa')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_4))
+
+            # Run test query.
+            results = self.connector.records.select(table_name, where_clause='description = "test aaa"')
+
+            # Verify no records returned.
             self.assertEqual(len(results), 2)
-            self.assertIn(row, results)
+            self.assertIn(row_2, results)
+            self.assertIn(row_4, results)
+            self.assertNotIn(row_1, results)
+            self.assertNotIn(row_3, results)
 
     def test__insert__basic__success(self):
         """
@@ -243,9 +339,27 @@ class CoreRecordsTestMixin:
             self.assertNotIn(old_row_3, results)
 
         with self.subTest('Without WHERE clause'):
-            pass
-            # raise NotImplementedError()
-        # self.assertTrue(False)
+            # Update all rows.
+            # Note, to help with database integrity (and prevent accidentally updating all rows via accidental clause
+            # omission), we still need to provide the where clause. It's a required arg.
+            # But providing a blank clause means we're intentionally setting it to empty, and thus is allowed.
+            self.connector.records.update(table_name, 'name = "test name"', '')
+
+            # Verify all rows updated.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            old_row_1 = row_1
+            old_row_2 = row_2
+            old_row_3 = row_3
+            row_1 = (4, 'test name', 'test_desc_1')
+            row_2 = (2, 'test name', 'test_desc_2')
+            row_3 = (3, 'test name', 'testing aaa')
+            self.assertEqual(len(results), 3)
+            self.assertIn(row_1, results)
+            self.assertIn(row_2, results)
+            self.assertIn(row_3, results)
+            self.assertNotIn(old_row_1, results)
+            self.assertNotIn(old_row_2, results)
+            self.assertNotIn(old_row_3, results)
 
     def test__update__datetime__success(self):
         """
@@ -373,38 +487,65 @@ class CoreRecordsTestMixin:
             # Table already exists, as we want.
             pass
 
-        # Initialize state.
-        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
-        self.assertEqual(len(results), 0)
-        row_1 = (1, 'test_name_1', 'test_desc_1')
-        self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_1))
-        row_2 = (2, 'test_name_2', 'test_desc_2')
-        self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_2))
-        row_3 = (3, 'test_name_3', 'test_desc_3')
-        self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_3))
-        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
-        self.assertEqual(len(results), 3)
-        self.assertIn(row_1, results)
-        self.assertIn(row_2, results)
-        self.assertIn(row_3, results)
+        with self.subTest('With WHERE clause'):
+            # Initialize state.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 0)
+            row_1 = (1, 'test_name_1', 'test_desc_1')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_1))
+            row_2 = (2, 'test_name_2', 'test_desc_2')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_2))
+            row_3 = (3, 'test_name_3', 'test_desc_3')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_3))
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 3)
+            self.assertIn(row_1, results)
+            self.assertIn(row_2, results)
+            self.assertIn(row_3, results)
 
-        # Remove record 2.
-        self.connector.records.delete(table_name, 'id = 2')
-        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
-        self.assertEqual(len(results), 2)
-        self.assertIn(row_1, results)
-        self.assertNotIn(row_2, results)
-        self.assertIn(row_3, results)
+            # Remove record 2.
+            self.connector.records.delete(table_name, 'id = 2')
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 2)
+            self.assertIn(row_1, results)
+            self.assertNotIn(row_2, results)
+            self.assertIn(row_3, results)
 
-        # Remove record 1.
-        self.connector.records.delete(table_name, 'id = 1')
-        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
-        self.assertEqual(len(results), 1)
-        self.assertNotIn(row_1, results)
-        self.assertNotIn(row_2, results)
-        self.assertIn(row_3, results)
+            # Remove record 1.
+            self.connector.records.delete(table_name, 'id = 1')
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 1)
+            self.assertNotIn(row_1, results)
+            self.assertNotIn(row_2, results)
+            self.assertIn(row_3, results)
 
-        # Remove record 1.
-        self.connector.records.delete(table_name, 'id = 3')
-        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
-        self.assertEqual(len(results), 0)
+            # Remove record 1.
+            self.connector.records.delete(table_name, 'id = 3')
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 0)
+
+        with self.subTest('Without WHERE clause'):
+            # Update all rows.
+            # Note, to help with database integrity (and prevent accidentally deleting all rows via accidental clause
+            # omission), we still need to provide the where clause. It's a required arg.
+            # However, providing a blank clause means we're intentionally setting it to empty, and thus is allowed.
+
+            # Initialize state.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 0)
+            row_1 = (1, 'test_name_1', 'test_desc_1')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_1))
+            row_2 = (2, 'test_name_2', 'test_desc_2')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_2))
+            row_3 = (3, 'test_name_3', 'test_desc_3')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_3))
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 3)
+            self.assertIn(row_1, results)
+            self.assertIn(row_2, results)
+            self.assertIn(row_3, results)
+
+            # Remove all records.
+            self.connector.records.delete(table_name, '')
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 0)
