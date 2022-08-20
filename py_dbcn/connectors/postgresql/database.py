@@ -30,11 +30,12 @@ class PostgresqlDatabase(BaseDatabase):
         self._show_databases_query = 'SELECT datname FROM pg_database;'
         self._current_database_query = 'SELECT current_database();'
 
-    def use(self, db_name, display_query=True):
+    def use(self, db_name, display_query=True, display_results=True):
         """Selects given database for use.
 
         :param db_name: Name of db to use.
-        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
+        :param display_query: Bool indicating if query should output to console. Defaults to True.
+        :param display_results: Bool indicating if results should output to console. Defaults to True.
         """
         # First, check that provided name is valid format.
         if not self._base.validate.database_name(db_name):
@@ -62,7 +63,7 @@ class PostgresqlDatabase(BaseDatabase):
             )
 
         if display_query:
-            logger.query('Switching databases. No query to display. Recreating connection.')
+            self._base.display.query('Switching databases. No query to display. Recreating connection.')
 
         # Switch active database.
         # PostgreSQL is annoying in that it doesn't seem to have a friendly way to switch databases.
@@ -70,13 +71,15 @@ class PostgresqlDatabase(BaseDatabase):
         # with the desired new database to use.
         self._base.close_connection()
         self._base.create_connection(db_name=db_name)
-        logger.results('Database changed to "{0}".'.format(db_name))
+        if display_results:
+            self._base.display.results('Database changed to "{0}".'.format(db_name))
 
-    def drop(self, db_name, display_query=True):
+    def drop(self, db_name, display_query=True, display_results=True):
         """Deletes database with provided name.
 
         :param db_name: Name of database to delete.
-        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
+        :param display_query: Bool indicating if query should output to console. Defaults to True.
+        :param display_results: Bool indicating if results should output to console. Defaults to True.
         """
         # First, check that provided name is valid format.
         if not self._base.validate.database_name(db_name):
@@ -117,7 +120,8 @@ class PostgresqlDatabase(BaseDatabase):
 
         query = 'DROP DATABASE {0};'.format(db_name)
         self._base.query.execute(query, display_query=display_query)
-        logger.results('Dropped database "{0}".'.format(db_name))
+        if display_results:
+            self._base.display.results('Dropped database "{0}".'.format(db_name))
 
         # If we switched database, then immediately close connection at this point,
         # to avoid accidentally doing further manipulations on an arbitrary other database.

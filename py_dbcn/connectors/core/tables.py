@@ -35,11 +35,11 @@ class BaseTables:
         self._show_tables_query = None
         self._describe_table_query = None
 
-    def _get(self, display_query=False, show=False):
+    def _get(self, display_query=False, display_results=False):
         """Gets list of all currently-available tables in database.
 
-        :param display_query: Optional bool indicating if query should output to console or not. Defaults to False.
-        :param show: Bool indicating if results should be printed to console or not. Used for "SHOW TABLES" query.
+        :param display_query: Bool indicating if query should output to console. Defaults to False.
+        :param display_results: Bool indicating if results should output to console. Used for "SHOW TABLES" query.
         """
         if not self._show_tables_query:
             raise ValueError('SHOW TABLES query is not defined.')
@@ -53,7 +53,7 @@ class BaseTables:
             formatted_results.append(result[0])
         results = formatted_results
 
-        if show:
+        if display_results:
             self._base.display.tables._get(results, logger)
 
         # Return data.
@@ -62,14 +62,14 @@ class BaseTables:
     def show(self, display_query=True):
         """Displays all tables available in database.
 
-        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
+        :param display_query: Bool indicating if query should output to console. Defaults to True.
         """
-        return self._get(display_query=display_query, show=True)
+        return self._get(display_query=display_query, display_results=True)
 
     def describe(self, table_name, display_query=True):
         """Describes given table in database.
 
-        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
+        :param display_query: Bool indicating if query should output to console. Defaults to True.
         """
         if not self._describe_table_query:
             raise ValueError('DESCRIBE TABLE query is not defined.')
@@ -90,12 +90,13 @@ class BaseTables:
 
         return results
 
-    def create(self, table_name, table_columns, display_query=True):
+    def create(self, table_name, table_columns, display_query=True, display_results=True):
         """Creates new table with provided name.
 
         :param table_name: Desired name of new table.
         :param table_columns: Column values for new table.
-        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
+        :param display_query: Bool indicating if query should output to console. Defaults to True.
+        :param display_results: Bool indicating if results should output to console. Defaults to True.
         """
         # First, check that provided name is valid format.
         if not self._base.validate.table_name(table_name):
@@ -119,15 +120,17 @@ class BaseTables:
         # raise NotImplemented('Function needs column-definition handling.')
         query = 'CREATE TABLE {0} {1};'.format(table_name, table_columns)
         self._base.query.execute(query, display_query=display_query)
-        self._base.display.results('Created table "{0}".'.format(table_name))
+        if display_results:
+            self._base.display.results('Created table "{0}".'.format(table_name))
 
-    def modify(self, table_name, modify_clause, column_clause, display_query=True):
+    def modify(self, table_name, modify_clause, column_clause, display_query=True, display_results=True):
         """Modifies table column with provided name.
 
         :param table_name: Name of table to modify.
         :param modify_clause: Clause of values to apply.
         :param column_clause: Clause of columns to update.
-        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
+        :param display_query: Bool indicating if query should output to console. Defaults to True.
+        :param display_results: Bool indicating if results should output to console. Defaults to True.
         """
         if str(modify_clause).upper() == 'ADD':
             modify_clause = 'ADD'
@@ -153,50 +156,80 @@ class BaseTables:
         {1} {2};
         """.format(table_name, modify_clause, column_clause)
         self._base.query.execute(query, display_query=display_query)
-        self._base.display.results('Created table "{0}".'.format(table_name))
+        if display_results:
+            self._base.display.results('Created table "{0}".'.format(table_name))
 
-    def update(self, table_name, modify_clause, column_clause, display_query=True):
+    def update(self, table_name, modify_clause, column_clause, display_query=True, display_results=True):
         """Alias for modify().
 
         :param table_name: Name of table to modify.
         :param modify_clause: Clause of values to apply.
         :param column_clause: Clause of columns to update.
-        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
+        :param display_query: Bool indicating if query should output to console. Defaults to True.
+        :param display_results: Bool indicating if results should output to console. Defaults to True.
         """
-        return self.modify(table_name, modify_clause, column_clause, display_query=display_query)
+        return self.modify(
+            table_name,
+            modify_clause,
+            column_clause,
+            display_query=display_query,
+            display_results=display_results,
+        )
 
-    def add_column(self, table_name, column_clause, display_query=True):
+    def add_column(self, table_name, column_clause, display_query=True, display_results=True):
         """Adds column to provided table.
 
         :param table_name: Name of table to modify.
         :param column_clause: Clause of columns to add.
-        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
+        :param display_query: Bool indicating if query should output to console. Defaults to True.
+        :param display_results: Bool indicating if results should output to console. Defaults to True.
         """
-        return self.modify(table_name, 'ADD', column_clause, display_query=display_query)
+        return self.modify(
+            table_name,
+            'ADD',
+            column_clause,
+            display_query=display_query,
+            display_results=display_results,
+        )
 
-    def drop_column(self, table_name, column_clause, display_query=True):
+    def drop_column(self, table_name, column_clause, display_query=True, display_results=True):
         """Drops column from provided table.
 
         :param table_name: Name of table to modify.
         :param column_clause: Clause of columns to drop.
-        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
+        :param display_query: Bool indicating if query should output to console. Defaults to True.
+        :param display_results: Bool indicating if results should output to console. Defaults to True.
         """
-        return self.modify(table_name, 'DROP', column_clause, display_query=display_query)
+        return self.modify(
+            table_name,
+            'DROP',
+            column_clause,
+            display_query=display_query,
+            display_results=display_results,
+        )
 
-    def modify_column(self, table_name, column_clause, display_query=True):
+    def modify_column(self, table_name, column_clause, display_query=True, display_results=True):
         """Modifies column in provided table.
 
         :param table_name: Name of table to modify.
         :param column_clause: Clause of columns to update.
-        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
+        :param display_query: Bool indicating if query should output to console. Defaults to True.
+        :param display_results: Bool indicating if results should output to console. Defaults to True.
         """
-        return self.modify(table_name, 'MODIFY', column_clause, display_query=display_query)
+        return self.modify(
+            table_name,
+            'MODIFY',
+            column_clause,
+            display_query=display_query,
+            display_results=display_results,
+        )
 
-    def drop(self, table_name, display_query=True):
+    def drop(self, table_name, display_query=True, display_results=True):
         """Deletes table with provided name.
 
         :param table_name: Name of table to delete.
-        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
+        :param display_query: Bool indicating if query should output to console. Defaults to True.
+        :param display_results: Bool indicating if results should output to console. Defaults to True.
         """
         # First, check that provided name is valid format.
         if not self._base.validate.table_name(table_name):
@@ -213,21 +246,24 @@ class BaseTables:
         # Remove table.
         query = 'DROP TABLE {0};'.format(table_name)
         self._base.query.execute(query, display_query=display_query)
-        self._base.display.results('Dropped table "{0}".'.format(table_name))
+        if display_results:
+            self._base.display.results('Dropped table "{0}".'.format(table_name))
 
-    def delete(self, table_name, display_query=True):
+    def delete(self, table_name, display_query=True, display_results=True):
         """Alias for table "drop" function.
 
         :param table_name: Name of table to delete.
-        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
+        :param display_query: Bool indicating if query should output to console. Defaults to True.
+        :param display_results: Bool indicating if results should output to console. Defaults to True.
         """
-        self.drop(table_name, display_query=display_query)
+        self.drop(table_name, display_query=display_query, display_results=display_results)
 
-    def count(self, table_name, display_query=True):
+    def count(self, table_name, display_query=True, display_results=True):
         """Returns number of all records present in provided table.
 
         :param table_name: Name of table to count.
-        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
+        :param display_query: Bool indicating if query should output to console. Defaults to True.
+        :param display_results: Bool indicating if results should output to console. Defaults to True.
         """
         # Get list of valid tables.
         available_tables = self._get()
@@ -241,5 +277,8 @@ class BaseTables:
         # Count records in table.
         result = self._base.records.select(table_name, 'COUNT(*)', display_query=display_query)
         result = result[0][0]
+
+        if display_results:
+            self._base.display.results('Found {0} records in table.'.format(result))
 
         return result
