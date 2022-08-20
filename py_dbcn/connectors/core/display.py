@@ -6,6 +6,7 @@ Should be inherited by language-specific connectors.
 """
 
 # System Imports.
+from colorama import Fore, Style
 
 # User Imports.
 from py_dbcn.logging import init_logging
@@ -56,6 +57,14 @@ class BaseDisplay:
         # Return max of all.
         return max(max_count, len(curr_database))
 
+    def query(self, query_str):
+        """Formats query output for display."""
+        logger.results('{0}{1}{2}'.format(Fore.MAGENTA, query_str, Style.RESET_ALL))
+
+    def results(self, result_str):
+        """Formats result output for display."""
+        logger.results('{0}{1}{2}'.format(Fore.BLUE, result_str, Style.RESET_ALL))
+
 
 class TableDisplay:
     """Display logic for table queries."""
@@ -97,9 +106,9 @@ class TableDisplay:
             msg_str += divider
 
             # Finally display output.
-            logger.results('{0}'.format(msg_str))
+            self._parent.results(msg_str)
         else:
-            logger.results('Empty Set')
+            self._parent.results('Empty Set')
 
     def describe(self, results, logger):
         """Display logic for tables.describe()."""
@@ -205,7 +214,7 @@ class TableDisplay:
         msg_str += divider
 
         # Finally display output.
-        logger.results('{0}'.format(msg_str))
+        self._parent.results(msg_str)
 
 
 class RecordDisplay:
@@ -296,6 +305,6 @@ class RecordDisplay:
             msg_str = '{0}\n{1}\n{0}\n{2}{0}'.format(divider, header, record_str)
 
             # Finally display output.
-            logger.results('{0}'.format(msg_str))
+            self._parent.results(msg_str)
         else:
-            logger.results('Empty Set')
+            self._parent.results('Empty Set')

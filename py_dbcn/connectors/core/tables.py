@@ -119,7 +119,7 @@ class BaseTables:
         # raise NotImplemented('Function needs column-definition handling.')
         query = 'CREATE TABLE {0} {1};'.format(table_name, table_columns)
         self._base.query.execute(query, display_query=display_query)
-        logger.results('Created table "{0}".'.format(table_name))
+        self._base.display.results('Created table "{0}".'.format(table_name))
 
     def modify(self, table_name, modify_clause, column_clause, display_query=True):
         """Modifies table column with provided name.
@@ -153,7 +153,7 @@ class BaseTables:
         {1} {2};
         """.format(table_name, modify_clause, column_clause)
         self._base.query.execute(query, display_query=display_query)
-        logger.results('Created table "{0}".'.format(table_name))
+        self._base.display.results('Created table "{0}".'.format(table_name))
 
     def update(self, table_name, modify_clause, column_clause, display_query=True):
         """Alias for modify().
@@ -213,7 +213,7 @@ class BaseTables:
         # Remove table.
         query = 'DROP TABLE {0};'.format(table_name)
         self._base.query.execute(query, display_query=display_query)
-        logger.results('Dropped table "{0}".'.format(table_name))
+        self._base.display.results('Dropped table "{0}".'.format(table_name))
 
     def delete(self, table_name, display_query=True):
         """Alias for table "drop" function.

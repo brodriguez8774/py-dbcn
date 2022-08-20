@@ -95,7 +95,7 @@ EXPECTED__TABLE__DESCRIBE__COLS_ID = """
 +-------+------+------+-----+---------+----------------+
 | id    | int  | NO   | PRI | NULL    | auto_increment |
 +-------+------+------+-----+---------+----------------+
-"""
+""".strip()
 
 
 EXPECTED__TABLE__DESCRIBE__COLS_ID_NAME = """
@@ -105,7 +105,7 @@ EXPECTED__TABLE__DESCRIBE__COLS_ID_NAME = """
 | id    | int          | NO   | PRI | NULL    | auto_increment |
 | name  | varchar(100) | YES  |     | NULL    |                |
 +-------+--------------+------+-----+---------+----------------+
-"""
+""".strip()
 
 
 EXPECTED__TABLE__DESCRIBE__COLS_ID_NAME_DESC = """
@@ -116,7 +116,7 @@ EXPECTED__TABLE__DESCRIBE__COLS_ID_NAME_DESC = """
 | name        | varchar(100) | YES  |     | NULL    |                |
 | description | varchar(100) | YES  |     | NULL    |                |
 +-------------+--------------+------+-----+---------+----------------+
-"""
+""".strip()
 
 # endregion Table Display Output
 
@@ -129,7 +129,7 @@ EXPECTED__RECORD__SELECT__PT_1 = """
 +----+------+-------------+
 | 1  | tn   | td          |
 +----+------+-------------+
-"""
+""".strip()
 
 
 EXPECTED__RECORD__SELECT__PT_2 = """
@@ -139,7 +139,7 @@ EXPECTED__RECORD__SELECT__PT_2 = """
 | 1  | tn   | td          |
 | 2  | t n  | t d         |
 +----+------+-------------+
-"""
+""".strip()
 
 
 EXPECTED__RECORD__SELECT__PT_3 = """
@@ -150,7 +150,7 @@ EXPECTED__RECORD__SELECT__PT_3 = """
 | 2  | t n  | t d         |
 | 3  | te n | te d        |
 +----+------+-------------+
-"""
+""".strip()
 
 
 EXPECTED__RECORD__SELECT__PT_4 = """
@@ -162,7 +162,7 @@ EXPECTED__RECORD__SELECT__PT_4 = """
 | 3  | te n  | te d        |
 | 4  | tes n | tes d       |
 +----+-------+-------------+
-"""
+""".strip()
 
 
 EXPECTED__RECORD__SELECT__PT_5 = """
@@ -175,7 +175,7 @@ EXPECTED__RECORD__SELECT__PT_5 = """
 | 4  | tes n  | tes d       |
 | 5  | test n | test d      |
 +----+--------+-------------+
-"""
+""".strip()
 
 
 EXPECTED__RECORD__SELECT__PT_6 = """
@@ -189,7 +189,7 @@ EXPECTED__RECORD__SELECT__PT_6 = """
 | 5  | test n  | test d      |
 | 6  | test na | test de     |
 +----+---------+-------------+
-"""
+""".strip()
 
 
 EXPECTED__RECORD__SELECT__PT_7 = """
@@ -204,7 +204,7 @@ EXPECTED__RECORD__SELECT__PT_7 = """
 | 6  | test na  | test de     |
 | 7  | test nam | test des    |
 +----+----------+-------------+
-"""
+""".strip()
 
 
 EXPECTED__RECORD__SELECT__PT_8 = """
@@ -220,7 +220,7 @@ EXPECTED__RECORD__SELECT__PT_8 = """
 | 7  | test nam  | test des    |
 | 8  | test name | test desc   |
 +----+-----------+-------------+
-"""
+""".strip()
 
 
 EXPECTED__RECORD__SELECT__PT_9 = """
@@ -237,7 +237,7 @@ EXPECTED__RECORD__SELECT__PT_9 = """
 | 8  | test name | test desc   |
 | 9  | test name | test descr  |
 +----+-----------+-------------+
-"""
+""".strip()
 
 
 EXPECTED__RECORD__SELECT__PT_10 = """
@@ -255,7 +255,7 @@ EXPECTED__RECORD__SELECT__PT_10 = """
 | 9  | test name | test descr  |
 | 10 | test name | test descri |
 +----+-----------+-------------+
-"""
+""".strip()
 
 
 EXPECTED__RECORD__SELECT__PT_11 = """
@@ -274,7 +274,7 @@ EXPECTED__RECORD__SELECT__PT_11 = """
 | 10  | test name | test descri  |
 | 101 | test name | test descrip |
 +-----+-----------+--------------+
-"""
+""".strip()
 
 
 EXPECTED__RECORD__SELECT__PT_12 = """
@@ -294,7 +294,7 @@ EXPECTED__RECORD__SELECT__PT_12 = """
 | 101  | test name | test descrip  |
 | 1010 | test name | test descript |
 +------+-----------+---------------+
-"""
+""".strip()
 
 
 EXPECTED__RECORD__SELECT__PT_13 = """
@@ -315,7 +315,7 @@ EXPECTED__RECORD__SELECT__PT_13 = """
 | 1010  | test name | test descript  |
 | 10101 | test name | test descripti |
 +-------+-----------+----------------+
-"""
+""".strip()
 
 
 EXPECTED__RECORD__SELECT__PT_14 = """
@@ -337,7 +337,7 @@ EXPECTED__RECORD__SELECT__PT_14 = """
 | 10101  | test name | test descripti  |
 | 101010 | test name | test descriptio |
 +--------+-----------+-----------------+
-"""
+""".strip()
 
 
 EXPECTED__RECORD__SELECT__PT_15 = """
@@ -360,7 +360,7 @@ EXPECTED__RECORD__SELECT__PT_15 = """
 | 101010  | test name | test descriptio  |
 | 1010101 | test name | test description |
 +---------+-----------+------------------+
-"""
+""".strip()
 
 # endregion Record Display Output
 

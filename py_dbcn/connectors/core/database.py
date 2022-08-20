@@ -77,7 +77,7 @@ class BaseDatabase:
         results = formatted_results
 
         if show:
-            logger.results('results: {0}'.format(results))
+            self._base.display.results('results: {0}'.format(results))
 
         # Return data.
         return results
@@ -112,7 +112,7 @@ class BaseDatabase:
         # Switch active database.
         query = 'USE {0};'.format(db_name)
         self._base.query.execute(query, display_query=display_query)
-        logger.results('Database changed to "{0}".'.format(db_name))
+        self._base.display.results('Database changed to "{0}".'.format(db_name))
 
     def create(self, db_name, display_query=True):
         """Creates new database with provided name.
@@ -137,7 +137,7 @@ class BaseDatabase:
         # Create new database.
         query = 'CREATE DATABASE {0};'.format(db_name)
         self._base.query.execute(query, display_query=display_query)
-        logger.results('Created database "{0}".'.format(db_name))
+        self._base.display.results('Created database "{0}".'.format(db_name))
 
     def drop(self, db_name, display_query=True):
         """Deletes database with provided name.
@@ -160,7 +160,7 @@ class BaseDatabase:
         # Remove database.
         query = 'DROP DATABASE {0};'.format(db_name)
         self._base.query.execute(query, display_query=display_query)
-        logger.results('Dropped database "{0}".'.format(db_name))
+        self._base.display.results('Dropped database "{0}".'.format(db_name))
 
     def delete(self, db_name, display_query=True):
         """Alias for database "drop" function.

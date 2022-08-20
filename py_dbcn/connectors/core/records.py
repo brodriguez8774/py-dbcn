@@ -60,7 +60,7 @@ class BaseRecords:
         # Select record.
         query = 'SELECT {0} FROM {1}{2};'.format(select_clause, table_name, where_clause)
         results = self._base.query.execute(query, display_query=display_query)
-        logger.query('{0}'.format(query))
+        self._base.display.query('{0}'.format(query))
         self._base.display.records.select(results, logger, table_name, select_clause)
 
         return results
@@ -113,8 +113,8 @@ class BaseRecords:
         VALUES {2};
         """.format(table_name, columns_clause, values_clause)
         results = self._base.query.execute(query, display_query=display_query)
-        logger.query('{0}'.format(query))
-        logger.results('{0}'.format(results))
+        self._base.display.query('{0}'.format(query))
+        self._base.display.results('{0}'.format(results))
 
         return results
 
@@ -164,8 +164,8 @@ class BaseRecords:
         WHERE {2};
         """.format(table_name, values_clause, where_clause)
         results = self._base.query.execute(query, display_query=display_query)
-        logger.query('{0}'.format(query))
-        logger.results('{0}'.format(results))
+        self._base.display.query('{0}'.format(query))
+        self._base.display.results('{0}'.format(results))
 
         return results
 
@@ -187,7 +187,7 @@ class BaseRecords:
         # Delete record.
         query = 'DELETE FROM {0} WHERE {1};'.format(table_name, where_clause)
         results = self._base.query.execute(query, display_query=display_query)
-        logger.query('{0}'.format(query))
-        logger.results('{0}'.format(results))
+        self._base.display.query('{0}'.format(query))
+        self._base.display.results('{0}'.format(results))
 
         return results

@@ -7,7 +7,8 @@ various specific database test classes. This ensures that all databases types ru
 """
 
 # System Imports.
-import unittest
+import re, unittest
+from colorama import Fore, Style
 
 # User Imports.
 from py_dbcn.connectors.core.core import AbstractDbConnector
@@ -85,9 +86,22 @@ class CoreTestParent(unittest.TestCase):
         super().tearDownClass()
 
     def assertText(self, actual_text, expected_text):
-        """Wrapper for assertEquals, that prints full values to console on mismatch."""
+        """Wrapper for assertEquals, that prints full values to console on mismatch.
+
+        Note that this also strips any colored text output, to directly compare the actual text itself, not formatting.
+        """
+
+        # Strip any initial whitespace.
         actual_text = str(actual_text).strip()
         expected_text = str(expected_text).strip()
+
+        # Strip any colorama colorings.
+        actual_text = actual_text.lstrip(Fore.BLUE).lstrip(Fore.MAGENTA).rstrip(Style.RESET_ALL)
+        expected_text = expected_text.lstrip(Fore.BLUE).lstrip(Fore.MAGENTA).rstrip(Style.RESET_ALL)
+
+        # Strip any unintentional "whitespace" caused by colorama + code indentations.
+        actual_text = actual_text.strip()
+        expected_text = expected_text.strip()
 
         # Attempt assertion.
         try:

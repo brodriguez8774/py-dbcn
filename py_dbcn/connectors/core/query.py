@@ -6,6 +6,7 @@ Should be inherited by language-specific connectors.
 """
 
 # System Imports.
+from colorama import Fore, Style
 
 # User Imports.
 from py_dbcn.logging import init_logging
@@ -38,7 +39,7 @@ class BaseQuery:
         :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
         """
         if display_query:
-            logger.query(query)
+            self._base.display.query(query)
 
         # Create connection and execute query.
         cursor = self._base._connection.cursor()

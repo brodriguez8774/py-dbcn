@@ -89,7 +89,7 @@ def get_logging_settings():
                 'filename': this.logging_directory.joinpath('query.log'),
                 'maxBytes': this.logging_max_bytes,
                 'backupCount': this.logging_backup_count,
-                'formatter': 'standard',
+                'formatter': 'minimal',
             },
             'file_results': {
                 'level': 'RESULTS',
@@ -97,7 +97,7 @@ def get_logging_settings():
                 'filename': this.logging_directory.joinpath('results.log'),
                 'maxBytes': this.logging_max_bytes,
                 'backupCount': this.logging_backup_count,
-                'formatter': 'standard',
+                'formatter': 'minimal',
             },
             # Warn Level - To file.
             'file_warn': {
