@@ -6,6 +6,7 @@ Should be inherited by language-specific connectors.
 """
 
 # System Imports.
+import textwrap
 from colorama import Fore, Style
 
 # User Imports.
@@ -59,10 +60,18 @@ class BaseDisplay:
 
     def query(self, query_str):
         """Formats query output for display."""
-        logger.results('{0}{1}{2}'.format(Fore.MAGENTA, query_str, Style.RESET_ALL))
+        # Remove any whitespace created from standard code indentations.
+        query_str = textwrap.dedent(query_str).strip()
+
+        # Log results.
+        logger.query('{0}{1}{2}'.format(Fore.MAGENTA, query_str, Style.RESET_ALL))
 
     def results(self, result_str):
         """Formats result output for display."""
+        # Remove any whitespace created from standard code indentations.
+        result_str = textwrap.dedent(result_str).strip()
+
+        # Log results.
         logger.results('{0}{1}{2}'.format(Fore.BLUE, result_str, Style.RESET_ALL))
 
 

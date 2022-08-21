@@ -5,6 +5,8 @@ Tests for "tables" logic of "MySQL" DB Connector class.
 # System Imports.
 
 # User Imports.
+import textwrap
+
 from .test_core import TestMysqlDatabaseParent
 from tests.connectors.core.test_tables import CoreTablesTestMixin
 
@@ -35,13 +37,21 @@ class TestMysqlTables(TestMysqlDatabaseParent, CoreTablesTestMixin):
                 cls.connector.tables.drop(result)
 
         # Define database-specific query values.
-        cls._basic_table_columns = """
-            id INT(11) NOT NULL AUTO_INCREMENT,
-            PRIMARY KEY (id)
-        """
-        cls._columns_query = """(
-            id INT NOT NULL AUTO_INCREMENT,
-            name VARCHAR(100),
-            description VARCHAR(100),
-            PRIMARY KEY ( id )
-        )"""
+        cls._basic_table_columns = textwrap.dedent(
+            """
+            (
+                id INT(11) NOT NULL AUTO_INCREMENT,
+                PRIMARY KEY (id)
+            )
+            """
+        ).strip()
+        cls._columns_query = textwrap.dedent(
+            """
+            (
+                id INT NOT NULL AUTO_INCREMENT,
+                name VARCHAR(100),
+                description VARCHAR(100),
+                PRIMARY KEY ( id )
+            )
+            """
+        ).strip()

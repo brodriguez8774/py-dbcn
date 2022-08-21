@@ -5,6 +5,7 @@ Contains database connection logic specific to PostgreSQL databases.
 """
 
 # System Imports.
+import textwrap
 
 # User Imports.
 from py_dbcn.connectors.core.tables import BaseTables
@@ -28,9 +29,11 @@ class PostgresqlTables(BaseTables):
         # Initialize variables.
         # StackOverflow suggested each of these in different answers.
         # Unsure of which one is better/worse, and what the differences mean.
-        self._show_tables_query = (
-            "SELECT table_name FROM information_schema.tables "
-            "WHERE table_schema = 'public';"
+        self._show_tables_query = textwrap.dedent(
+            """
+            SELECT table_name FROM information_schema.tables
+            WHERE table_schema = 'public';
+            """
 
             # "SELECT table_schema || '.' || table_name "
             # "FROM information_schema.tables "
@@ -39,8 +42,10 @@ class PostgresqlTables(BaseTables):
 
             # "SELECT * FROM pg_catalog.pg_tables "
             # "WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';"
-        )
-        self._describe_table_query = (
-            "SELECT * FROM information_schema.columns "
-            "WHERE (table_schema = 'public' AND table_name = '{0}');"
-        )
+        ).strip()
+        self._describe_table_query = textwrap.dedent(
+            """
+            SELECT * FROM information_schema.columns
+            WHERE (table_schema = 'public' AND table_name = '{0}');
+            """
+        ).strip()

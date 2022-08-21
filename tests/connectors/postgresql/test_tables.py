@@ -3,6 +3,7 @@ Tests for "tables" logic of "PostgreSQL" DB Connector class.
 """
 
 # System Imports.
+import textwrap
 
 # User Imports.
 from .test_core import TestPostgresqlDatabaseParent
@@ -35,11 +36,19 @@ class TestPostgresqlTables(TestPostgresqlDatabaseParent, CoreTablesTestMixin):
                 cls.connector.tables.drop(result)
 
         # Define database-specific query values.
-        cls._basic_table_columns = """
-            id serial PRIMARY KEY
-        """
-        cls._columns_query = """(
-            id serial PRIMARY KEY,
-            name VARCHAR(100),
-            description VARCHAR(100)
-        )"""
+        cls._basic_table_columns = textwrap.dedent(
+            """
+            (
+                id serial PRIMARY KEY
+            )
+            """
+        ).strip()
+        cls._columns_query = textwrap.dedent(
+            """
+            (
+                id serial PRIMARY KEY,
+                name VARCHAR(100),
+                description VARCHAR(100)
+            )
+            """
+        ).strip()
