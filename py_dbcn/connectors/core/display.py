@@ -256,7 +256,7 @@ class RecordDisplay:
                 # Calculate column header values, using all columns.
                 table_cols = [
                     x[0]
-                    for x in self._base.tables.describe(table_name, display_query=False)
+                    for x in self._base.tables.describe(table_name, display_query=False, display_results=False)
                 ]
             else:
                 select_clause = select_clause.split(',')
@@ -269,7 +269,7 @@ class RecordDisplay:
                 # Calculate column header values, filtered by select clause.
                 table_cols = [
                     x[0]
-                    for x in self._base.tables.describe(table_name, display_query=False)
+                    for x in self._base.tables.describe(table_name, display_query=False, display_results=False)
                     if x[0] in select_clause
                 ]
             col_len_array = []
@@ -281,7 +281,8 @@ class RecordDisplay:
                         table_col,
                         table_name,
                         self._base.validate._quote_column_format,
-                    )
+                    ),
+                    display_query=False,
                 )[0][0]
                 length = max(col_len, record_len or 0)
                 col_len_array.append(length)

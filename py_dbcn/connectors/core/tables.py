@@ -66,10 +66,12 @@ class BaseTables:
         """
         return self._get(display_query=display_query, display_results=True)
 
-    def describe(self, table_name, display_query=True):
+    def describe(self, table_name, display_query=True, display_results=True):
         """Describes given table in database.
 
+        :param table_name: Name of table to describe.
         :param display_query: Bool indicating if query should output to console. Defaults to True.
+        :param display_results: Bool indicating if results should output to console. Defaults to True.
         """
         if not self._describe_table_query:
             raise ValueError('DESCRIBE TABLE query is not defined.')
@@ -86,7 +88,8 @@ class BaseTables:
         # Generate and execute query.
         query = self._describe_table_query.format(table_name)
         results = self._base.query.execute(query, display_query=display_query)
-        self._base.display.tables.describe(results, logger)
+        if display_results:
+            self._base.display.tables.describe(results, logger)
 
         return results
 
