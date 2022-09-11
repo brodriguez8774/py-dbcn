@@ -18,6 +18,13 @@ connector to allow Pythonic interaction with multiple database types.
    quickstart
    configuration
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Versions:
+
+   roadmap
+   version_history
+
 
 Indices and tables
 ==================
