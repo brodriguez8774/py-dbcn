@@ -4,7 +4,7 @@
 #
 # # System Imports.
 #
-# # User Imports.
+# # Internal Imports.
 # from .test_core import TestSqLiteDatabaseParent
 # from tests.connectors.core.test_utils import CoreUtilsTestMixin
 #

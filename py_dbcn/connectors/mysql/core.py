@@ -5,9 +5,11 @@ Contains database connection logic specific to MySQL databases.
 """
 
 # System Imports.
+
+# Third-party Imports.
 import MySQLdb
 
-# User Imports.
+# Internal Imports.
 from .database import MysqlDatabase
 from .display import MysqlDisplay
 from .query import MysqlQuery

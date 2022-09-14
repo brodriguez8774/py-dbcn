@@ -5,9 +5,11 @@ Contains database connection logic specific to SqLite databases.
 """
 
 # System Imports.
+
+# Third-party Imports.
 import sqlite3
 
-# User Imports.
+# Internal Imports.
 from .database import SqliteDatabase
 from .display import SqliteDisplay
 from .query import SqliteQuery

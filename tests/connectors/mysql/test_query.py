@@ -4,7 +4,7 @@ Tests for "query" logic of "MySQL" DB Connector class.
 
 # System Imports.
 
-# User Imports.
+# Internal Imports.
 from .test_core import TestMysqlDatabaseParent
 from tests.connectors.core.test_query import CoreQueryTestMixin
 

@@ -4,7 +4,7 @@ Tests for "database" logic of "PostgreSQL" DB Connector class.
 
 # System Imports.
 
-# User Imports.
+# Internal Imports.
 from .test_core import TestPostgresqlDatabaseParent
 from tests.connectors.core.test_database import CoreDatabaseTestMixin
 

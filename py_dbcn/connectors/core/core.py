@@ -8,8 +8,7 @@ Should be inherited by language-specific connectors.
 # System Imports.
 from abc import ABC, abstractmethod
 
-# User Imports.
-from py_dbcn.logging import init_logging
+# Internal Imports.
 from .database import BaseDatabase
 from .display import BaseDisplay
 from .query import BaseQuery
@@ -17,6 +16,7 @@ from .records import BaseRecords
 from .tables import BaseTables
 from .utils import BaseUtils
 from .validate import BaseValidate
+from py_dbcn.logging import init_logging
 
 
 # Import logger.

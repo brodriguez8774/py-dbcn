@@ -5,7 +5,7 @@ Tests for "records" logic of "MySQL" DB Connector class.
 # System Imports.
 import textwrap
 
-# User Imports.
+# Internal Imports.
 from .test_core import TestMysqlDatabaseParent
 from tests.connectors.core.test_records import CoreRecordsTestMixin
 

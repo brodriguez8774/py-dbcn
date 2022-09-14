@@ -16,7 +16,7 @@ if POSTGRESQL_PRESENT:
     # System Imports.
     import psycopg2
 
-    # User Imports.
+    # Internal Imports.
     from config import postgresql_config
     from py_dbcn.connectors import PostgresqlDbConnector
 

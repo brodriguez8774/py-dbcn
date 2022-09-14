@@ -6,7 +6,7 @@ Contains database connection logic specific to MySQL databases.
 
 # System Imports.
 
-# User Imports.
+# Internal Imports.
 from py_dbcn.connectors.core.tables import BaseTables
 from py_dbcn.logging import init_logging
 

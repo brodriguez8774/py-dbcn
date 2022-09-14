@@ -4,7 +4,7 @@ Tests for "tables" logic of "MySQL" DB Connector class.
 
 # System Imports.
 
-# User Imports.
+# Internal Imports.
 import textwrap
 
 from .test_core import TestMysqlDatabaseParent

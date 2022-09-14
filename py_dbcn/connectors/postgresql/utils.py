@@ -6,7 +6,7 @@ Contains database connection logic specific to PostgreSQL databases.
 
 # System Imports.
 
-# User Imports.
+# Internal Imports.
 from py_dbcn.connectors.core.utils import BaseUtils
 from py_dbcn.logging import init_logging
 

@@ -4,7 +4,7 @@ Tests for "validate" logic of "PostgreSQL" DB Connector class.
 
 # System Imports.
 
-# User Imports.
+# Internal Imports.
 from .test_core import TestPostgresqlDatabaseParent
 from tests.connectors.core.test_validate import CoreValidateTestMixin
 

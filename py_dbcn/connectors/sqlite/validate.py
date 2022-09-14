@@ -6,7 +6,7 @@ Contains database connection logic specific to SqLite databases.
 
 # System Imports.
 
-# User Imports.
+# Internal Imports.
 from py_dbcn.connectors.core.validate import BaseValidate
 from py_dbcn.logging import init_logging
 

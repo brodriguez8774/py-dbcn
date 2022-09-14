@@ -9,7 +9,7 @@ various specific database test classes. This ensures that all databases types ru
 # System Imports.
 import datetime
 
-# User Imports.
+# Internal Imports.
 
 
 class CoreRecordsTestMixin:

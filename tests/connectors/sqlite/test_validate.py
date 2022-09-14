@@ -5,7 +5,7 @@ Tests for "validate" logic of "SqLite" DB Connector class.
 # System Imports.
 import unittest
 
-# User Imports.
+# Internal Imports.
 from config import mysql_config, sqlite_config
 from py_dbcn.connectors import MysqlDbConnector, PostgresqlDbConnector, SqliteDbConnector
 from py_dbcn.connectors.core.validate import BaseValidate

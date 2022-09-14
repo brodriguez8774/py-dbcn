@@ -5,9 +5,11 @@ Contains database connection logic specific to PostgreSQL databases.
 """
 
 # System Imports.
+
+# Third-party Imports.
 import psycopg2
 
-# User Imports.
+# Internal Imports.
 from .database import PostgresqlDatabase
 from .display import PostgresqlDisplay
 from .query import PostgresqlQuery

@@ -4,9 +4,8 @@ Tests for "query" logic of "PostgreSQL" DB Connector class.
 
 # System Imports.
 
-# User Imports.
+# Internal Imports.
 from .test_core import TestPostgresqlDatabaseParent
-from py_dbcn.connectors.postgresql.validate import PostgresqlValidate
 from tests.connectors.core.test_query import CoreQueryTestMixin
 
 

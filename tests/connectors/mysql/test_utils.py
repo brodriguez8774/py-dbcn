@@ -5,7 +5,7 @@ Tests for "utility" logic of "MySQL" DB Connector class.
 # System Imports.
 import datetime
 
-# User Imports.
+# Internal Imports.
 from .test_core import TestMysqlDatabaseParent
 from tests.connectors.core.test_utils import CoreUtilsTestMixin
 

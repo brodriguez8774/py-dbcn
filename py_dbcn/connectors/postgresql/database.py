@@ -5,9 +5,8 @@ Contains database connection logic specific to PostgreSQL databases.
 """
 
 # System Imports.
-import psycopg2
 
-# User Imports.
+# Internal Imports.
 from py_dbcn.connectors.core.database import BaseDatabase
 from py_dbcn.logging import init_logging
 

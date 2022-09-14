@@ -4,7 +4,7 @@ Tests for "display" logic of "MySQL" DB Connector class.
 
 # System Imports.
 
-# User Imports.
+# Internal Imports.
 from .test_core import TestMysqlDatabaseParent
 from .expected_display_output import ExpectedOutput
 from tests.connectors.core.test_display import (

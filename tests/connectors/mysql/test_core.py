@@ -4,6 +4,8 @@ Initialization of "core" logic of "MySQL" DB Connector class.
 
 # Standard Imports.
 import unittest
+
+# Internal Imports.
 from tests.connectors.core.test_core import CoreTestParent
 
 
@@ -16,7 +18,7 @@ if MYSQL_PRESENT:
     # System Imports.
     import MySQLdb
 
-    # User Imports.
+    # Internal Imports.
     from config import mysql_config
     from py_dbcn.connectors import MysqlDbConnector
 

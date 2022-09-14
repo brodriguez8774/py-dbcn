@@ -4,7 +4,7 @@ Entrypoint for manually testing project logic.
 
 # System Imports.
 
-# User Imports.
+# Internal Imports.
 from config import mysql_config, postgresql_config, sqlite_config
 from py_dbcn.connectors import MysqlDbConnector, PostgresqlDbConnector, SqliteDbConnector
 from py_dbcn.logging import init_logging

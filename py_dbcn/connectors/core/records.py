@@ -8,7 +8,7 @@ Should be inherited by language-specific connectors.
 # System Imports.
 import datetime
 
-# User Imports.
+# Internal Imports.
 from py_dbcn.logging import init_logging
 
 

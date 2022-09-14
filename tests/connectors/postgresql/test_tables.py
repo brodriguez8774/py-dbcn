@@ -5,7 +5,7 @@ Tests for "tables" logic of "PostgreSQL" DB Connector class.
 # System Imports.
 import textwrap
 
-# User Imports.
+# Internal Imports.
 from .test_core import TestPostgresqlDatabaseParent
 from tests.connectors.core.test_tables import CoreTablesTestMixin
 

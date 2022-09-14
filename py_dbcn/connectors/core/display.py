@@ -7,9 +7,11 @@ Should be inherited by language-specific connectors.
 
 # System Imports.
 import textwrap
+
+# Third-party Imports.
 from colorama import Fore, Style
 
-# User Imports.
+# Internal Imports.
 from py_dbcn.logging import init_logging
 
 
