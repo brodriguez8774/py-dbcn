@@ -15,6 +15,12 @@ from py_dbcn.logging import init_logging
 logger = init_logging(__name__)
 
 
+# Module Variables.
+QUOTE_COLUMN_FORMAT = """`"""           # Used for quoting table columns.
+QUOTE_IDENTIFIER_FORMAT = """`"""       # Used for quoting identifiers (such as SELECT clause field id's).
+QUOTE_STR_LITERAL_FORMAT = """\""""     # Used for quoting actual strings.
+
+
 class MysqlValidate(BaseValidate):
     """
     Logic for validating various queries and query subsections, for MySQL databases.
@@ -23,6 +29,10 @@ class MysqlValidate(BaseValidate):
         # Call parent logic.
         super().__init__(parent, *args, **kwargs)
 
+        logger.debug('Generating related (MySQL) Validate class.')
+
+        # Function names that are used within the database system.
+        # These should not be allowed for user values, such as table names, etc.
         # Full List:
         # https://dev.mysql.com/doc/refman/8.0/en/built-in-function-reference.html
         self._reserved_function_names = [
@@ -124,8 +134,9 @@ class MysqlValidate(BaseValidate):
             'VAR_SAMP',
             'YEAR',
         ]
-        self._quote_column_format = """`"""
-        self._quote_identifier_format = """`"""
-        self._quote_str_literal_format = """\""""
 
-        logger.debug('Generating related (MySQL) Validate class.')
+        # Initialize database string-quote types.
+        # Aka, what the database says is "okay" to surround string values with.
+        self._quote_column_format = QUOTE_COLUMN_FORMAT
+        self._quote_identifier_format = QUOTE_IDENTIFIER_FORMAT
+        self._quote_str_literal_format = QUOTE_STR_LITERAL_FORMAT

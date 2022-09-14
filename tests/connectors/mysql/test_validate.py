@@ -33,3 +33,19 @@ class TestMysqlValidate(TestMysqlDatabaseParent, CoreValidateTestMixin):
         if len(results) > 0:
             for result in results:
                 cls.connector.tables.drop(result)
+
+        # Import here to prevent errors if database type is not installed on system.
+        from py_dbcn.connectors.mysql.validate import QUOTE_IDENTIFIER_FORMAT
+
+        # Initialize variables.
+        cls._identifier_str = '{0}{1}{0}'.format(QUOTE_IDENTIFIER_FORMAT, '{0}')
+
+    def test__sanitize_select_clause__success(self):
+        """
+        Test sanitizing a SELECT clause, in cases when it should succeed.
+        """
+        # Verify identifier str is as we expect.
+        self.assertText('`{0}`', self._identifier_str)
+
+        # Call parent logic.
+        super().test__sanitize_select_clause__success()

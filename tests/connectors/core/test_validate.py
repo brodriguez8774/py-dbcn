@@ -28,6 +28,7 @@ class CoreValidateTestMixin:
         # Initialize variables.
         cls.unallowed_char_list = [';', '\\']
         cls.unallowed_unicode_index_list = [59, 92]
+        cls._identifier_str = None
 
     def test__identifier__success(self):
         """
@@ -687,7 +688,16 @@ class CoreValidateTestMixin:
                 self.connector.validate.table_columns({'id': 'INT;'})
 
     def test__sanitize_select_clause__success(self):
-        """"""
+        """
+        Test sanitizing a SELECT clause, in cases when it should succeed.
+
+        For the most part, we test that the library gracefully handles any of
+        the "standard" database quote types (', ", and `), and then properly
+        converts it to the actual type/format as expected by the given database.
+        """
+        if self._identifier_str is None:
+            TypeError('Invalid _identifier_str variable. Is None.')
+
         # None provided. Defaults back to "*".
         result = self.connector.validate.sanitize_select_clause(None)
         self.assertEqual(result, '*')
@@ -699,211 +709,437 @@ class CoreValidateTestMixin:
         with self.subTest('Values as str - Without quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_clause('id')
-            self.assertEqual(result, '`id`')
+            self.assertEqual(result, self._identifier_str.format('id'))
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_clause(' id ')
-            self.assertEqual(result, '`id`')
+            self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_clause('id, name')
-            self.assertEqual(result, '`id`, `name`')
+            self.assertEqual(
+                result,
+                '{0}, {1}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name')
+                ),
+            )
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_clause(' id ,  name ')
-            self.assertEqual(result, '`id`, `name`')
+            self.assertEqual(
+                result,
+                '{0}, {1}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                ),
+            )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_clause('id, name, code')
-            self.assertEqual(result, '`id`, `name`, `code`')
+            self.assertEqual(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                    self._identifier_str.format('code'),
+                ),
+            )
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_clause(' id ,  name ,  code ')
-            self.assertEqual(result, '`id`, `name`, `code`')
+            self.assertEqual(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                    self._identifier_str.format('code'),
+                ),
+            )
 
         with self.subTest('Values as triple str - Without quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_clause("""id""")
-            self.assertEqual(result, '`id`')
+            self.assertEqual(result, self._identifier_str.format('id'))
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_clause(""" id """)
-            self.assertEqual(result, '`id`')
+            self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_clause("""id, name""")
-            self.assertEqual(result, '`id`, `name`')
+            self.assertEqual(
+                result,
+                '{0}, {1}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                ),
+            )
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_clause(""" id ,  name """)
-            self.assertEqual(result, '`id`, `name`')
+            self.assertEqual(
+                result,
+                '{0}, {1}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                ),
+            )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_clause("""id, name, code""")
-            self.assertEqual(result, '`id`, `name`, `code`')
+            self.assertEqual(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                    self._identifier_str.format('code'),
+                ),
+            )
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_clause(""" id ,  name ,  code """)
-            self.assertEqual(result, '`id`, `name`, `code`')
+            self.assertEqual(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                    self._identifier_str.format('code'),
+                ),
+            )
 
         with self.subTest('Values as list - Without quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_clause(['id'])
-            self.assertEqual(result, '`id`')
+            self.assertEqual(result, self._identifier_str.format('id'))
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_clause([' id '])
-            self.assertEqual(result, '`id`')
+            self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_clause(['id', 'name'])
-            self.assertEqual(result, '`id`, `name`')
+            self.assertEqual(
+                result,
+                '{0}, {1}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                ),
+            )
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_clause([' id ', ' name '])
-            self.assertEqual(result, '`id`, `name`')
+            self.assertEqual(
+                result,
+                '{0}, {1}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                ),
+            )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_clause(['id', 'name', 'code'])
-            self.assertEqual(result, '`id`, `name`, `code`')
+            self.assertEqual(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                    self._identifier_str.format('code'),
+                ),
+            )
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_clause([' id ', ' name ', ' code '])
-            self.assertEqual(result, '`id`, `name`, `code`')
+            self.assertEqual(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                    self._identifier_str.format('code'),
+                ),
+            )
 
         with self.subTest('Values as tuple - Without quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_clause(('id',))
-            self.assertEqual(result, '`id`')
+            self.assertEqual(result, self._identifier_str.format('id'))
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_clause((' id ',))
-            self.assertEqual(result, '`id`')
+            self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_clause(('id', 'name'))
-            self.assertEqual(result, '`id`, `name`')
+            self.assertEqual(
+                result,
+                '{0}, {1}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                ),
+            )
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_clause((' id ', ' name '))
-            self.assertEqual(result, '`id`, `name`')
+            self.assertEqual(
+                result,
+                '{0}, {1}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                ),
+            )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_clause(('id', 'name', 'code'))
-            self.assertEqual(result, '`id`, `name`, `code`')
+            self.assertEqual(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                    self._identifier_str.format('code'),
+                ),
+            )
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_clause((' id ', ' name ', ' code '))
-            self.assertEqual(result, '`id`, `name`, `code`')
+            self.assertEqual(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                    self._identifier_str.format('code'),
+                ),
+            )
 
         with self.subTest('Values as str - With single quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_clause("'id'")
-            self.assertEqual(result, '`id`')
+            self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_clause("'id', 'name'")
-            self.assertEqual(result, '`id`, `name`')
+            self.assertEqual(
+                result,
+                '{0}, {1}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                ),
+            )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_clause("'id', 'name', 'code'")
-            self.assertEqual(result, '`id`, `name`, `code`')
+            self.assertEqual(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                    self._identifier_str.format('code')
+                ),
+            )
 
         with self.subTest('Values as list - With single quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_clause(["'id'"])
-            self.assertEqual(result, '`id`')
+            self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_clause(["'id'", "'name'"])
-            self.assertEqual(result, '`id`, `name`')
+            self.assertEqual(
+                result,
+                '{0}, {1}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                ),
+            )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_clause(["'id'", "'name'", "'code'"])
-            self.assertEqual(result, '`id`, `name`, `code`')
+            self.assertEqual(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                    self._identifier_str.format('code'),
+                ),
+            )
 
         with self.subTest('Values as tuple - With single quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_clause(("'id'",))
-            self.assertEqual(result, '`id`')
+            self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_clause(("'id'", "'name'"))
-            self.assertEqual(result, '`id`, `name`')
+            self.assertEqual(
+                result,
+                '{0}, {1}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                ),
+            )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_clause(("'id'", "'name'", "'code'"))
-            self.assertEqual(result, '`id`, `name`, `code`')
+            self.assertEqual(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                    self._identifier_str.format('code'),
+                ),
+            )
 
         with self.subTest('Values as str - With double quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_clause('"id"')
-            self.assertEqual(result, '`id`')
+            self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_clause('"id", "name"')
-            self.assertEqual(result, '`id`, `name`')
+            self.assertEqual(
+                result,
+                '{0}, {1}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                ),
+            )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_clause('"id", "name", code')
-            self.assertEqual(result, '`id`, `name`, `code`')
+            self.assertEqual(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                    self._identifier_str.format('code'),
+                ),
+            )
 
         with self.subTest('Values as list - With double quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_clause(['"id"'])
-            self.assertEqual(result, '`id`')
+            self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_clause(['"id"', '"name"'])
-            self.assertEqual(result, '`id`, `name`')
+            self.assertEqual(
+                result,
+                '{0}, {1}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                ),
+            )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_clause(['"id"', '"name"', '"code"'])
-            self.assertEqual(result, '`id`, `name`, `code`')
+            self.assertEqual(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                    self._identifier_str.format('code'),
+                ),
+            )
 
         with self.subTest('Values as tuple - With double quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_clause(('"id"',))
-            self.assertEqual(result, '`id`')
+            self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_clause(('"id"', '"name"'))
-            self.assertEqual(result, '`id`, `name`')
+            self.assertEqual(
+                result, '{0}, {1}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                ),
+            )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_clause(('"id"', '"name"', '"code"'))
-            self.assertEqual(result, '`id`, `name`, `code`')
+            self.assertEqual(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                    self._identifier_str.format('code'),
+                ),
+            )
 
         with self.subTest('Values as str - With backtick quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_clause('`id`')
-            self.assertEqual(result, '`id`')
+            self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_clause('`id`, `name`')
-            self.assertEqual(result, '`id`, `name`')
+            self.assertEqual(
+                result,
+                '{0}, {1}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                ),
+            )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_clause('`id`, `name`, `code`')
-            self.assertEqual(result, '`id`, `name`, `code`')
+            self.assertEqual(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                    self._identifier_str.format('code'),
+                ),
+            )
 
         with self.subTest('Values as list - With backtick quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_clause(['`id`'])
-            self.assertEqual(result, '`id`')
+            self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_clause(['`id`', '`name`'])
-            self.assertEqual(result, '`id`, `name`')
+            self.assertEqual(
+                result,
+                '{0}, {1}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                ),
+            )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_clause(['`id`', '`name`', '`code`'])
-            self.assertEqual(result, '`id`, `name`, `code`')
+            self.assertEqual(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                    self._identifier_str.format('code'),
+                ),
+            )
 
         with self.subTest('Values as tuple - With backtick quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_clause(('`id`',))
-            self.assertEqual(result, '`id`')
+            self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_clause(('`id`', '`name`'))
-            self.assertEqual(result, '`id`, `name`')
+            self.assertEqual(
+                result,
+                '{0}, {1}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                ),
+            )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_clause(('`id`', '`name`', '`code`'))
-            self.assertEqual(result, '`id`, `name`, `code`')
+            self.assertEqual(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._identifier_str.format('id'),
+                    self._identifier_str.format('name'),
+                    self._identifier_str.format('code'),
+                ),
+            )
 
         with self.subTest('Values as non-standard types'):
             result = self.connector.validate.sanitize_select_clause((1, True))
-            self.assertEqual(result, '`1`, `True`')
+            self.assertEqual(
+                result,
+                '{0}, {1}'.format(
+                    self._identifier_str.format(1),
+                    self._identifier_str.format(True),
+                ),
+            )
 
         with self.subTest('Values with function calls'):
             # Uppercase.
@@ -915,7 +1151,9 @@ class CoreValidateTestMixin:
             self.assertEqual(result, 'COUNT(*)')
 
     def test__sanitize_select_clause__failure(self):
-        """"""
+        """
+        Test sanitizing a SELECT clause, in cases when it should fail.
+        """
         # Param "*" provided with other values.
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_select_clause('* , id')
