@@ -14,6 +14,14 @@ from colorama import Fore, Style
 
 # Internal Imports.
 from py_dbcn.connectors.core.core import AbstractDbConnector
+from py_dbcn.constants import (
+    OUTPUT_ACTUALS_ERROR,
+    OUTPUT_ACTUALS_MATCH,
+    OUTPUT_ERROR,
+    OUTPUT_EXPECTED_ERROR,
+    OUTPUT_EXPECTED_MATCH,
+    OUTPUT_RESET,
+)
 
 
 class CoreTestParent(unittest.TestCase):
@@ -87,39 +95,158 @@ class CoreTestParent(unittest.TestCase):
         # Run parent teardown logic.
         super().tearDownClass()
 
-    def assertText(self, actual_text, expected_text):
-        """Wrapper for assertEquals, that prints full values to console on mismatch.
+    def assertText(self, actual_text, expected_text, strip=True):
+        """Wrapper for assertEqual(), that prints full values to console on mismatch.
 
-        Note that this also strips any colored text output, to directly compare the actual text itself, not formatting.
+        NOTE: Outer whitespace is stripped if either strip or standardize params are set to True.
+
+        :param actual_text: Actual text value to compare.
+        :param expected_text: Expected text value to check against.
+        :param strip: Bool indicating if outer whitespace should be stripped. Defaults to True.
         """
+        # Enforce str type.
+        actual_text = str(actual_text)
+        expected_text = str(expected_text)
 
-        # Strip any initial whitespace.
-        actual_text = str(actual_text).strip()
-        expected_text = str(expected_text).strip()
-
-        # Strip any colorama colorings.
-        actual_text = actual_text.lstrip(Fore.BLUE).lstrip(Fore.MAGENTA).rstrip(Style.RESET_ALL)
-        expected_text = expected_text.lstrip(Fore.BLUE).lstrip(Fore.MAGENTA).rstrip(Style.RESET_ALL)
-
-        # Strip any unintentional "whitespace" caused by colorama + code indentations.
-        actual_text = actual_text.strip()
-        expected_text = expected_text.strip()
+        # Handle optional cleaning params.
+        if strip:
+            actual_text = actual_text.strip()
+            expected_text = expected_text.strip()
 
         # Attempt assertion.
         try:
             self.assertEqual(actual_text, expected_text)
         except AssertionError as err:
             # Assertion failed. Provide debug output.
-            print('\n\n\n\n')
-            print('ACTUAL:')
-            print(actual_text)
-            print('\n')
-            print('EXPECTED:')
-            print(expected_text)
-            print('\n\n\n\n')
+
+            # Loop through to calculate color output differences.
+            # First split on newlines.
+            split_expected = expected_text.split('\n')
+            split_actual = actual_text.split('\n')
+            append_newline = False
+
+            # Handle if either is empty.
+            if len(split_expected) == 1 and split_expected[0].strip() == '':
+                split_expected = []
+            if len(split_actual) == 1 and split_actual[0].strip() == '':
+                split_actual = []
+
+            # Determine which one is longer.
+            if len(split_actual) > len(split_expected):
+                max_lines = len(split_actual)
+            else:
+                max_lines = len(split_expected)
+
+            formatted_actual_output = ''
+            formatted_expected_output = ''
+            for line_index in range(max_lines):
+                try:
+                    curr_expected_line = split_expected[line_index]
+                    if append_newline:
+                        curr_expected_line = '\n{0}'.format(curr_expected_line)
+                except IndexError:
+                    curr_expected_line = None
+                try:
+                    curr_actual_line = split_actual[line_index]
+                    if append_newline:
+                        curr_actual_line = '\n{0}'.format(curr_actual_line)
+                except IndexError:
+                    curr_actual_line = None
+                append_newline = False
+
+                if curr_expected_line == curr_actual_line:
+                    # Line is full match and correct.
+                    curr_actual_line = '{0}{1}{2}\n'.format(OUTPUT_ACTUALS_MATCH, curr_actual_line, OUTPUT_RESET)
+                    curr_expected_line = '{0}{1}{2}\n'.format(OUTPUT_EXPECTED_MATCH, curr_expected_line, OUTPUT_RESET)
+                elif curr_expected_line is None:
+                    # "Actual" output is longer than "expected" output. Impossible to match current line.
+                    curr_expected_line = ''
+                    curr_actual_line = '{0}{1}{2}\n'.format(
+                        OUTPUT_ACTUALS_ERROR,
+                        curr_actual_line,
+                        OUTPUT_RESET,
+                    )
+                elif curr_actual_line is None:
+                    # "Expected" output is longer than "actual" output. Impossible to match current line.
+                    curr_expected_line = '{0}{1}{2}\n'.format(
+                        OUTPUT_EXPECTED_ERROR,
+                        curr_expected_line,
+                        OUTPUT_RESET,
+                    )
+                    curr_actual_line = ''
+                else:
+                    # Both lines are populated but do not match.
+                    # Determine which one is longer.
+                    if len(curr_actual_line) > len(curr_expected_line):
+                        max_chars = len(curr_actual_line)
+                    else:
+                        max_chars = len(curr_expected_line)
+
+                    # Check each character and determine where non-match happens.
+                    curr_actual_color = OUTPUT_RESET
+                    curr_expected_color = OUTPUT_RESET
+                    curr_actual_char_line = ''
+                    curr_expected_char_line = ''
+                    for char_index in range(max_chars):
+                        # Grab current character.
+                        try:
+                            expected_char = curr_expected_line[char_index]
+                        except IndexError:
+                            expected_char = ''
+                        try:
+                            actual_char = curr_actual_line[char_index]
+                        except IndexError:
+                            actual_char = ''
+
+                        # Format based on match.
+                        if expected_char == actual_char:
+                            # Match.
+                            if curr_actual_color != OUTPUT_ACTUALS_MATCH:
+                                curr_actual_color = OUTPUT_ACTUALS_MATCH
+                                curr_actual_char_line += curr_actual_color
+                            if curr_expected_color != OUTPUT_EXPECTED_MATCH:
+                                curr_expected_color = OUTPUT_EXPECTED_MATCH
+                                curr_expected_char_line += curr_expected_color
+                        else:
+                            # Non-match.
+                            if curr_actual_color != OUTPUT_ACTUALS_ERROR:
+                                curr_actual_color = OUTPUT_ACTUALS_ERROR
+                                curr_actual_char_line += curr_actual_color
+                            if curr_expected_color != OUTPUT_EXPECTED_ERROR:
+                                curr_expected_color = OUTPUT_EXPECTED_ERROR
+                                curr_expected_char_line += curr_expected_color
+
+                        curr_actual_char_line += '{0}'.format(actual_char)
+                        curr_expected_char_line += '{0}'.format(expected_char)
+
+                    # Update output strings.
+                    append_newline = True
+                    if not curr_expected_char_line.endswith(str(OUTPUT_RESET)):
+                        curr_expected_line += str(OUTPUT_RESET)
+                    if not curr_actual_char_line.endswith(str(OUTPUT_RESET)):
+                        curr_actual_line += str(OUTPUT_RESET)
+                    formatted_expected_output += curr_expected_char_line
+                    formatted_actual_output += curr_actual_char_line
+                    continue
+
+                # Update output strings.
+                formatted_expected_output += curr_expected_line
+                formatted_actual_output += curr_actual_line
+
+            # Finally print actual debug output.
+            print('')
+            print('')
+            print('{0}EXPECTED:{1}'.format(OUTPUT_EXPECTED_MATCH, OUTPUT_RESET))
+            print(formatted_expected_output)
+            print('')
+            print('')
+            print('{0}ACTUAL:{1}'.format(OUTPUT_ACTUALS_MATCH, OUTPUT_RESET))
+            print(formatted_actual_output)
+            print('')
+            print('')
 
             # Raise original error.
-            raise AssertionError(err)
+            raise AssertionError(err) from err
 
     def get_logging_output(self, log_capture, record_num):
         """Helper function to read captured logging output."""
