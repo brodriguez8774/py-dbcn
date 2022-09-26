@@ -19,7 +19,6 @@ python_version = "3.9"
  # General packages, installed via `pipenv sync`.
  ##
 [packages]
-colorama = "*"                  # Console coloring package.
 mysqlclient = "*"               # For connecting to mysql.
 psycopg2-binary = "*"           # For connecting to PostgreSQL.
 pytz = "*"                      # For datetime shenanigans.
@@ -48,3 +47,15 @@ sphinx-rtd-theme = "*"          # Additional Sphinx logic for building with stan
 build = "*"                     # For building packages according to PEP 517 standards (for PyPi deployment).
 pip-tools = "*"                 # Management of Package dependencies and building.
 twine = "*"                     # For pushing/publishing packages.
+
+
+###
+ # Optional packages.
+ # Technically not supported by Pipfile, so they need manual installation.
+ # This section is mostly only present for reference.
+ #
+ # These are dependencies that this package can take advantage of, but are not required for use.
+ # When not present, certain functionality will be disabled, but the project as a whole should still be functional.
+ ##
+[optional-packages]
+colorama = "*"                  # Console coloring package.
