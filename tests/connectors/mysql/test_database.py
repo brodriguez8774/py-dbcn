@@ -33,3 +33,38 @@ class TestMysqlDatabase(TestMysqlDatabaseParent, CoreDatabaseTestMixin):
         if len(results) > 0:
             for result in results:
                 cls.connector.tables.drop(result)
+
+        cls.error_handler__database_does_not_exist = cls.db_error_handler.OperationalError
+        cls.error_handler__database_already_exists = cls.db_error_handler.ProgrammingError
+
+    def test_error_catch_types(self):
+        """Tests to ensure database ERROR types are properly caught.
+
+        Ex: MySQL and PostgreSQL interfaces do not catch "Database does not exist" errors the same.
+            These tests make sure this error (and others) are properly caught, regardless of what database is
+            being called.
+        """
+        # Call parent logic.
+        super().test_error_catch_types()
+
+        with self.subTest('Verify handling when database does not exist'):
+            # Make sure we're using a database name that is not yet created.
+            db_name = 'NewDatabaseName'
+            results = self.connector.database.show()
+            if db_name in results:
+                raise AssertionError('Database already present. Incorrect name provided.')
+
+            # Check that we use the correct handler.
+            with self.assertRaises(self.error_handler__database_does_not_exist):
+                self.connector.query.execute('DROP DATABASE {0};'.format(db_name))
+
+        with self.subTest('Verify handling when database already exists'):
+            # Make sure we're using a database name that is already created.
+            db_name = 'test_database'
+            results = self.connector.database.show()
+            if db_name not in results:
+                raise AssertionError('Database not yet present. Incorrect name provided.')
+
+            # Check that we use the correct handler.
+            with self.assertRaises(self.error_handler__database_already_exists):
+                self.connector.query.execute('CREATE DATABASE {0};'.format(db_name))

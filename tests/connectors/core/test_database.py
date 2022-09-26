@@ -25,6 +25,21 @@ class CoreDatabaseTestMixin:
         """
         cls.test_db_name_start = cls.test_db_name_start.format(cls.db_type)
 
+        cls.error_handler__database_does_not_exist = None
+        cls.error_handler__database_already_exists = None
+
+    def test_error_catch_types(self):
+        """Tests to ensure database ERROR types are properly caught.
+
+        For example, MySQL and PostgreSQL interfaces do not catch "Database Does Not Exist" errors the same way.
+        These tests make sure this error (and others) are properly caught, regardless of what database is being called.
+        """
+        # Ensure error types are first defined.
+        if not self.error_handler__database_does_not_exist:
+            raise ValueError('Please define error handler for "Database Does Not Exist" error type.')
+        if not self.error_handler__database_already_exists:
+            raise ValueError('Please define error handler for "Database Already Exists" error type.')
+
     def test__select(self):
         """
         Test logic for `SELECT;` query.
@@ -44,7 +59,7 @@ class CoreDatabaseTestMixin:
             # Verify database exists.
             try:
                 self.connector.database.create(db_name)
-            except self.db_error_handler.ProgrammingError:
+            except self.error_handler__database_already_exists:
                 # Database already exists, as we want.
                 pass
 
@@ -63,7 +78,7 @@ class CoreDatabaseTestMixin:
             # Verify database exists.
             try:
                 self.connector.database.create(db_name)
-            except self.db_error_handler.ProgrammingError:
+            except self.error_handler__database_already_exists:
                 # Database already exists, as we want.
                 pass
 
@@ -86,7 +101,7 @@ class CoreDatabaseTestMixin:
             # Verify database exists.
             try:
                 self.connector.database.create(db_name)
-            except self.db_error_handler.ProgrammingError:
+            except self.error_handler__database_already_exists:
                 # Database already exists, as we want.
                 pass
 
@@ -104,7 +119,7 @@ class CoreDatabaseTestMixin:
             # Verify database does not exist.
             try:
                 self.connector.database.drop(db_name)
-            except self.db_error_handler.OperationalError:
+            except self.error_handler__database_does_not_exist:
                 # Database does not yet exist, as we want.
                 pass
 
@@ -148,7 +163,7 @@ class CoreDatabaseTestMixin:
         # Verify database does not yet exist.
         try:
             self.connector.database.create(db_name)
-        except self.db_error_handler.OperationalError:
+        except self.error_handler__database_already_exists:
             # Database already exists, as we want.
             pass
 
@@ -175,7 +190,7 @@ class CoreDatabaseTestMixin:
         # Verify database exists.
         try:
             self.connector.database.create(db_name)
-        except self.db_error_handler.OperationalError:
+        except self.error_handler__database_already_exists:
             # Database already exists, as we want.
             pass
 
@@ -224,7 +239,7 @@ class CoreDatabaseTestMixin:
         # Verify database does not yet exist.
         try:
             self.connector.database.create(db_name)
-        except self.db_error_handler.OperationalError:
+        except self.error_handler__database_already_exists:
             # Database already exists, as we want.
             pass
 

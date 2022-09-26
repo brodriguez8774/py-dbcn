@@ -25,6 +25,21 @@ class CoreTablesTestMixin:
         """
         cls.test_db_name_start = cls.test_db_name_start.format(cls.db_type)
 
+        cls.error_handler__table_does_not_exist = None
+        cls.error_handler__table_already_exists = None
+
+    def test_error_catch_types(self):
+        """Tests to ensure database ERROR types are properly caught.
+
+        For example, MySQL and PostgreSQL interfaces do not catch "Database Does Not Exist" errors the same way.
+        These tests make sure this error (and others) are properly caught, regardless of what database is being called.
+        """
+        # Ensure error types are first defined.
+        if not self.error_handler__table_does_not_exist:
+            raise ValueError('Please define error handler for "Table Does Not Exist" error type.')
+        if not self.error_handler__table_already_exists:
+            raise ValueError('Please define error handler for "Table Already Exists" error type.')
+
     def test__create_table___col_str(self):
         """
         Tests that connector object properly creates new tables, via str of column data.
@@ -93,7 +108,7 @@ class CoreTablesTestMixin:
             # Verify table exists.
             try:
                 self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query))
-            except self.db_error_handler.OperationalError:
+            except self.error_handler__table_already_exists:
                 # Table already exists, as we want.
                 pass
 
@@ -109,7 +124,7 @@ class CoreTablesTestMixin:
             # Verify table does not exist.
             try:
                 self.connector.query.execute('DROP TABLE {0};'.format(table_name))
-            except self.db_error_handler.OperationalError:
+            except self.error_handler__table_does_not_exist:
                 # Table does not yet exist, as we want.
                 pass
 
@@ -153,7 +168,7 @@ class CoreTablesTestMixin:
         # Verify table exists.
         try:
             self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query))
-        except self.db_error_handler.OperationalError:
+        except self.error_handler__table_already_exists:
             # Table already exists, as we want.
             pass
 
@@ -178,7 +193,7 @@ class CoreTablesTestMixin:
     #     # Verify table exists.
     #     try:
     #         self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query))
-    #     except self.db_error_handler.OperationalError:
+    #     except self.error_handler__table_already_exists:
     #         # Table already exists, as we want.
     #         pass
     #
@@ -265,7 +280,7 @@ class CoreTablesTestMixin:
         # Verify table exists.
         try:
             self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query))
-        except self.db_error_handler.OperationalError:
+        except self.error_handler__table_already_exists:
             # Table already exists, as we want.
             pass
 

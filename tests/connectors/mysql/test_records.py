@@ -56,3 +56,29 @@ class TestMysqlRecords(TestMysqlDatabaseParent, CoreRecordsTestMixin):
             )
             """
         ).strip()
+
+        cls.error_handler__table_does_not_exist = cls.db_error_handler.OperationalError
+        cls.error_handler__table_already_exists = cls.db_error_handler.OperationalError
+
+    def test_error_catch_types(self):
+        """Tests to ensure database ERROR types are properly caught.
+
+        Ex: MySQL and PostgreSQL interfaces do not catch "Database does not exist" errors the same.
+            These tests make sure this error (and others) are properly caught, regardless of what database is
+            being called.
+        """
+        # Call parent logic.
+        super().test_error_catch_types()
+
+        with self.subTest('Verify handling when database already exists'):
+            # Make sure we're using a table name that is not already created.
+            table_name = 'test_table'
+            self.connector.tables.create(table_name, self._basic_table_columns)
+
+            results = self.connector.tables.show()
+            if table_name not in results:
+                raise AssertionError('Table not yet present. Incorrect name provided.')
+
+            # Check that we use the correct handler.
+            with self.assertRaises(self.error_handler__table_already_exists):
+                self.connector.query.execute('CREATE TABLE {0} {1};'.format(table_name, self._basic_table_columns))
