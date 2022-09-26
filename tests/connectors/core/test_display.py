@@ -9,6 +9,11 @@ various specific database test classes. This ensures that all databases types ru
 # System Imports.
 
 # Internal Imports.
+from py_dbcn.constants import (
+    OUTPUT_QUERY,
+    OUTPUT_RESULTS,
+    OUTPUT_RESET,
+)
 
 
 class CoreDisplayBaseTestMixin:
@@ -193,6 +198,8 @@ class CoreDisplayTablesTestMixin:
             PRIMARY KEY ( id )
         )"""
 
+        show_tables_query = '{0}SHOW TABLES;{1}'.format(OUTPUT_QUERY, OUTPUT_RESET)
+
         # Since this directly tests display of tables, ensure we use a fresh database.
         db_name = '{0}d__tables__show'.format(self.test_db_name[0:-15])
         self.connector.database.create(db_name, display_query=False)
@@ -202,8 +209,8 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'QUERY') as qlog:
                 self.connector.tables.show()
-            self.assertText(self.get_logging_output(qlog, 0), 'SHOW TABLES;')
-            self.assertText(self.get_logging_output(qlog, 1), 'Empty Set')
+            self.assertText(self.get_logging_output(qlog, 0), show_tables_query)
+            self.assertText(self.get_logging_output(qlog, 1), '{0}Empty Set{1}'.format(OUTPUT_RESULTS, OUTPUT_RESET))
 
         with self.subTest('Db name longer - Pt 1'):
             # Create table.
@@ -212,8 +219,11 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertText(self.get_logging_output(ilog, 0), 'SHOW TABLES;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.tables.SHOW__DB_LONGER__PT_1)
+            self.assertText(self.get_logging_output(ilog, 0), show_tables_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.tables.SHOW__DB_LONGER__PT_1, OUTPUT_RESET),
+            )
 
         with self.subTest('Db name longer - Pt 2'):
             # Create table.
@@ -222,8 +232,11 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertText(self.get_logging_output(ilog, 0), 'SHOW TABLES;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.tables.SHOW__DB_LONGER__PT_2)
+            self.assertText(self.get_logging_output(ilog, 0), show_tables_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.tables.SHOW__DB_LONGER__PT_2, OUTPUT_RESET),
+            )
 
         with self.subTest('Db name longer - Pt 3'):
             # Create table.
@@ -232,8 +245,11 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertText(self.get_logging_output(ilog, 0), 'SHOW TABLES;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.tables.SHOW__DB_LONGER__PT_3)
+            self.assertText(self.get_logging_output(ilog, 0), show_tables_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.tables.SHOW__DB_LONGER__PT_3, OUTPUT_RESET),
+            )
 
         with self.subTest('Db name and table name equal length'):
             # Create table.
@@ -246,8 +262,11 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertText(self.get_logging_output(ilog, 0), 'SHOW TABLES;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.tables.SHOW__EQUAL_LENGTH)
+            self.assertText(self.get_logging_output(ilog, 0), show_tables_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.tables.SHOW__EQUAL_LENGTH, OUTPUT_RESET),
+            )
 
         with self.subTest('Table name longer - Pt 1'):
             # Create table.
@@ -260,8 +279,11 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertText(self.get_logging_output(ilog, 0), 'SHOW TABLES;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.tables.SHOW__TABLE_LONGER__PT_1)
+            self.assertText(self.get_logging_output(ilog, 0), show_tables_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.tables.SHOW__TABLE_LONGER__PT_1, OUTPUT_RESET),
+            )
 
         with self.subTest('Table name longer - Pt 2'):
             # Create table.
@@ -270,8 +292,11 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertText(self.get_logging_output(ilog, 0), 'SHOW TABLES;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.tables.SHOW__TABLE_LONGER__PT_2)
+            self.assertText(self.get_logging_output(ilog, 0), show_tables_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.tables.SHOW__TABLE_LONGER__PT_2, OUTPUT_RESET),
+            )
 
         with self.subTest('Table name longer - Pt 3'):
             # Create table.
@@ -284,8 +309,11 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertText(self.get_logging_output(ilog, 0), 'SHOW TABLES;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.tables.SHOW__TABLE_LONGER__PT_3)
+            self.assertText(self.get_logging_output(ilog, 0), show_tables_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.tables.SHOW__TABLE_LONGER__PT_3, OUTPUT_RESET),
+            )
 
     def test__display__describe_tables(self):
         """"""
@@ -293,6 +321,8 @@ class CoreDisplayTablesTestMixin:
             id INT NOT NULL AUTO_INCREMENT,
             PRIMARY KEY ( id )
         )"""
+
+        describe_table_query = '{0}DESCRIBE category;{1}'.format(OUTPUT_QUERY, OUTPUT_RESET)
 
         # Since this directly tests display of tables, ensure we use a fresh database.
         db_name = '{0}d__tables__desc'.format(self.test_db_name[0:-15])
@@ -306,8 +336,11 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.describe('category')
-            self.assertText(self.get_logging_output(ilog, 0), 'DESCRIBE category;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.tables.DESCRIBE__COLS_ID)
+            self.assertText(self.get_logging_output(ilog, 0), describe_table_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.tables.DESCRIBE__COLS_ID, OUTPUT_RESET),
+            )
 
         with self.subTest('With id, name'):
             # Add new table column.
@@ -316,8 +349,11 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.describe('category')
-            self.assertText(self.get_logging_output(ilog, 0), 'DESCRIBE category;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.tables.DESCRIBE__COLS_ID_NAME)
+            self.assertText(self.get_logging_output(ilog, 0), describe_table_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.tables.DESCRIBE__COLS_ID_NAME, OUTPUT_RESET),
+            )
 
         with self.subTest('With id, name, desc'):
             # Add new table column.
@@ -326,8 +362,11 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.describe('category')
-            self.assertText(self.get_logging_output(ilog, 0), 'DESCRIBE category;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.tables.DESCRIBE__COLS_ID_NAME_DESC)
+            self.assertText(self.get_logging_output(ilog, 0), describe_table_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.tables.DESCRIBE__COLS_ID_NAME_DESC, OUTPUT_RESET),
+            )
 
 
 class CoreDisplayRecordsMixin:
@@ -354,14 +393,19 @@ class CoreDisplayRecordsMixin:
             PRIMARY KEY ( id )
         )"""
 
+        select_from_query = '{0}SELECT * FROM category;{1}'.format(OUTPUT_QUERY, OUTPUT_RESET)
+
         self.connector.tables.create('category', columns, display_query=False)
 
         with self.subTest('With no records present'):
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), 'SELECT * FROM category;')
-            self.assertText(self.get_logging_output(ilog, 1), 'Empty Set')
+            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}Empty Set{1}'.format(OUTPUT_RESULTS, OUTPUT_RESET),
+            )
 
         with self.subTest('With 1 record present'):
             # Create record.
@@ -370,8 +414,11 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), 'SELECT * FROM category;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.records.SELECT__PT_1)
+            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_1, OUTPUT_RESET),
+            )
 
         with self.subTest('With 2 records present'):
             # Create record.
@@ -380,8 +427,11 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), 'SELECT * FROM category;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.records.SELECT__PT_2)
+            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_2, OUTPUT_RESET),
+            )
 
         with self.subTest('With 3 records present'):
             # Create record.
@@ -390,8 +440,11 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), 'SELECT * FROM category;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.records.SELECT__PT_3)
+            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_3, OUTPUT_RESET),
+            )
 
         with self.subTest('With 4 records present'):
             # Create record.
@@ -400,8 +453,11 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), 'SELECT * FROM category;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.records.SELECT__PT_4)
+            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_4, OUTPUT_RESET),
+            )
 
         with self.subTest('With 5 records present'):
             # Create record.
@@ -410,8 +466,11 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), 'SELECT * FROM category;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.records.SELECT__PT_5)
+            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_5, OUTPUT_RESET),
+            )
 
         with self.subTest('With 6 records present'):
             # Create record.
@@ -420,8 +479,11 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), 'SELECT * FROM category;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.records.SELECT__PT_6)
+            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_6, OUTPUT_RESET),
+            )
 
         with self.subTest('With 7 records present'):
             # Create record.
@@ -430,8 +492,11 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), 'SELECT * FROM category;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.records.SELECT__PT_7)
+            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_7, OUTPUT_RESET),
+            )
 
         with self.subTest('With 8 records present'):
             # Create record.
@@ -440,8 +505,11 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), 'SELECT * FROM category;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.records.SELECT__PT_8)
+            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_8, OUTPUT_RESET),
+            )
 
         with self.subTest('With 9 records present'):
             # Create record.
@@ -450,8 +518,11 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), 'SELECT * FROM category;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.records.SELECT__PT_9)
+            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_9, OUTPUT_RESET),
+            )
 
         with self.subTest('With 10 records present'):
             # Create record.
@@ -460,8 +531,11 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), 'SELECT * FROM category;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.records.SELECT__PT_10)
+            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_10, OUTPUT_RESET),
+            )
 
         with self.subTest('With 11 records present'):
             # Create record.
@@ -470,8 +544,11 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), 'SELECT * FROM category;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.records.SELECT__PT_11)
+            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_11, OUTPUT_RESET),
+            )
 
         with self.subTest('With 12 records present'):
             # Create record.
@@ -480,8 +557,11 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), 'SELECT * FROM category;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.records.SELECT__PT_12)
+            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_12, OUTPUT_RESET),
+            )
 
         with self.subTest('With 13 records present'):
             # Create record.
@@ -490,8 +570,11 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), 'SELECT * FROM category;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.records.SELECT__PT_13)
+            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_13, OUTPUT_RESET),
+            )
 
         with self.subTest('With 14 records present'):
             # Create record.
@@ -500,8 +583,11 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), 'SELECT * FROM category;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.records.SELECT__PT_14)
+            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_14, OUTPUT_RESET),
+            )
 
         with self.subTest('With 15 records present'):
             # Create record.
@@ -510,5 +596,8 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), 'SELECT * FROM category;')
-            self.assertText(self.get_logging_output(ilog, 1), self.expected_output.records.SELECT__PT_15)
+            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(
+                self.get_logging_output(ilog, 1),
+                '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_15, OUTPUT_RESET),
+            )

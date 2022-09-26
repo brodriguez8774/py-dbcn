@@ -8,10 +8,8 @@ Should be inherited by language-specific connectors.
 # System Imports.
 import textwrap
 
-# Third-party Imports.
-from colorama import Fore, Style
-
 # Internal Imports.
+from py_dbcn.constants import OUTPUT_QUERY, OUTPUT_RESULTS, OUTPUT_RESET
 from py_dbcn.logging import init_logging
 
 
@@ -66,7 +64,7 @@ class BaseDisplay:
         query_str = textwrap.dedent(query_str).strip()
 
         # Log results.
-        logger.query('{0}{1}{2}'.format(Fore.MAGENTA, query_str, Style.RESET_ALL))
+        logger.query('{0}{1}{2}'.format(OUTPUT_QUERY, query_str, OUTPUT_RESET))
 
     def results(self, result_str):
         """Formats result output for display."""
@@ -74,7 +72,7 @@ class BaseDisplay:
         result_str = textwrap.dedent(result_str).strip()
 
         # Log results.
-        logger.results('{0}{1}{2}'.format(Fore.BLUE, result_str, Style.RESET_ALL))
+        logger.results('{0}{1}{2}'.format(OUTPUT_RESULTS, result_str, OUTPUT_RESET))
 
 
 class TableDisplay:

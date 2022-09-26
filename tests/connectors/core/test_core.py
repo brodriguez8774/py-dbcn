@@ -9,9 +9,6 @@ various specific database test classes. This ensures that all databases types ru
 # System Imports.
 import unittest
 
-# Third-party Imports.
-from colorama import Fore, Style
-
 # Internal Imports.
 from py_dbcn.connectors.core.core import AbstractDbConnector
 from py_dbcn.constants import (

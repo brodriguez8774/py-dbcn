@@ -41,6 +41,8 @@ UNDERLINE_RESET = '\u001b[0m'
 
 
 # General output format settings.
+OUTPUT_QUERY = str('{0}'.format(Fore.MAGENTA) if COLORAMA_PRESENT else '')
+OUTPUT_RESULTS = str('{0}'.format(Fore.BLUE) if COLORAMA_PRESENT else '')
 OUTPUT_ERROR = str('{0}{1}{2}'.format(Fore.RED, Back.RESET, Style.NORMAL) if COLORAMA_PRESENT else '')
 OUTPUT_EXPECTED_MATCH = str('{0}{1}{2}'.format(Fore.GREEN, Back.RESET, Style.NORMAL) if COLORAMA_PRESENT else '')
 OUTPUT_EXPECTED_ERROR = str('{0}{1}{2}'.format(Fore.BLACK, Back.GREEN, Style.NORMAL) if COLORAMA_PRESENT else '')
