@@ -110,7 +110,7 @@ class TableDisplay:
 
             # Add results.
             base_row_str = '| {0:<' + '{0}'.format(inner_row_len) + '} |\n'
-            for result in results:
+            for result in sorted(results):
                 msg_str += base_row_str.format(str(result).strip())
             msg_str += divider
 
@@ -122,12 +122,31 @@ class TableDisplay:
     def describe(self, results, logger):
         """Display logic for tables.describe()."""
         # Initialize record col sets.
+
+        if self._base._config.db_type == 'MySQL':
+            field_col_index = 0
+            type_col_index = 1
+            null_col_index = 2
+            key_col_index = 3
+            default_col_index = 4
+            extra_col_index = 5
+        elif self._base._config.db_type == 'PostgreSQL':
+            field_col_index = 3
+            type_col_index = 27
+            null_col_index = 6
+            key_col_index = None
+            default_col_index = 5
+            extra_col_index = None
+        else:
+            raise NotImplementedError('Please define expected index to find describe columns.')
+
         field_col_values = []
         type_col_values = []
         null_col_values = []
         key_col_values = []
         default_col_values = []
         extra_col_values = []
+
         field_col_max_len = 5
         type_col_max_len = 4
         null_col_max_len = 4
@@ -135,46 +154,81 @@ class TableDisplay:
         default_col_max_len = 7
         extra_col_max_len = 5
 
+        print('\n\n\n\n')
+        if len(results) > 1:
+            for index in range(len(results[1])):
+                print('    {0} - {1}'.format(index, results[1][index]))
+
         # Populate record col sets.
+        undefined_value = '{0}__UNDEFINED'.format(self._base._config.db_type)
         for record in results:
-            # Handle col 1.
-            value = record[0]
-            if value is None:
+            # Handle col "name".
+            value = undefined_value
+            if field_col_index is not None:
+                value = record[field_col_index]
+            if value == undefined_value:
+                value = ''
+            elif value is None:
                 value = 'NULL'
             field_col_values.append(value)
             field_col_max_len = max(field_col_max_len, len(str(value)))
 
-            # Handle col 2.
-            value = record[1]
-            if value is None:
+            # Handle col "type".
+            value = undefined_value
+            if type_col_index is not None:
+                value = record[type_col_index]
+            if value == undefined_value:
+                value = 'UNKNOWN'
+            elif value is None:
                 value = 'NULL'
             type_col_values.append(value)
             type_col_max_len = max(type_col_max_len, len(str(value)))
 
-            # Handle col 3.
-            value = record[2]
-            if value is None:
+            # Handle col "nullable".
+            value = undefined_value
+            if null_col_index is not None:
+                value = record[null_col_index]
+            if value == undefined_value:
+                value = 'UNKNOWN'
+            elif value is None:
                 value = 'NULL'
             null_col_values.append(value)
             null_col_max_len = max(null_col_max_len, len(str(value)))
 
-            # Handle col 4.
-            value = record[3]
-            if value is None:
+            # Handle col "key".
+            value = undefined_value
+            if key_col_index is not None:
+                value = record[key_col_index]
+            if value == undefined_value:
+                value = 'UNKNOWN'
+            elif value is None:
                 value = 'NULL'
             key_col_values.append(value)
             key_col_max_len = max(key_col_max_len, len(str(value)))
 
-            # Handle col 5.
-            value = record[4]
-            if value is None:
+            # Handle col "default".
+            value = undefined_value
+            if default_col_index is not None:
+                value = record[default_col_index]
+            if value == undefined_value:
+                value = 'UNKNOWN'
+            elif value is None:
                 value = 'NULL'
+            elif value.startswith('nextval('):
+                # TODO: See https://stackoverflow.com/a/8148177
+                pass
+                # value = self._base.query.execute('SELECT {0}'.format(value), display_query=False)[0]
+                # value = self._base.query.execute('SELECT {0}'.format(value))
             default_col_values.append(value)
             default_col_max_len = max(default_col_max_len, len(str(value)))
 
-            # Handle col 6.
-            value = record[5]
-            if value is None:
+            # Handle col "extra".
+            value = undefined_value
+            if extra_col_index is not None:
+                value = record[extra_col_index]
+            if value == undefined_value:
+                value = 'UNKNOWN'
+            elif value is None:
                 value = 'NULL'
             extra_col_values.append(value)
             extra_col_max_len = max(extra_col_max_len, len(str(value)))
@@ -250,12 +304,20 @@ class RecordDisplay:
                 select_clause = '*'
             else:
                 select_clause = str(select_clause).strip()
+
+            if self._base._config.db_type == 'MySQL':
+                col_name_index = 0
+            elif self._base._config.db_type == 'PostgreSQL':
+                col_name_index = 3
+            else:
+                raise NotImplementedError('Please define expected index to find column name.')
+
             # Handle based on star or specific cols.
             # TODO: Probably need to tokenize this, to properly compare.
             if select_clause == '*' or '(*)' in select_clause:
                 # Calculate column header values, using all columns.
                 table_cols = [
-                    x[0]
+                    x[col_name_index]
                     for x in self._base.tables.describe(table_name, display_query=False, display_results=False)
                 ]
             else:
@@ -268,22 +330,28 @@ class RecordDisplay:
 
                 # Calculate column header values, filtered by select clause.
                 table_cols = [
-                    x[0]
+                    x[col_name_index]
                     for x in self._base.tables.describe(table_name, display_query=False, display_results=False)
-                    if x[0] in select_clause
+                    if x[col_name_index] in select_clause
                 ]
             col_len_array = []
             total_col_len = 0
             for table_col in table_cols:
                 col_len = len(table_col)
                 record_len = self._base.query.execute(
-                    'SELECT MAX(LENGTH({2}{0}{2})) FROM {1};'.format(
+                    self._parent.max_col_length_query .format(
                         table_col,
                         table_name,
-                        self._base.validate._quote_column_format,
+                        self._base.validate._quote_identifier_format,
                     ),
                     display_query=False,
                 )[0][0]
+                print('')
+                print('table_name: {0}'.format(table_name))
+                print('tab_col: {0}'.format(table_col))
+                print('col_len: {0}'.format(col_len))
+                print('record_len: {0}'.format(record_len))
+                print('')
                 length = max(col_len, record_len or 0)
                 col_len_array.append(length)
                 total_col_len += length + 2

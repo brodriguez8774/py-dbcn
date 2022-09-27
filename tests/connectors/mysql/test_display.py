@@ -14,6 +14,27 @@ from tests.connectors.core.test_display import (
 )
 
 
+SHOW_TABLES_QUERY = """
+SHOW TABLES;
+""".strip()
+DESCRIBE_TABLE_QUERY = """DESCRIBE category;"""
+COLUMNS_QUERY__MINIMAL = """
+(
+    id INT NOT NULL AUTO_INCREMENT,
+    PRIMARY KEY ( id )
+)
+""".strip()
+COLUMNS_QUERY__BASIC = """
+(
+    id INT NOT NULL AUTO_INCREMENT,
+    name VARCHAR(100),
+    description VARCHAR(100),
+    PRIMARY KEY ( id )
+)
+""".strip()
+
+
+
 class TestMysqlDisplayCore(TestMysqlDatabaseParent, CoreDisplayBaseTestMixin):
     """
     Tests "MySQL" DB Connector class display logic.
@@ -43,6 +64,7 @@ class TestMysqlDisplayCore(TestMysqlDatabaseParent, CoreDisplayBaseTestMixin):
 
         # Define expected output to compare against.
         cls.expected_output = ExpectedOutput
+        cls.show_tables_query = SHOW_TABLES_QUERY
 
 
 class TestMysqlDisplayTables(TestMysqlDatabaseParent, CoreDisplayTablesTestMixin):
@@ -74,6 +96,10 @@ class TestMysqlDisplayTables(TestMysqlDatabaseParent, CoreDisplayTablesTestMixin
 
         # Define expected output to compare against.
         cls.expected_output = ExpectedOutput
+        cls.show_tables_query = SHOW_TABLES_QUERY
+        cls.describe_table_query = DESCRIBE_TABLE_QUERY
+        cls.columns_query__minimal = COLUMNS_QUERY__MINIMAL
+        cls.columns_query__basic = COLUMNS_QUERY__BASIC
 
 
 class TestMysqlDisplayRecords(TestMysqlDatabaseParent, CoreDisplayRecordsMixin):
@@ -105,3 +131,6 @@ class TestMysqlDisplayRecords(TestMysqlDatabaseParent, CoreDisplayRecordsMixin):
 
         # Define expected output to compare against.
         cls.expected_output = ExpectedOutput
+        cls.show_tables_query = SHOW_TABLES_QUERY
+        cls.columns_query__minimal = COLUMNS_QUERY__MINIMAL
+        cls.columns_query__basic = COLUMNS_QUERY__BASIC

@@ -121,7 +121,7 @@ class CoreDisplayBaseTestMixin:
 
             # Test with empty value. Should equal length of database name.
             return_val = self.connector.display._get_longest(test_list)
-            self.assertEqual(return_val, 42)
+            self.assertEqual(return_val, 37 + len(self.db_type))
 
             # Test with select function. Aka, verify that it equals length of database name.
             db_name_len = len(self.connector.database.select())
@@ -131,47 +131,47 @@ class CoreDisplayBaseTestMixin:
             # Test with list being larger.
             test_list = ['{0}__plus_ten'.format(self.test_db_name)]
             return_val = self.connector.display._get_longest(test_list)
-            self.assertEqual(return_val, 52)
+            self.assertEqual(return_val, 47 + len(self.db_type))
 
             # Test with multiple list values, all smaller.
             test_list = ['a', 'bb', 'ccc']
             return_val = self.connector.display._get_longest(test_list)
-            self.assertEqual(return_val, 42)
+            self.assertEqual(return_val, 37 + len(self.db_type))
 
             # Test with multiple list values, one equal.
             test_list = [
                 'a',
                 'bb',
-                'd' * 42,
+                'd' * (37 + len(self.db_type)),
                 'ccc',
             ]
             return_val = self.connector.display._get_longest(test_list)
-            self.assertEqual(return_val, 42)
+            self.assertEqual(return_val, 37 + len(self.db_type))
 
             # Test with multiple list values, one larger.
             test_list = [
                 'a',
                 'bb',
-                'd' * 42,
-                'e' * 47,
+                'd' * (37 + len(self.db_type)),
+                'e' * (42 + len(self.db_type)),
                 'ccc',
             ]
             return_val = self.connector.display._get_longest(test_list)
-            self.assertEqual(return_val, 47)
+            self.assertEqual(return_val, 42 + len(self.db_type))
 
             # Test with multiple list values, multiple larger.
             test_list = [
                 'a',
-                'h' * 49,
-                'f' * 45,
+                'h' * (44 + len(self.db_type)),
+                'f' * (40 + len(self.db_type)),
                 'bb',
-                'd' * 42,
-                'e' * 47,
+                'd' * (37 + len(self.db_type)),
+                'e' * (42 + len(self.db_type)),
                 'ccc',
-                'g' * 46,
+                'g' * (41 + len(self.db_type)),
             ]
             return_val = self.connector.display._get_longest(test_list)
-            self.assertEqual(return_val, 49)
+            self.assertEqual(return_val, 44 + len(self.db_type))
 
 
 class CoreDisplayTablesTestMixin:
@@ -191,14 +191,7 @@ class CoreDisplayTablesTestMixin:
 
     def test__display__show_tables(self):
         """"""
-        columns = """(
-            id INT NOT NULL AUTO_INCREMENT,
-            name VARCHAR(100),
-            description VARCHAR(100),
-            PRIMARY KEY ( id )
-        )"""
-
-        show_tables_query = '{0}SHOW TABLES;{1}'.format(OUTPUT_QUERY, OUTPUT_RESET)
+        show_tables_query = '{0}{1}{2}'.format(OUTPUT_QUERY, self.show_tables_query, OUTPUT_RESET)
 
         # Since this directly tests display of tables, ensure we use a fresh database.
         db_name = '{0}d__tables__show'.format(self.test_db_name[0:-15])
@@ -214,7 +207,7 @@ class CoreDisplayTablesTestMixin:
 
         with self.subTest('Db name longer - Pt 1'):
             # Create table.
-            self.connector.tables.create('category', columns, display_query=False)
+            self.connector.tables.create('category', self.columns_query__basic, display_query=False)
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -227,7 +220,7 @@ class CoreDisplayTablesTestMixin:
 
         with self.subTest('Db name longer - Pt 2'):
             # Create table.
-            self.connector.tables.create('priority', columns, display_query=False)
+            self.connector.tables.create('priority', self.columns_query__basic, display_query=False)
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -240,7 +233,7 @@ class CoreDisplayTablesTestMixin:
 
         with self.subTest('Db name longer - Pt 3'):
             # Create table.
-            self.connector.tables.create('a', columns, display_query=False)
+            self.connector.tables.create('a', self.columns_query__basic, display_query=False)
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -254,8 +247,8 @@ class CoreDisplayTablesTestMixin:
         with self.subTest('Db name and table name equal length'):
             # Create table.
             self.connector.tables.create(
-                'test__testing__this_is_a_really_long_table_name__test_',
-                columns,
+                'test___{0}___this_is_a_really_long_table_name__test_'.format(self.db_type.lower()),
+                self.columns_query__basic,
                 display_query=False,
             )
 
@@ -271,8 +264,8 @@ class CoreDisplayTablesTestMixin:
         with self.subTest('Table name longer - Pt 1'):
             # Create table.
             self.connector.tables.create(
-                'test__testing__this_is_a_really_long_table_name__test__',
-                columns,
+                'test___{0}___this_is_a_really_long_table_name__test__'.format(self.db_type.lower()),
+                self.columns_query__basic,
                 display_query=False,
             )
 
@@ -287,7 +280,7 @@ class CoreDisplayTablesTestMixin:
 
         with self.subTest('Table name longer - Pt 2'):
             # Create table.
-            self.connector.tables.create('zzz', columns, display_query=False)
+            self.connector.tables.create('zzz', self.columns_query__basic, display_query=False)
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -301,8 +294,8 @@ class CoreDisplayTablesTestMixin:
         with self.subTest('Table name longer - Pt 3'):
             # Create table.
             self.connector.tables.create(
-                'test__testing__this_is_a_really_long_table_name__testing__',
-                columns,
+                'test___{0}___this_is_a_really_long_table_name__testing__'.format(self.db_type.lower()),
+                self.columns_query__basic,
                 display_query=False,
             )
 
@@ -317,12 +310,7 @@ class CoreDisplayTablesTestMixin:
 
     def test__display__describe_tables(self):
         """"""
-        columns = """(
-            id INT NOT NULL AUTO_INCREMENT,
-            PRIMARY KEY ( id )
-        )"""
-
-        describe_table_query = '{0}DESCRIBE category;{1}'.format(OUTPUT_QUERY, OUTPUT_RESET)
+        describe_table_query = '{0}{1}{2}'.format(OUTPUT_QUERY, self.describe_table_query, OUTPUT_RESET)
 
         # Since this directly tests display of tables, ensure we use a fresh database.
         db_name = '{0}d__tables__desc'.format(self.test_db_name[0:-15])
@@ -330,7 +318,7 @@ class CoreDisplayTablesTestMixin:
         self.connector.database.use(db_name, display_query=False)
 
         # Create initial table to describe.
-        self.connector.tables.create('category', columns, display_query=False)
+        self.connector.tables.create('category', self.columns_query__minimal, display_query=False)
 
         with self.subTest('With only id'):
             # Capture logging output.
@@ -386,16 +374,9 @@ class CoreDisplayRecordsMixin:
 
     def test__display__select_records__basic(self):
         """"""
-        columns = """(
-            id INT NOT NULL AUTO_INCREMENT,
-            name VARCHAR(100),
-            description VARCHAR(100),
-            PRIMARY KEY ( id )
-        )"""
-
         select_from_query = '{0}SELECT * FROM category;{1}'.format(OUTPUT_QUERY, OUTPUT_RESET)
 
-        self.connector.tables.create('category', columns, display_query=False)
+        self.connector.tables.create('category', self.columns_query__basic, display_query=False)
 
         with self.subTest('With no records present'):
             # Capture logging output.
@@ -409,7 +390,11 @@ class CoreDisplayRecordsMixin:
 
         with self.subTest('With 1 record present'):
             # Create record.
-            self.connector.records.insert('category', '(1, "tn", "td")', display_query=False)
+            self.connector.records.insert(
+                'category',
+                '(1, {0}tn{0}, {0}td{0})'.format(self.connector.validate._quote_str_literal_format),
+                display_query=False,
+            )
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -422,7 +407,11 @@ class CoreDisplayRecordsMixin:
 
         with self.subTest('With 2 records present'):
             # Create record.
-            self.connector.records.insert('category', '(2, "t n", "t d")', display_query=False)
+            self.connector.records.insert(
+                'category',
+                '(2, {0}t n{0}, {0}t d{0})'.format(self.connector.validate._quote_str_literal_format),
+                display_query=False,
+            )
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -435,7 +424,11 @@ class CoreDisplayRecordsMixin:
 
         with self.subTest('With 3 records present'):
             # Create record.
-            self.connector.records.insert('category', '(3, "te n", "te d")', display_query=False)
+            self.connector.records.insert(
+                'category',
+                '(3, {0}te n{0}, {0}te d{0})'.format(self.connector.validate._quote_str_literal_format),
+                display_query=False,
+            )
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -448,7 +441,11 @@ class CoreDisplayRecordsMixin:
 
         with self.subTest('With 4 records present'):
             # Create record.
-            self.connector.records.insert('category', '(4, "tes n", "tes d")', display_query=False)
+            self.connector.records.insert(
+                'category',
+                '(4, {0}tes n{0}, {0}tes d{0})'.format(self.connector.validate._quote_str_literal_format),
+                display_query=False,
+            )
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -461,7 +458,11 @@ class CoreDisplayRecordsMixin:
 
         with self.subTest('With 5 records present'):
             # Create record.
-            self.connector.records.insert('category', '(5, "test n", "test d")', display_query=False)
+            self.connector.records.insert(
+                'category',
+                '(5, {0}test n{0}, {0}test d{0})'.format(self.connector.validate._quote_str_literal_format),
+                display_query=False,
+            )
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -474,7 +475,11 @@ class CoreDisplayRecordsMixin:
 
         with self.subTest('With 6 records present'):
             # Create record.
-            self.connector.records.insert('category', '(6, "test na", "test de")', display_query=False)
+            self.connector.records.insert(
+                'category',
+                '(6, {0}test na{0}, {0}test de{0})'.format(self.connector.validate._quote_str_literal_format),
+                display_query=False,
+            )
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -487,7 +492,11 @@ class CoreDisplayRecordsMixin:
 
         with self.subTest('With 7 records present'):
             # Create record.
-            self.connector.records.insert('category', '(7, "test nam", "test des")', display_query=False)
+            self.connector.records.insert(
+                'category',
+                '(7, {0}test nam{0}, {0}test des{0})'.format(self.connector.validate._quote_str_literal_format),
+                display_query=False,
+            )
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -500,7 +509,11 @@ class CoreDisplayRecordsMixin:
 
         with self.subTest('With 8 records present'):
             # Create record.
-            self.connector.records.insert('category', '(8, "test name", "test desc")', display_query=False)
+            self.connector.records.insert(
+                'category',
+                '(8, {0}test name{0}, {0}test desc{0})'.format(self.connector.validate._quote_str_literal_format),
+                display_query=False,
+            )
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -513,7 +526,11 @@ class CoreDisplayRecordsMixin:
 
         with self.subTest('With 9 records present'):
             # Create record.
-            self.connector.records.insert('category', '(9, "test name", "test descr")', display_query=False)
+            self.connector.records.insert(
+                'category',
+                '(9, {0}test name{0}, {0}test descr{0})'.format(self.connector.validate._quote_str_literal_format),
+                display_query=False,
+            )
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -526,7 +543,11 @@ class CoreDisplayRecordsMixin:
 
         with self.subTest('With 10 records present'):
             # Create record.
-            self.connector.records.insert('category', '(10, "test name", "test descri")', display_query=False)
+            self.connector.records.insert(
+                'category',
+                '(10, {0}test name{0}, {0}test descri{0})'.format(self.connector.validate._quote_str_literal_format),
+                display_query=False,
+            )
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -539,7 +560,11 @@ class CoreDisplayRecordsMixin:
 
         with self.subTest('With 11 records present'):
             # Create record.
-            self.connector.records.insert('category', '(101, "test name", "test descrip")', display_query=False)
+            self.connector.records.insert(
+                'category',
+                '(101, {0}test name{0}, {0}test descrip{0})'.format(self.connector.validate._quote_str_literal_format),
+                display_query=False,
+            )
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -552,7 +577,13 @@ class CoreDisplayRecordsMixin:
 
         with self.subTest('With 12 records present'):
             # Create record.
-            self.connector.records.insert('category', '(1010, "test name", "test descript")')
+            self.connector.records.insert(
+                'category',
+                '(1010, {0}test name{0}, {0}test descript{0})'.format(
+                    self.connector.validate._quote_str_literal_format,
+                ),
+                display_query=False,
+            )
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -565,7 +596,13 @@ class CoreDisplayRecordsMixin:
 
         with self.subTest('With 13 records present'):
             # Create record.
-            self.connector.records.insert('category', '(10101, "test name", "test descripti")', display_query=False)
+            self.connector.records.insert(
+                'category',
+                '(10101, {0}test name{0}, {0}test descripti{0})'.format(
+                    self.connector.validate._quote_str_literal_format,
+                ),
+                display_query=False,
+            )
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -578,7 +615,13 @@ class CoreDisplayRecordsMixin:
 
         with self.subTest('With 14 records present'):
             # Create record.
-            self.connector.records.insert('category', '(101010, "test name", "test descriptio")', display_query=False)
+            self.connector.records.insert(
+                'category',
+                '(101010, {0}test name{0}, {0}test descriptio{0})'.format(
+                    self.connector.validate._quote_str_literal_format,
+                ),
+                display_query=False,
+            )
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -591,7 +634,13 @@ class CoreDisplayRecordsMixin:
 
         with self.subTest('With 15 records present'):
             # Create record.
-            self.connector.records.insert('category', '(1010101, "test name", "test description")', display_query=False)
+            self.connector.records.insert(
+                'category',
+                '(1010101, {0}test name{0}, {0}test description{0})'.format(
+                    self.connector.validate._quote_str_literal_format,
+                ),
+                display_query=False,
+            )
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:

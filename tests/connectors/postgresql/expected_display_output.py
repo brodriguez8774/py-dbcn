@@ -6,116 +6,116 @@ Expected display output for various functions.
 # region Table Display Output
 
 EXPECTED__TABLE__SHOW__DB_LONGER__PT_1 = """
-+--------------------------------------------------------+
-| Tables in pydbcn__MySQL_unittest__test_d__tables__show |
-+--------------------------------------------------------+
-| category                                               |
-+--------------------------------------------------------+
++-------------------------------------------------------------+
+| Tables in pydbcn__postgresql_unittest__test_d__tables__show |
++-------------------------------------------------------------+
+| category                                                    |
++-------------------------------------------------------------+
 """.strip()
 
 
 EXPECTED__TABLE__SHOW__DB_LONGER__PT_2 = """
-+--------------------------------------------------------+
-| Tables in pydbcn__MySQL_unittest__test_d__tables__show |
-+--------------------------------------------------------+
-| category                                               |
-| priority                                               |
-+--------------------------------------------------------+
++-------------------------------------------------------------+
+| Tables in pydbcn__postgresql_unittest__test_d__tables__show |
++-------------------------------------------------------------+
+| category                                                    |
+| priority                                                    |
++-------------------------------------------------------------+
 """.strip()
 
 
 EXPECTED__TABLE__SHOW__DB_LONGER__PT_3 = """
-+--------------------------------------------------------+
-| Tables in pydbcn__MySQL_unittest__test_d__tables__show |
-+--------------------------------------------------------+
-| a                                                      |
-| category                                               |
-| priority                                               |
-+--------------------------------------------------------+
++-------------------------------------------------------------+
+| Tables in pydbcn__postgresql_unittest__test_d__tables__show |
++-------------------------------------------------------------+
+| a                                                           |
+| category                                                    |
+| priority                                                    |
++-------------------------------------------------------------+
 """.strip()
 
 
 EXPECTED__TABLE__SHOW__EQUAL_LENGTH = """
-+--------------------------------------------------------+
-| Tables in pydbcn__MySQL_unittest__test_d__tables__show |
-+--------------------------------------------------------+
-| a                                                      |
-| category                                               |
-| priority                                               |
-| test___mysql___this_is_a_really_long_table_name__test_ |
-+--------------------------------------------------------+
++-------------------------------------------------------------+
+| Tables in pydbcn__postgresql_unittest__test_d__tables__show |
++-------------------------------------------------------------+
+| a                                                           |
+| category                                                    |
+| priority                                                    |
+| test___postgresql___this_is_a_really_long_table_name__test_ |
++-------------------------------------------------------------+
 """.strip()
 
 
 EXPECTED__TABLE__SHOW__TABLE_LONGER__PT_1 = """
-+---------------------------------------------------------+
-| Tables in pydbcn__MySQL_unittest__test_d__tables__show  |
-+---------------------------------------------------------+
-| a                                                       |
-| category                                                |
-| priority                                                |
-| test___mysql___this_is_a_really_long_table_name__test_  |
-| test___mysql___this_is_a_really_long_table_name__test__ |
-+---------------------------------------------------------+
++--------------------------------------------------------------+
+| Tables in pydbcn__postgresql_unittest__test_d__tables__show  |
++--------------------------------------------------------------+
+| a                                                            |
+| category                                                     |
+| priority                                                     |
+| test___postgresql___this_is_a_really_long_table_name__test_  |
+| test___postgresql___this_is_a_really_long_table_name__test__ |
++--------------------------------------------------------------+
 """.strip()
 
 
 EXPECTED__TABLE__SHOW__TABLE_LONGER__PT_2 = """
-+---------------------------------------------------------+
-| Tables in pydbcn__MySQL_unittest__test_d__tables__show  |
-+---------------------------------------------------------+
-| a                                                       |
-| category                                                |
-| priority                                                |
-| test___mysql___this_is_a_really_long_table_name__test_  |
-| test___mysql___this_is_a_really_long_table_name__test__ |
-| zzz                                                     |
-+---------------------------------------------------------+
++--------------------------------------------------------------+
+| Tables in pydbcn__postgresql_unittest__test_d__tables__show  |
++--------------------------------------------------------------+
+| a                                                            |
+| category                                                     |
+| priority                                                     |
+| test___postgresql___this_is_a_really_long_table_name__test_  |
+| test___postgresql___this_is_a_really_long_table_name__test__ |
+| zzz                                                          |
++--------------------------------------------------------------+
 """.strip()
 
 
 EXPECTED__TABLE__SHOW__TABLE_LONGER__PT_3 = """
-+------------------------------------------------------------+
-| Tables in pydbcn__MySQL_unittest__test_d__tables__show     |
-+------------------------------------------------------------+
-| a                                                          |
-| category                                                   |
-| priority                                                   |
-| test___mysql___this_is_a_really_long_table_name__test_     |
-| test___mysql___this_is_a_really_long_table_name__test__    |
-| test___mysql___this_is_a_really_long_table_name__testing__ |
-| zzz                                                        |
-+------------------------------------------------------------+
++-----------------------------------------------------------------+
+| Tables in pydbcn__postgresql_unittest__test_d__tables__show     |
++-----------------------------------------------------------------+
+| a                                                               |
+| category                                                        |
+| priority                                                        |
+| test___postgresql___this_is_a_really_long_table_name__test_     |
+| test___postgresql___this_is_a_really_long_table_name__test__    |
+| test___postgresql___this_is_a_really_long_table_name__testing__ |
+| zzz                                                             |
++-----------------------------------------------------------------+
 """.strip()
 
 
 EXPECTED__TABLE__DESCRIBE__COLS_ID = """
-+-------+------+------+-----+---------+----------------+
-| Field | Type | Null | Key | Default | Extra          |
-+-------+------+------+-----+---------+----------------+
-| id    | int  | NO   | PRI | NULL    | auto_increment |
-+-------+------+------+-----+---------+----------------+
++-------+------+------+---------+--------------------------------------+---------+
+| Field | Type | Null | Key     | Default                              | Extra   |
++-------+------+------+---------+--------------------------------------+---------+
+| id    | int4 | NO   | UNKNOWN | nextval('category_id_seq'::regclass) | UNKNOWN |
++-------+------+------+---------+--------------------------------------+---------+
 """.strip()
 
 
 EXPECTED__TABLE__DESCRIBE__COLS_ID_NAME = """
-+-------+--------------+------+-----+---------+----------------+
-| Field | Type         | Null | Key | Default | Extra          |
-+-------+--------------+------+-----+---------+----------------+
-| id    | int          | NO   | PRI | NULL    | auto_increment |
-| name  | varchar(100) | YES  |     | NULL    |                |
-+-------+--------------+------+-----+---------+----------------+
++-------+---------+------+---------+--------------------------------------+---------+
+| Field | Type    | Null | Key     | Default                              | Extra   |
++-------+---------+------+---------+--------------------------------------+---------+
+| id    | int4    | NO   | UNKNOWN | nextval('category_id_seq'::regclass) | UNKNOWN |
+| name  | varchar | YES  | UNKNOWN | NULL                                 | UNKNOWN |
++-------+---------+------+---------+--------------------------------------+---------+
 """.strip()
 
 
 EXPECTED__TABLE__DESCRIBE__COLS_ID_NAME_DESC = """
-+-------------+--------------+------+-----+---------+----------------+
-| Field       | Type         | Null | Key | Default | Extra          |
-+-------------+--------------+------+-----+---------+----------------+
-| id          | int          | NO   | PRI | NULL    | auto_increment |
-| name        | varchar(100) | YES  |     | NULL    |                |
-| description | varchar(100) | YES  |     | NULL    |                |
-+-------------+--------------+------+-----+---------+----------------+
++-------------+---------+------+---------+--------------------------------------+---------+
+| Field       | Type    | Null | Key     | Default                              | Extra   |
++-------------+---------+------+---------+--------------------------------------+---------+
+| id          | int4    | NO   | UNKNOWN | nextval('category_id_seq'::regclass) | UNKNOWN |
+| name        | varchar | YES  | UNKNOWN | NULL                                 | UNKNOWN |
+| description | varchar | YES  | UNKNOWN | NULL                                 | UNKNOWN |
++-------------+---------+------+---------+--------------------------------------+---------+
 """.strip()
 
 # endregion Table Display Output
