@@ -40,8 +40,6 @@ class TestMysqlRecords(TestMysqlDatabaseParent, CoreRecordsTestMixin):
         cls._columns_clause__basic = COLUMNS_CLAUSE__BASIC
         cls._columns_clause__datetime = COLUMNS_CLAUSE__DATETIME
 
-        cls.error_handler__table_already_exists = cls.db_error_handler.OperationalError
-
     def test_error_catch_types(self):
         """Tests to ensure database ERROR types are properly caught.
 
@@ -62,5 +60,5 @@ class TestMysqlRecords(TestMysqlDatabaseParent, CoreRecordsTestMixin):
                 raise AssertionError('Table not yet present. Incorrect name provided.')
 
             # Check that we use the correct handler.
-            with self.assertRaises(self.error_handler__table_already_exists):
+            with self.assertRaises(self.connector.errors.table_already_exists):
                 self.connector.query.execute('CREATE TABLE {0} {1};'.format(table_name, self._columns_clause__basic))

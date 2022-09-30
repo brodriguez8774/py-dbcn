@@ -44,4 +44,4 @@ class TestMysqlDatabaseParent(CoreTestParent):
         )
         cls.db_type = cls.connector._config.db_type
         cls._implemented_db_types = cls.connector._config._implemented_db_types
-        cls.db_error_handler = MySQLdb
+        cls.db_error_handler = cls.connector.errors.handler

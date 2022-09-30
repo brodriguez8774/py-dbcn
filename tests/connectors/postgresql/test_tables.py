@@ -39,9 +39,6 @@ class TestPostgresqlTables(TestPostgresqlDatabaseParent, CoreTablesTestMixin):
         cls._columns_clause__minimal = COLUMNS_CLAUSE__MINIMAL
         cls._columns_clause__basic = COLUMNS_CLAUSE__BASIC
 
-        cls.error_handler__table_does_not_exist = cls.db_error_handler.errors.UndefinedTable
-        cls.error_handler__table_already_exists = cls.db_error_handler.errors.DuplicateTable
-
     def test_error_catch_types(self):
         """Tests to ensure database ERROR types are properly caught.
 
@@ -60,7 +57,7 @@ class TestPostgresqlTables(TestPostgresqlDatabaseParent, CoreTablesTestMixin):
                 raise AssertionError('Table already present. Incorrect name provided.')
 
             # Check that we use the correct handler.
-            with self.assertRaises(self.error_handler__table_does_not_exist):
+            with self.assertRaises(self.connector.errors.table_does_not_exist):
                 self.connector.query.execute('DROP TABLE {0};'.format(table_name))
 
         with self.subTest('Verify handling when database already exists'):
@@ -73,5 +70,5 @@ class TestPostgresqlTables(TestPostgresqlDatabaseParent, CoreTablesTestMixin):
                 raise AssertionError('Table not yet present. Incorrect name provided.')
 
             # Check that we use the correct handler.
-            with self.assertRaises(self.error_handler__table_already_exists):
+            with self.assertRaises(self.connector.errors.table_already_exists):
                 self.connector.query.execute('CREATE TABLE {0} {1};'.format(table_name, self._columns_clause__minimal))

@@ -38,6 +38,8 @@ class AbstractDbConnector(ABC):
         self._connection = None
         self._debug = debug
 
+        # region Config Initialization
+
         # Define class to hold config values.
         class Config:
             pass
@@ -54,6 +56,25 @@ class AbstractDbConnector(ABC):
         self._config.db_type = None
         self._config._implemented_db_types = ['MySQL', 'PostgreSQL']
 
+        # endregion Config Initialization
+
+        # region Error Handler Setup
+
+        # Define class to hold error handler references.
+        class Errors:
+            pass
+
+        self.errors = Errors()
+        self.errors.handler = None
+        self.errors.database_does_not_exist = None
+        self.errors.database_already_exists = None
+        self.errors.table_does_not_exist = None
+        self.errors.table_already_exists = None
+
+        # endregion Error Handler Setup
+
+        # region Child Sub-Class Initialization
+
         # Create references to related subclasses.
         self.database = self._get_related_database_class()
         self.display = self._get_related_display_class()
@@ -62,6 +83,8 @@ class AbstractDbConnector(ABC):
         self.tables = self._get_related_tables_class()
         self.utils = self._get_related_utils_class()
         self.validate = self._get_related_validate_class()
+
+        # endregion Child Sub-Class Initialization
 
     def __del__(self):
         """

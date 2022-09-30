@@ -33,6 +33,13 @@ class PostgresqlDbConnector(AbstractDbConnector):
         # Call parent logic.
         super().__init__(*args, **kwargs)
 
+        # Initialize error handlers.
+        self.errors.handler = psycopg2.errors
+        self.errors.database_does_not_exist = self.errors.handler.InvalidCatalogName
+        self.errors.database_already_exists = self.errors.handler.DuplicateDatabase
+        self.errors.table_does_not_exist = self.errors.handler.UndefinedTable
+        self.errors.table_already_exists = self.errors.handler.DuplicateTable
+
         # Initialize database connection.
         self._config.db_type = 'PostgreSQL'
         self.create_connection()

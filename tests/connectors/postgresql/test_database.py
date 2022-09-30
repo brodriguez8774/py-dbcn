@@ -34,9 +34,6 @@ class TestPostgresqlDatabase(TestPostgresqlDatabaseParent, CoreDatabaseTestMixin
             for result in results:
                 cls.connector.tables.drop(result)
 
-        cls.error_handler__database_does_not_exist = cls.db_error_handler.errors.InvalidCatalogName
-        cls.error_handler__database_already_exists = cls.db_error_handler.errors.DuplicateDatabase
-
     def test_error_catch_types(self):
         """Tests to ensure database ERROR types are properly caught.
 
@@ -55,7 +52,7 @@ class TestPostgresqlDatabase(TestPostgresqlDatabaseParent, CoreDatabaseTestMixin
                 raise AssertionError('Database already present. Incorrect name provided.')
 
             # Check that we use the correct handler.
-            with self.assertRaises(self.error_handler__database_does_not_exist):
+            with self.assertRaises(self.connector.errors.database_does_not_exist):
                 self.connector.query.execute('DROP DATABASE {0};'.format(db_name))
 
         with self.subTest('Verify handling when database already exists'):
@@ -66,5 +63,5 @@ class TestPostgresqlDatabase(TestPostgresqlDatabaseParent, CoreDatabaseTestMixin
                 raise AssertionError('Database not yet present. Incorrect name provided.')
 
             # Check that we use the correct handler.
-            with self.assertRaises(self.error_handler__database_already_exists):
+            with self.assertRaises(self.connector.errors.database_already_exists):
                 self.connector.query.execute('CREATE DATABASE {0};'.format(db_name))
