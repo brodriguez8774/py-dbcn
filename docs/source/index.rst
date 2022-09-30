@@ -42,6 +42,14 @@ the way.
    roadmap
    version_history
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Supplementary Documentation
+
+   supplementary/sqlite_syntax_docs
+   supplementary/mysql_syntax_docs
+   supplementary/postgresql_syntax_docs
+
 
 Indices and tables
 ==================
