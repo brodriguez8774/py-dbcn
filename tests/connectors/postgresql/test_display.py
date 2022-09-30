@@ -5,6 +5,12 @@ Tests for "display" logic of "PostgreSQL" DB Connector class.
 # System Imports.
 
 # Internal Imports.
+from .constants import (
+    DESCRIBE_TABLE_QUERY,
+    SHOW_TABLES_QUERY,
+    COLUMNS_CLAUSE__BASIC,
+    COLUMNS_CLAUSE__MINIMAL,
+)
 from .expected_display_output import ExpectedOutput
 from .test_core import TestPostgresqlDatabaseParent
 from tests.connectors.core.test_display import (
@@ -12,28 +18,6 @@ from tests.connectors.core.test_display import (
     CoreDisplayTablesTestMixin,
     CoreDisplayRecordsMixin,
 )
-
-
-SHOW_TABLES_QUERY = """
-SELECT table_name FROM information_schema.tables
-WHERE table_schema = 'public';
-""".strip()
-DESCRIBE_TABLE_QUERY = """
-SELECT * FROM information_schema.columns
-WHERE (table_schema = 'public' AND table_name = 'category');
-""".strip()
-COLUMNS_QUERY__MINIMAL = """
-(
-    id serial PRIMARY KEY
-)
-""".strip()
-COLUMNS_QUERY__BASIC = """
-(
-    id serial PRIMARY KEY,
-    name VARCHAR(100),
-    description VARCHAR(100)
-)
-""".strip()
 
 
 class TestPostgresqlDisplay(TestPostgresqlDatabaseParent, CoreDisplayBaseTestMixin):
@@ -63,7 +47,7 @@ class TestPostgresqlDisplay(TestPostgresqlDatabaseParent, CoreDisplayBaseTestMix
 
         # Define expected output to compare against.
         cls.expected_output = ExpectedOutput
-        cls.show_tables_query = SHOW_TABLES_QUERY
+        cls._show_tables_query = SHOW_TABLES_QUERY
 
 
 class TestPostgresqlDisplayTables(TestPostgresqlDatabaseParent, CoreDisplayTablesTestMixin):
@@ -95,10 +79,10 @@ class TestPostgresqlDisplayTables(TestPostgresqlDatabaseParent, CoreDisplayTable
 
         # Define expected output to compare against.
         cls.expected_output = ExpectedOutput
-        cls.show_tables_query = SHOW_TABLES_QUERY
-        cls.describe_table_query = DESCRIBE_TABLE_QUERY
-        cls.columns_query__minimal = COLUMNS_QUERY__MINIMAL
-        cls.columns_query__basic = COLUMNS_QUERY__BASIC
+        cls._show_tables_query = SHOW_TABLES_QUERY
+        cls._describe_table_query = DESCRIBE_TABLE_QUERY
+        cls._columns_clause__minimal = COLUMNS_CLAUSE__MINIMAL
+        cls._columns_clause__basic = COLUMNS_CLAUSE__BASIC
 
 
 class TestPostgreSQLDisplayRecords(TestPostgresqlDatabaseParent, CoreDisplayRecordsMixin):
@@ -130,6 +114,6 @@ class TestPostgreSQLDisplayRecords(TestPostgresqlDatabaseParent, CoreDisplayReco
 
         # Define expected output to compare against.
         cls.expected_output = ExpectedOutput
-        cls.show_tables_query = SHOW_TABLES_QUERY
-        cls.columns_query__minimal = COLUMNS_QUERY__MINIMAL
-        cls.columns_query__basic = COLUMNS_QUERY__BASIC
+        cls._show_tables_query = SHOW_TABLES_QUERY
+        cls._columns_clause__minimal = COLUMNS_CLAUSE__MINIMAL
+        cls._columns_clause__basic = COLUMNS_CLAUSE__BASIC

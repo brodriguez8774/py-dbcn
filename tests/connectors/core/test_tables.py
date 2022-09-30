@@ -51,7 +51,7 @@ class CoreTablesTestMixin:
         self.assertNotIn(table_name, results)
 
         # Attempt to generate table.
-        self.connector.tables.create(table_name, self._basic_table_columns)
+        self.connector.tables.create(table_name, self._columns_clause__minimal)
 
         # Check that expected table now exists in database.
         results = self.connector.tables.show()
@@ -85,7 +85,7 @@ class CoreTablesTestMixin:
         self.assertNotIn(table_name, results)
 
         # Attempt to generate table.
-        self.connector.tables.create(table_name, self._basic_table_columns)
+        self.connector.tables.create(table_name, self._columns_clause__minimal)
 
         # Check that expected table now exists in database.
         results = self.connector.tables.show()
@@ -107,7 +107,7 @@ class CoreTablesTestMixin:
         with self.subTest('SHOW query when table exists'):
             # Verify table exists.
             try:
-                self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query))
+                self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__basic))
             except self.error_handler__table_already_exists:
                 # Table already exists, as we want.
                 pass
@@ -152,7 +152,7 @@ class CoreTablesTestMixin:
         self.assertNotIn(table_name, results)
 
         # Run test query.
-        self.connector.tables.create(table_name, self._columns_query)
+        self.connector.tables.create(table_name, self._columns_clause__basic)
 
         # Check tables after test query. Verify expected table returned.
         results = self.connector.tables.show()
@@ -167,7 +167,7 @@ class CoreTablesTestMixin:
 
         # Verify table exists.
         try:
-            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query))
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__basic))
         except self.error_handler__table_already_exists:
             # Table already exists, as we want.
             pass
@@ -179,7 +179,7 @@ class CoreTablesTestMixin:
 
         # Run test query.
         with self.assertRaises(ValueError):
-            self.connector.tables.create(table_name, self._columns_query)
+            self.connector.tables.create(table_name, self._columns_clause__basic)
 
     # def test__modify_table__success(self):
     #     """
@@ -192,7 +192,7 @@ class CoreTablesTestMixin:
     #
     #     # Verify table exists.
     #     try:
-    #         self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query))
+    #         self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, _columns_clause__basic))
     #     except self.error_handler__table_already_exists:
     #         # Table already exists, as we want.
     #         pass
@@ -279,7 +279,7 @@ class CoreTablesTestMixin:
 
         # Verify table exists.
         try:
-            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query))
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__basic))
         except self.error_handler__table_already_exists:
             # Table already exists, as we want.
             pass
@@ -300,7 +300,7 @@ class CoreTablesTestMixin:
 
         # Verify table exists.
         # try:
-        self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query))
+        self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__basic))
 
         # Check tables prior to test query. Verify expected table returned.
         results = self.connector.tables.show()

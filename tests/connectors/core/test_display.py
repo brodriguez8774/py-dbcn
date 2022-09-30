@@ -191,7 +191,7 @@ class CoreDisplayTablesTestMixin:
 
     def test__display__show_tables(self):
         """"""
-        show_tables_query = '{0}{1}{2}'.format(OUTPUT_QUERY, self.show_tables_query, OUTPUT_RESET)
+        show_tables_query = '{0}{1}{2}'.format(OUTPUT_QUERY, self._show_tables_query, OUTPUT_RESET)
 
         # Since this directly tests display of tables, ensure we use a fresh database.
         db_name = '{0}d__tables__show'.format(self.test_db_name[0:-15])
@@ -207,7 +207,7 @@ class CoreDisplayTablesTestMixin:
 
         with self.subTest('Db name longer - Pt 1'):
             # Create table.
-            self.connector.tables.create('category', self.columns_query__basic, display_query=False)
+            self.connector.tables.create('category', self._columns_clause__basic, display_query=False)
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -220,7 +220,7 @@ class CoreDisplayTablesTestMixin:
 
         with self.subTest('Db name longer - Pt 2'):
             # Create table.
-            self.connector.tables.create('priority', self.columns_query__basic, display_query=False)
+            self.connector.tables.create('priority', self._columns_clause__basic, display_query=False)
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -233,7 +233,7 @@ class CoreDisplayTablesTestMixin:
 
         with self.subTest('Db name longer - Pt 3'):
             # Create table.
-            self.connector.tables.create('a', self.columns_query__basic, display_query=False)
+            self.connector.tables.create('a', self._columns_clause__basic, display_query=False)
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -248,7 +248,7 @@ class CoreDisplayTablesTestMixin:
             # Create table.
             self.connector.tables.create(
                 'test___{0}___this_is_a_really_long_table_name__test_'.format(self.db_type.lower()),
-                self.columns_query__basic,
+                self._columns_clause__basic,
                 display_query=False,
             )
 
@@ -265,7 +265,7 @@ class CoreDisplayTablesTestMixin:
             # Create table.
             self.connector.tables.create(
                 'test___{0}___this_is_a_really_long_table_name__test__'.format(self.db_type.lower()),
-                self.columns_query__basic,
+                self._columns_clause__basic,
                 display_query=False,
             )
 
@@ -280,7 +280,7 @@ class CoreDisplayTablesTestMixin:
 
         with self.subTest('Table name longer - Pt 2'):
             # Create table.
-            self.connector.tables.create('zzz', self.columns_query__basic, display_query=False)
+            self.connector.tables.create('zzz', self._columns_clause__basic, display_query=False)
 
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
@@ -295,7 +295,7 @@ class CoreDisplayTablesTestMixin:
             # Create table.
             self.connector.tables.create(
                 'test___{0}___this_is_a_really_long_table_name__testing__'.format(self.db_type.lower()),
-                self.columns_query__basic,
+                self._columns_clause__basic,
                 display_query=False,
             )
 
@@ -310,7 +310,7 @@ class CoreDisplayTablesTestMixin:
 
     def test__display__describe_tables(self):
         """"""
-        describe_table_query = '{0}{1}{2}'.format(OUTPUT_QUERY, self.describe_table_query, OUTPUT_RESET)
+        describe_table_query = '{0}{1}{2}'.format(OUTPUT_QUERY, self._describe_table_query, OUTPUT_RESET)
 
         # Since this directly tests display of tables, ensure we use a fresh database.
         db_name = '{0}d__tables__desc'.format(self.test_db_name[0:-15])
@@ -318,7 +318,7 @@ class CoreDisplayTablesTestMixin:
         self.connector.database.use(db_name, display_query=False)
 
         # Create initial table to describe.
-        self.connector.tables.create('category', self.columns_query__minimal, display_query=False)
+        self.connector.tables.create('category', self._columns_clause__minimal, display_query=False)
 
         with self.subTest('With only id'):
             # Capture logging output.
@@ -376,7 +376,7 @@ class CoreDisplayRecordsMixin:
         """"""
         select_from_query = '{0}SELECT * FROM category;{1}'.format(OUTPUT_QUERY, OUTPUT_RESET)
 
-        self.connector.tables.create('category', self.columns_query__basic, display_query=False)
+        self.connector.tables.create('category', self._columns_clause__basic, display_query=False)
 
         with self.subTest('With no records present'):
             # Capture logging output.

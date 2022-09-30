@@ -3,9 +3,9 @@ Tests for "tables" logic of "PostgreSQL" DB Connector class.
 """
 
 # System Imports.
-import textwrap
 
 # Internal Imports.
+from .constants import COLUMNS_CLAUSE__MINIMAL, COLUMNS_CLAUSE__BASIC
 from .test_core import TestPostgresqlDatabaseParent
 from tests.connectors.core.test_tables import CoreTablesTestMixin
 
@@ -36,22 +36,8 @@ class TestPostgresqlTables(TestPostgresqlDatabaseParent, CoreTablesTestMixin):
                 cls.connector.tables.drop(result)
 
         # Define database-specific query values.
-        cls._basic_table_columns = textwrap.dedent(
-            """
-            (
-                id serial PRIMARY KEY
-            )
-            """
-        ).strip()
-        cls._columns_query = textwrap.dedent(
-            """
-            (
-                id serial PRIMARY KEY,
-                name VARCHAR(100),
-                description VARCHAR(100)
-            )
-            """
-        ).strip()
+        cls._columns_clause__minimal = COLUMNS_CLAUSE__MINIMAL
+        cls._columns_clause__basic = COLUMNS_CLAUSE__BASIC
 
         cls.error_handler__table_does_not_exist = cls.db_error_handler.errors.UndefinedTable
         cls.error_handler__table_already_exists = cls.db_error_handler.errors.DuplicateTable
@@ -80,7 +66,7 @@ class TestPostgresqlTables(TestPostgresqlDatabaseParent, CoreTablesTestMixin):
         with self.subTest('Verify handling when database already exists'):
             # Make sure we're using a table name that is not already created.
             table_name = 'test_table'
-            self.connector.tables.create(table_name, self._basic_table_columns)
+            self.connector.tables.create(table_name, self._columns_clause__minimal)
 
             results = self.connector.tables.show()
             if table_name not in results:
@@ -88,4 +74,4 @@ class TestPostgresqlTables(TestPostgresqlDatabaseParent, CoreTablesTestMixin):
 
             # Check that we use the correct handler.
             with self.assertRaises(self.error_handler__table_already_exists):
-                self.connector.query.execute('CREATE TABLE {0} {1};'.format(table_name, self._basic_table_columns))
+                self.connector.query.execute('CREATE TABLE {0} {1};'.format(table_name, self._columns_clause__minimal))

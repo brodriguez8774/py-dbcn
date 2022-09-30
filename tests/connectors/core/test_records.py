@@ -27,8 +27,8 @@ class CoreRecordsTestMixin:
         """
         cls.test_db_name_start = cls.test_db_name_start.format(cls.db_type)
 
-        cls._columns_query__basic = None
-        cls._columns_query__datetime = None
+        cls._columns_clause__basic = None
+        cls._columns_clause__datetime = None
 
         cls.error_handler__table_already_exists = None
 
@@ -50,7 +50,7 @@ class CoreRecordsTestMixin:
 
         # Verify table exists.
         try:
-            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query__basic))
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__basic))
         except self.error_handler__table_already_exists:
             # Table already exists, as we want.
             pass
@@ -128,7 +128,7 @@ class CoreRecordsTestMixin:
 
         # Verify table exists.
         try:
-            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query__basic))
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__basic))
         except self.error_handler__table_already_exists:
             # Table already exists, as we want.
             pass
@@ -216,7 +216,7 @@ class CoreRecordsTestMixin:
 
         # Verify table exists.
         try:
-            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query__basic))
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__basic))
         except self.error_handler__table_already_exists:
             # Table already exists, as we want.
             pass
@@ -253,7 +253,7 @@ class CoreRecordsTestMixin:
 
         # Verify table exists.
         try:
-            self.connector.query.execute('CREATE TABLE {0} {1};'.format(table_name, self._columns_query__datetime))
+            self.connector.query.execute('CREATE TABLE {0} {1};'.format(table_name, self._columns_clause__datetime))
         except self.error_handler__table_already_exists:
             # Table already exists, as we want.
             pass
@@ -315,7 +315,7 @@ class CoreRecordsTestMixin:
 
         # Verify table exists.
         try:
-            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query__basic))
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__basic))
         except self.error_handler__table_already_exists:
             # Table already exists, as we want.
             pass
@@ -415,7 +415,7 @@ class CoreRecordsTestMixin:
 
         # Verify table exists.
         try:
-            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query__datetime))
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__datetime))
         except self.error_handler__table_already_exists:
             # Table already exists, as we want.
             pass
@@ -566,7 +566,7 @@ class CoreRecordsTestMixin:
 
         # Verify table exists.
         try:
-            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_query__basic))
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__basic))
         except self.error_handler__table_already_exists:
             # Table already exists, as we want.
             pass

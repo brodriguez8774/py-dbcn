@@ -6,6 +6,7 @@ Tests for "records" logic of "MySQL" DB Connector class.
 import textwrap
 
 # Internal Imports.
+from .constants import COLUMNS_CLAUSE__BASIC, COLUMNS_CLAUSE__DATETIME
 from .test_core import TestMysqlDatabaseParent
 from tests.connectors.core.test_records import CoreRecordsTestMixin
 
@@ -36,26 +37,8 @@ class TestMysqlRecords(TestMysqlDatabaseParent, CoreRecordsTestMixin):
                 cls.connector.tables.drop(result)
 
         # Define default table columns.
-        cls._columns_query__basic = textwrap.dedent(
-            """
-            (
-                id INT NOT NULL AUTO_INCREMENT,
-                name VARCHAR(100),
-                description VARCHAR(100),
-                PRIMARY KEY ( id )
-            )
-            """
-        ).strip()
-        cls._columns_query__datetime = textwrap.dedent(
-            """
-            (
-                id INT NOT NULL AUTO_INCREMENT,
-                test_datetime DATETIME,
-                test_date DATE,
-                PRIMARY KEY ( id )
-            )
-            """
-        ).strip()
+        cls._columns_clause__basic = COLUMNS_CLAUSE__BASIC
+        cls._columns_clause__datetime = COLUMNS_CLAUSE__DATETIME
 
         cls.error_handler__table_already_exists = cls.db_error_handler.OperationalError
 
@@ -72,7 +55,7 @@ class TestMysqlRecords(TestMysqlDatabaseParent, CoreRecordsTestMixin):
         with self.subTest('Verify handling when database already exists'):
             # Make sure we're using a table name that is not already created.
             table_name = 'test_table'
-            self.connector.tables.create(table_name, self._columns_query__basic)
+            self.connector.tables.create(table_name, self._columns_clause__basic)
 
             results = self.connector.tables.show()
             if table_name not in results:
@@ -80,4 +63,4 @@ class TestMysqlRecords(TestMysqlDatabaseParent, CoreRecordsTestMixin):
 
             # Check that we use the correct handler.
             with self.assertRaises(self.error_handler__table_already_exists):
-                self.connector.query.execute('CREATE TABLE {0} {1};'.format(table_name, self._columns_query__basic))
+                self.connector.query.execute('CREATE TABLE {0} {1};'.format(table_name, self._columns_clause__basic))

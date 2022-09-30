@@ -5,6 +5,12 @@ Tests for "display" logic of "MySQL" DB Connector class.
 # System Imports.
 
 # Internal Imports.
+from .constants import (
+    DESCRIBE_TABLE_QUERY,
+    SHOW_TABLES_QUERY,
+    COLUMNS_CLAUSE__BASIC,
+    COLUMNS_CLAUSE__MINIMAL,
+)
 from .test_core import TestMysqlDatabaseParent
 from .expected_display_output import ExpectedOutput
 from tests.connectors.core.test_display import (
@@ -12,27 +18,6 @@ from tests.connectors.core.test_display import (
     CoreDisplayTablesTestMixin,
     CoreDisplayRecordsMixin,
 )
-
-
-SHOW_TABLES_QUERY = """
-SHOW TABLES;
-""".strip()
-DESCRIBE_TABLE_QUERY = """DESCRIBE category;"""
-COLUMNS_QUERY__MINIMAL = """
-(
-    id INT NOT NULL AUTO_INCREMENT,
-    PRIMARY KEY ( id )
-)
-""".strip()
-COLUMNS_QUERY__BASIC = """
-(
-    id INT NOT NULL AUTO_INCREMENT,
-    name VARCHAR(100),
-    description VARCHAR(100),
-    PRIMARY KEY ( id )
-)
-""".strip()
-
 
 
 class TestMysqlDisplayCore(TestMysqlDatabaseParent, CoreDisplayBaseTestMixin):
@@ -64,7 +49,7 @@ class TestMysqlDisplayCore(TestMysqlDatabaseParent, CoreDisplayBaseTestMixin):
 
         # Define expected output to compare against.
         cls.expected_output = ExpectedOutput
-        cls.show_tables_query = SHOW_TABLES_QUERY
+        cls._show_tables_query = SHOW_TABLES_QUERY
 
 
 class TestMysqlDisplayTables(TestMysqlDatabaseParent, CoreDisplayTablesTestMixin):
@@ -96,10 +81,10 @@ class TestMysqlDisplayTables(TestMysqlDatabaseParent, CoreDisplayTablesTestMixin
 
         # Define expected output to compare against.
         cls.expected_output = ExpectedOutput
-        cls.show_tables_query = SHOW_TABLES_QUERY
-        cls.describe_table_query = DESCRIBE_TABLE_QUERY
-        cls.columns_query__minimal = COLUMNS_QUERY__MINIMAL
-        cls.columns_query__basic = COLUMNS_QUERY__BASIC
+        cls._show_tables_query = SHOW_TABLES_QUERY
+        cls._describe_table_query = DESCRIBE_TABLE_QUERY
+        cls._columns_clause__minimal = COLUMNS_CLAUSE__MINIMAL
+        cls._columns_clause__basic = COLUMNS_CLAUSE__BASIC
 
 
 class TestMysqlDisplayRecords(TestMysqlDatabaseParent, CoreDisplayRecordsMixin):
@@ -131,6 +116,6 @@ class TestMysqlDisplayRecords(TestMysqlDatabaseParent, CoreDisplayRecordsMixin):
 
         # Define expected output to compare against.
         cls.expected_output = ExpectedOutput
-        cls.show_tables_query = SHOW_TABLES_QUERY
-        cls.columns_query__minimal = COLUMNS_QUERY__MINIMAL
-        cls.columns_query__basic = COLUMNS_QUERY__BASIC
+        cls._show_tables_query = SHOW_TABLES_QUERY
+        cls._columns_clause__minimal = COLUMNS_CLAUSE__MINIMAL
+        cls._columns_clause__basic = COLUMNS_CLAUSE__BASIC
