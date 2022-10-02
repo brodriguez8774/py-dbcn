@@ -26,13 +26,13 @@ Quickstart
 
    * Python package for **MySQL**:
 
-     .. code-block::
+     .. code-block:: python
 
         mysqlclient
 
    * Python package for **PostgreSQL**:
 
-     .. code-block::
+     .. code-block:: python
 
         psycopg2-binary
 
@@ -73,16 +73,45 @@ Quickstart
         credentials).
 
 
-4. Install optional packages for extra functionality.
+4. Optionally set up logging for ``py-dbcn``, in order to get additional
+   helpful logging output.
+
+   We recommend follow logging setup as discussed in the
+   `Django Docs <>`_.
+   Yes, this project doesn't require Django, but the Django docs provide
+   thorough documentation for what we believe is the best Python logging format.
+
+   Once logging is set up, add the ``py-dbcn`` package to your logging
+   namespace, similar to shown:
+
+
+   .. code-block:: python
+
+        'loggers': {
+
+            ...
+
+            'py_dbcn': {
+                'handlers': [<handlers_here>],
+                'level': 'NOTSET',
+            },
+        }
+
+   Where ``<handlers_here>`` is replaced by your project's actual logging
+   handlers.
+
+
+5. Install optional packages for extra functionality.
 
     This package offers support for the
     `colorama <https://pypi.org/project/colorama/>`_ Python package.
 
     Colorama is not necessary to use ``py-dbcn``, but adding it will provide
-    helpful coloring output, to help separate what kind of calls are being made.
+    helpful coloring output to log messages, to help separate what kind of
+    calls are being made.
 
 
-5. Run database queries as desired. See <link-here>.
+6. Run database queries as desired. See <link-here>.
 
     .. note::
 
