@@ -15,8 +15,30 @@ Quickstart
     `pipenv <https://pipenv.pypa.io/en/latest/>`_,
     `poetry <https://python-poetry.org/docs/>`_, etc).
 
-2. Create a new Python project (or load an existing one) and establish one or
-   more database connections:
+
+2. Install your database connection of choice:
+
+   The ``py-dbcn`` package does not inherently install the associated pip
+   libraries for each database. This is so the local installation only installs
+   the bare minimum needed for your specific use case.
+
+   Use the below packages to connect to the database type of choice:
+
+   * Python package for **MySQL**:
+
+     .. code-block::
+
+        mysqlclient
+
+   * Python package for **PostgreSQL**:
+
+     .. code-block::
+
+        psycopg2-binary
+
+
+3. Create a new Python project (or load an existing one) and establish one or
+   more database connections. For example, to connect with **MySQL**:
 
     .. code-block:: python
 
@@ -50,7 +72,8 @@ Quickstart
         settings should be provided (but without committing the actual database
         credentials).
 
-3. Install optional packages for extra functionality.
+
+4. Install optional packages for extra functionality.
 
     This package offers support for the
     `colorama <https://pypi.org/project/colorama/>`_ Python package.
@@ -58,7 +81,8 @@ Quickstart
     Colorama is not necessary to use ``py-dbcn``, but adding it will provide
     helpful coloring output, to help separate what kind of calls are being made.
 
-4. Run database queries as desired. See <link-here>.
+
+5. Run database queries as desired. See <link-here>.
 
     .. note::
 
