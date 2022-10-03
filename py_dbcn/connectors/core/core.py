@@ -77,9 +77,12 @@ class AbstractDbConnector(ABC):
 
         # Create references to related subclasses.
         self.database = self._get_related_database_class()
+        self.databases = self._get_related_database_class()
         self.display = self._get_related_display_class()
         self.query = self._get_related_query_class()
+        self.record = self._get_related_records_class()
         self.records = self._get_related_records_class()
+        self.table = self._get_related_tables_class()
         self.tables = self._get_related_tables_class()
         self.utils = self._get_related_utils_class()
         self.validate = self._get_related_validate_class()
