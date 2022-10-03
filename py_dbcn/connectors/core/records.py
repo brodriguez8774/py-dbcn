@@ -56,10 +56,13 @@ class BaseRecords:
         select_clause = self._base.validate.sanitize_select_clause(select_clause)
 
         # Check that provided WHERE clause is valid format.
+        # TODO: Implement proper clause sanitization.
         if where_clause is None:
             where_clause = ''
         where_clause = str(where_clause).strip()
-        where_clause = where_clause.casefold().lstrip('WHERE ')
+        if where_clause.lower().startswith('where'):
+            where_clause = where_clause[5:]
+        where_clause = where_clause.strip()
         if len(where_clause) > 1:
             where_clause = '\nWHERE ({0})'.format(where_clause)
         if not self._base.validate.where_clause(where_clause):
