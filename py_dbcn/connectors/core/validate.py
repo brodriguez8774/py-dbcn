@@ -375,7 +375,7 @@ class BaseValidate:
         """
         Validates that provided clause follows acceptable format.
         :param clause: ORDER_BY clause to validate.
-        :return: True if valid | False otherwise.
+        :return: Properly formatted clause if possible, otherwise error.
         """
         # TODO: Implement proper sanitization checks.
 
@@ -401,7 +401,36 @@ class BaseValidate:
             # Put in expected format.
             clause = ' ORDER BY {0}'.format(clause)
 
-        # For now, always return as valid.
+        # Return formatted clause.
+        return clause
+
+    def sanitize_limit_clause(self, clause):
+        """
+        Validates that provided clause follows acceptable format.
+        :param clause: LIMIT clause to validate.
+        :return: Properly formatted clause if possible, otherwise error.
+        """
+        # TODO: Implement proper sanitization checks.
+
+        if clause is None:
+            clause = ''
+
+        # Strip any potential whitespace.
+        clause = str(clause).strip()
+
+        # Handle if clause is not empty.
+        if clause != '':
+            # Remove prefix, if present.
+            if clause.lower().startswith('limit'):
+                clause = clause[5:]
+
+            # Strip again, with prefix removed.
+            clause = clause.strip()
+
+            # Put in expected format.
+            clause = ' LIMIT {0}'.format(clause)
+
+        # Return formatted clause.
         return clause
 
     # endregion Clause Validation

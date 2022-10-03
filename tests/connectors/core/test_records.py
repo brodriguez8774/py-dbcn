@@ -659,6 +659,126 @@ class CoreRecordsTestMixin:
             self.assertEqual(row_11, results[10])
             self.assertEqual(row_5, results[11])
 
+    def test__select__with_limit__success(self):
+        """
+        Test `SELECT` query when using limit clauses.
+        """
+        table_name = 'test_queries__select__limit__success'
+
+        # Verify table exists.
+        try:
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__basic))
+        except self.connector.errors.table_already_exists:
+            # Table already exists, as we want.
+            pass
+
+        with self.subTest('SELECT with LIMIT when table has no records'):
+            # Run test query.
+            results = self.connector.records.select(
+                table_name,
+                limit_clause=5,
+            )
+
+            # Verify no records returned.
+            self.assertEqual(len(results), 0)
+
+        with self.subTest('SELECT with LIMIT when table has less records than limit'):
+            # Insert record.
+            row_1 = (1, 'test_name_1', 'test_desc_1')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_1))
+            row_2 = (2, 'test_name_2', 'test_desc_2')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_2))
+            row_3 = (3, 'test_name_3', 'test_desc_3')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_3))
+            row_4 = (4, 'test_name_4', 'test_desc_4')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_4))
+
+            # Run test query.
+            results = self.connector.records.select(
+                table_name,
+                limit_clause=5,
+            )
+
+            # Verify all records returned.
+            self.assertEqual(len(results), 4)
+            self.assertIn(row_1, results)
+            self.assertIn(row_2, results)
+            self.assertIn(row_3, results)
+            self.assertIn(row_4, results)
+
+        with self.subTest('SELECT with LIMIT when table has equal records to limit'):
+            # Insert record.
+            row_5 = (5, 'test_name_5', 'test_desc_5')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_5))
+
+            # Run test query.
+            results = self.connector.records.select(
+                table_name,
+                limit_clause=5,
+            )
+
+            # Verify all records returned.
+            self.assertEqual(len(results), 5)
+            self.assertIn(row_1, results)
+            self.assertIn(row_2, results)
+            self.assertIn(row_3, results)
+            self.assertIn(row_4, results)
+            self.assertIn(row_5, results)
+
+        with self.subTest('SELECT with LIMIT when table has more records than limit'):
+            # Insert record.
+            row_6 = (6, 'test_name_6', 'test_desc_6')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_6))
+
+            # Verify table has 6 total records.
+            results = self.connector.records.select(table_name)
+            self.assertEqual(len(results), 6)
+
+            # Run test query.
+            results = self.connector.records.select(
+                table_name,
+                limit_clause=5,
+            )
+
+            # Verify limited set of records returned.
+            self.assertEqual(len(results), 5)
+            self.assertIn(row_1, results)
+            self.assertIn(row_2, results)
+            self.assertIn(row_3, results)
+            self.assertIn(row_4, results)
+            self.assertIn(row_5, results)
+
+        with self.subTest('SELECT with LIMIT when table has many more records than limit'):
+            # Insert record.
+            row_7 = (7, 'test_name_7', 'test_desc_7')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_7))
+            row_8 = (8, 'test_name_8', 'test_desc_8')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_8))
+            row_9 = (9, 'test_name_9', 'test_desc_9')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_9))
+            row_10 = (10, 'test_name_10', 'test_desc_10')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_10))
+            row_11 = (11, 'test_name_11', 'test_desc_11')
+            self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_11))
+
+            # Verify table has 11 total records.
+            results = self.connector.records.select(table_name)
+            self.assertEqual(len(results), 11)
+
+            # Run test query.
+            results = self.connector.records.select(
+                table_name,
+                limit_clause=5,
+            )
+
+            # Verify limited set of records returned.
+            self.assertEqual(len(results), 5)
+            self.assertIn(row_1, results)
+            self.assertIn(row_2, results)
+            self.assertIn(row_3, results)
+            self.assertIn(row_4, results)
+            self.assertIn(row_5, results)
+
     def test__insert__basic__success(self):
         """
         Test `INSERT` query with basic values.
