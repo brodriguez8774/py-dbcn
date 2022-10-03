@@ -154,11 +154,6 @@ class TableDisplay:
         default_col_max_len = 7
         extra_col_max_len = 5
 
-        print('\n\n\n\n')
-        if len(results) > 1:
-            for index in range(len(results[1])):
-                print('    {0} - {1}'.format(index, results[1][index]))
-
         # Populate record col sets.
         undefined_value = '{0}__UNDEFINED'.format(self._base._config.db_type)
         for record in results:
@@ -346,12 +341,6 @@ class RecordDisplay:
                     ),
                     display_query=False,
                 )[0][0]
-                print('')
-                print('table_name: {0}'.format(table_name))
-                print('tab_col: {0}'.format(table_col))
-                print('col_len: {0}'.format(col_len))
-                print('record_len: {0}'.format(record_len))
-                print('')
                 length = max(col_len, record_len or 0)
                 col_len_array.append(length)
                 total_col_len += length + 2
