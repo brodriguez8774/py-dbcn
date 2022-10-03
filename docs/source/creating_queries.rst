@@ -366,7 +366,7 @@ All record-level querying is done via the ``connector.record`` interface.
 SELECT a set of Records
 -----------------------
 
-``connector.records.select(table_name, select_clause=None, where_clause=None)``
+``connector.records.select(table_name, select_clause=None, where_clause=None, order_by_clause=None)``
 
 :param table_name: Name of table to select records from.
 
@@ -378,6 +378,9 @@ SELECT a set of Records
 
 :param where_clause: Optional clause to limit number of records selected. If
                      not provided, then all records are selected.
+
+:param order_by_clause: Optional clause to indicate the desired ordering of
+                        returned records.
 
 :return: A list of all returned records.
 
@@ -396,11 +399,13 @@ Example:
 
     # Run query.
     # In this case, we only pull "id", "name", and "description" columns from
-    # all records with an "id" less than 500.
+    # all records with an "id" less than 500. We then sort by descending name,
+    # and then ascending id.
     results = connector.records.select(
         'my_table',
         select_clause='id, name, description',
         where_clause='where id < 500',
+        order_by_clause='name DESC, id',
     )
 
     # Print list of pulled records.
