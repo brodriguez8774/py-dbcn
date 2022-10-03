@@ -371,14 +371,38 @@ class BaseValidate:
         # For now, always return as valid.
         return True
 
-    def order_by_clause(self, clause):
+    def sanitize_order_by_clause(self, clause):
         """
         Validates that provided clause follows acceptable format.
         :param clause: ORDER_BY clause to validate.
         :return: True if valid | False otherwise.
         """
+        # TODO: Implement proper sanitization checks.
+
+        if clause is None:
+            clause = ''
+
+        # Strip any potential whitespace.
+        clause = str(clause).strip()
+
+        # Handle if clause is not empty.
+        if clause != '':
+            # Remove prefix, if present.
+            if clause.lower().startswith('order by'):
+                clause = clause[8:]
+
+            # Strip again, with prefix removed.
+            clause = clause.strip()
+
+            # Prevent wildcard use.
+            if clause == '*':
+                raise ValueError('ORDER BY clause cannot use wildcard.')
+
+            # Put in expected format.
+            clause = ' ORDER BY {0}'.format(clause)
+
         # For now, always return as valid.
-        return True
+        return clause
 
     # endregion Clause Validation
 

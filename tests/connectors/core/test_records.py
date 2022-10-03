@@ -206,6 +206,459 @@ class CoreRecordsTestMixin:
             self.assertNotIn(row_1, results)
             self.assertNotIn(row_3, results)
 
+    def test__select__with_order_by__success__by_one_col(self):
+        """
+        Test `SELECT` query when using order_by clauses on a single column.
+        """
+        table_name = 'test_queries__select__order_by__single__success'
+        # Verify table exists.
+        try:
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__basic))
+        except self.connector.errors.table_already_exists:
+            # Table already exists, as we want.
+            pass
+
+        with self.subTest('SELECT with ORDER BY when table has no records'):
+            # Mostly just making sure there are no errors in this case.
+
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='description')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 0)
+
+        # Insert record.
+        row_1 = (1, 'test_name_1', 'test_desc_1')
+        self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_1))
+
+        with self.subTest('SELECT with ORDER BY when table has one record'):
+            # Mostly just making sure there are no errors in this case.
+
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='description')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 1)
+            self.assertEqual(row_1, results[0])
+
+        # Insert record.
+        row_2 = (2, 'z name', 'z desc')
+        self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_2))
+
+        with self.subTest('SELECT with ORDER BY when table has two records - By Unspecified'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='description')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 2)
+            self.assertEqual(row_1, results[0])
+            self.assertEqual(row_2, results[1])
+
+        with self.subTest('SELECT with ORDER BY when table has two records - By ASC'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='description ASC')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 2)
+            self.assertEqual(row_1, results[0])
+            self.assertEqual(row_2, results[1])
+
+        with self.subTest('SELECT with ORDER BY when table has two records - By DESC'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='description DESC')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 2)
+            self.assertEqual(row_2, results[0])
+            self.assertEqual(row_1, results[1])
+
+        # Insert record.
+        row_3 = (3, 'a name', 'a desc')
+        self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_3))
+
+        with self.subTest('SELECT with ORDER BY when table has three records - By Unspecified'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='description')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 3)
+            self.assertEqual(row_3, results[0])
+            self.assertEqual(row_1, results[1])
+            self.assertEqual(row_2, results[2])
+
+        with self.subTest('SELECT with ORDER BY when table has three records - By ASC'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='description ASC')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 3)
+            self.assertEqual(row_3, results[0])
+            self.assertEqual(row_1, results[1])
+            self.assertEqual(row_2, results[2])
+
+        with self.subTest('SELECT with ORDER BY when table has three records - By DESC'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='description DESC')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 3)
+            self.assertEqual(row_2, results[0])
+            self.assertEqual(row_1, results[1])
+            self.assertEqual(row_3, results[2])
+
+        # Insert record.
+        row_4 = (4, 'the name', 'the desc')
+        self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_4))
+
+        with self.subTest('SELECT with ORDER BY when table has four records - By Unspecified'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='description')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 4)
+            self.assertEqual(row_3, results[0])
+            self.assertEqual(row_1, results[1])
+            self.assertEqual(row_4, results[2])
+            self.assertEqual(row_2, results[3])
+
+        with self.subTest('SELECT with ORDER BY when table has four records - By ASC'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='description ASC')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 4)
+            self.assertEqual(row_3, results[0])
+            self.assertEqual(row_1, results[1])
+            self.assertEqual(row_4, results[2])
+            self.assertEqual(row_2, results[3])
+
+        with self.subTest('SELECT with ORDER BY when table has four records - By DESC'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='description DESC')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 4)
+            self.assertEqual(row_2, results[0])
+            self.assertEqual(row_4, results[1])
+            self.assertEqual(row_1, results[2])
+            self.assertEqual(row_3, results[3])
+
+        # Insert record.
+        row_5 = (5, 'b name', 'b desc')
+        self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_5))
+
+        with self.subTest('SELECT with ORDER BY when table has five records - By Unspecified'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='description')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 5)
+            self.assertEqual(row_3, results[0])
+            self.assertEqual(row_5, results[1])
+            self.assertEqual(row_1, results[2])
+            self.assertEqual(row_4, results[3])
+            self.assertEqual(row_2, results[4])
+
+        with self.subTest('SELECT with ORDER BY when table has five records - By ASC'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='description ASC')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 5)
+            self.assertEqual(row_3, results[0])
+            self.assertEqual(row_5, results[1])
+            self.assertEqual(row_1, results[2])
+            self.assertEqual(row_4, results[3])
+            self.assertEqual(row_2, results[4])
+
+        with self.subTest('SELECT with ORDER BY when table has five records - By DESC'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='description DESC')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 5)
+            self.assertEqual(row_2, results[0])
+            self.assertEqual(row_4, results[1])
+            self.assertEqual(row_1, results[2])
+            self.assertEqual(row_5, results[3])
+            self.assertEqual(row_3, results[4])
+
+    def test__select__with_order_by__success__by_multiple_cols(self):
+        """
+        Test `SELECT` query when using order_by clauses on multiple column.
+        """
+        table_name = 'test_queries__select__order_by__multiple__success'
+        # Verify table exists.
+        try:
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__basic))
+        except self.connector.errors.table_already_exists:
+            # Table already exists, as we want.
+            pass
+
+        with self.subTest('SELECT with ORDER BY when table has no records'):
+            # Mostly just making sure there are no errors in this case.
+
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='description, name')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 0)
+
+        # Insert records.
+        row_1 = (1, 'test_name_1', 'test_desc_1')
+        self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_1))
+        row_2 = (2, 'This is a test name', 'Some desc')
+        self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_2))
+        row_3 = (3, 'aaa name', 'zzz desc')
+        self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_3))
+        row_4 = (4, 'zzz name', 'This is a test description')
+        self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_4))
+        row_5 = (5, 'some name', 'aaa desc')
+        self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_5))
+        row_6 = (6, 'test_name_1', 'test_desc_1')
+        self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_6))
+        # Duplicate records in all but pk. Guarantees there is multiple overlap with ordering fields.
+        row_7 = (7, 'test_name_1', 'test_desc_1')
+        self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_7))
+        row_8 = (8, 'This is a test name', 'Some desc')
+        self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_8))
+        row_9 = (9, 'aaa name', 'zzz desc')
+        self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_9))
+        row_10 = (10, 'zzz name', 'This is a test description')
+        self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_10))
+        row_11 = (11, 'some name', 'aaa desc')
+        self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_11))
+        row_12 = (12, 'test_name_1', 'test_desc_1')
+        self.connector.query.execute('INSERT INTO {0} VALUES {1};'.format(table_name, row_12))
+
+        with self.subTest('SELECT with ORDER BY - By name, id - ASC'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='name, id')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 12)
+            self.assertEqual(row_3, results[0])
+            self.assertEqual(row_9, results[1])
+            self.assertEqual(row_5, results[2])
+            self.assertEqual(row_11, results[3])
+            self.assertEqual(row_1, results[4])
+            self.assertEqual(row_6, results[5])
+            self.assertEqual(row_7, results[6])
+            self.assertEqual(row_12, results[7])
+            self.assertEqual(row_2, results[8])
+            self.assertEqual(row_8, results[9])
+            self.assertEqual(row_4, results[10])
+            self.assertEqual(row_10, results[11])
+
+        with self.subTest('SELECT with ORDER BY - By name, id - DESC'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='name DESC, id DESC')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 12)
+            self.assertEqual(row_10, results[0])
+            self.assertEqual(row_4, results[1])
+            self.assertEqual(row_8, results[2])
+            self.assertEqual(row_2, results[3])
+            self.assertEqual(row_12, results[4])
+            self.assertEqual(row_7, results[5])
+            self.assertEqual(row_6, results[6])
+            self.assertEqual(row_1, results[7])
+            self.assertEqual(row_11, results[8])
+            self.assertEqual(row_5, results[9])
+            self.assertEqual(row_9, results[10])
+            self.assertEqual(row_3, results[11])
+
+        with self.subTest('SELECT with ORDER BY - By name, id - MIXED'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='name DESC, id ASC')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 12)
+            self.assertEqual(row_4, results[0])
+            self.assertEqual(row_10, results[1])
+            self.assertEqual(row_2, results[2])
+            self.assertEqual(row_8, results[3])
+            self.assertEqual(row_1, results[4])
+            self.assertEqual(row_6, results[5])
+            self.assertEqual(row_7, results[6])
+            self.assertEqual(row_12, results[7])
+            self.assertEqual(row_5, results[8])
+            self.assertEqual(row_11, results[9])
+            self.assertEqual(row_3, results[10])
+            self.assertEqual(row_9, results[11])
+
+        with self.subTest('SELECT with ORDER BY - By description, id - ASC'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='description, id')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 12)
+            self.assertEqual(row_5, results[0])
+            self.assertEqual(row_11, results[1])
+            self.assertEqual(row_2, results[2])
+            self.assertEqual(row_8, results[3])
+            self.assertEqual(row_1, results[4])
+            self.assertEqual(row_6, results[5])
+            self.assertEqual(row_7, results[6])
+            self.assertEqual(row_12, results[7])
+            self.assertEqual(row_4, results[8])
+            self.assertEqual(row_10, results[9])
+            self.assertEqual(row_3, results[10])
+            self.assertEqual(row_9, results[11])
+
+        with self.subTest('SELECT with ORDER BY - By description, id - DESC'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='description DESC, id DESC')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 12)
+            self.assertEqual(row_9, results[0])
+            self.assertEqual(row_3, results[1])
+            self.assertEqual(row_10, results[2])
+            self.assertEqual(row_4, results[3])
+            self.assertEqual(row_12, results[4])
+            self.assertEqual(row_7, results[5])
+            self.assertEqual(row_6, results[6])
+            self.assertEqual(row_1, results[7])
+            self.assertEqual(row_8, results[8])
+            self.assertEqual(row_2, results[9])
+            self.assertEqual(row_11, results[10])
+            self.assertEqual(row_5, results[11])
+
+        with self.subTest('SELECT with ORDER BY - By description, id - MIXED'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='description DESC, id ASC')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 12)
+            self.assertEqual(row_3, results[0])
+            self.assertEqual(row_9, results[1])
+            self.assertEqual(row_4, results[2])
+            self.assertEqual(row_10, results[3])
+            self.assertEqual(row_1, results[4])
+            self.assertEqual(row_6, results[5])
+            self.assertEqual(row_7, results[6])
+            self.assertEqual(row_12, results[7])
+            self.assertEqual(row_2, results[8])
+            self.assertEqual(row_8, results[9])
+            self.assertEqual(row_5, results[10])
+            self.assertEqual(row_11, results[11])
+
+        with self.subTest('SELECT with ORDER BY - By id, name, description - ASC'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='id, name, description')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 12)
+            self.assertEqual(row_1, results[0])
+            self.assertEqual(row_2, results[1])
+            self.assertEqual(row_3, results[2])
+            self.assertEqual(row_4, results[3])
+            self.assertEqual(row_5, results[4])
+            self.assertEqual(row_6, results[5])
+            self.assertEqual(row_7, results[6])
+            self.assertEqual(row_8, results[7])
+            self.assertEqual(row_9, results[8])
+            self.assertEqual(row_10, results[9])
+            self.assertEqual(row_11, results[10])
+            self.assertEqual(row_12, results[11])
+
+        with self.subTest('SELECT with ORDER BY - By id, name, description - DESC'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='id DESC, name DESC, description DESC')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 12)
+            self.assertEqual(row_12, results[0])
+            self.assertEqual(row_11, results[1])
+            self.assertEqual(row_10, results[2])
+            self.assertEqual(row_9, results[3])
+            self.assertEqual(row_8, results[4])
+            self.assertEqual(row_7, results[5])
+            self.assertEqual(row_6, results[6])
+            self.assertEqual(row_5, results[7])
+            self.assertEqual(row_4, results[8])
+            self.assertEqual(row_3, results[9])
+            self.assertEqual(row_2, results[10])
+            self.assertEqual(row_1, results[11])
+
+        with self.subTest('SELECT with ORDER BY - By name, description, id - ASC'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='name ASC, description ASC, id ASC')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 12)
+            self.assertEqual(row_3, results[0])
+            self.assertEqual(row_9, results[1])
+            self.assertEqual(row_5, results[2])
+            self.assertEqual(row_11, results[3])
+            self.assertEqual(row_1, results[4])
+            self.assertEqual(row_6, results[5])
+            self.assertEqual(row_7, results[6])
+            self.assertEqual(row_12, results[7])
+            self.assertEqual(row_2, results[8])
+            self.assertEqual(row_8, results[9])
+            self.assertEqual(row_4, results[10])
+            self.assertEqual(row_10, results[11])
+
+        with self.subTest('SELECT with ORDER BY - By name, description, id - DESC'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='name DESC, description DESC, id DESC')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 12)
+            self.assertEqual(row_10, results[0])
+            self.assertEqual(row_4, results[1])
+            self.assertEqual(row_8, results[2])
+            self.assertEqual(row_2, results[3])
+            self.assertEqual(row_12, results[4])
+            self.assertEqual(row_7, results[5])
+            self.assertEqual(row_6, results[6])
+            self.assertEqual(row_1, results[7])
+            self.assertEqual(row_11, results[8])
+            self.assertEqual(row_5, results[9])
+            self.assertEqual(row_9, results[10])
+            self.assertEqual(row_3, results[11])
+
+        with self.subTest('SELECT with ORDER BY - By description, name, id - ASC'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='description ASC, name ASC, id ASC')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 12)
+            self.assertEqual(row_5, results[0])
+            self.assertEqual(row_11, results[1])
+            self.assertEqual(row_2, results[2])
+            self.assertEqual(row_8, results[3])
+            self.assertEqual(row_1, results[4])
+            self.assertEqual(row_6, results[5])
+            self.assertEqual(row_7, results[6])
+            self.assertEqual(row_12, results[7])
+            self.assertEqual(row_4, results[8])
+            self.assertEqual(row_10, results[9])
+            self.assertEqual(row_3, results[10])
+            self.assertEqual(row_9, results[11])
+
+        with self.subTest('SELECT with ORDER BY - By description, name, id - DESC'):
+            # Run test query.
+            results = self.connector.records.select(table_name, order_by_clause='description DESC, name DESC, id DESC')
+
+            # Verify records returned in expected order.
+            self.assertEqual(len(results), 12)
+            self.assertEqual(row_9, results[0])
+            self.assertEqual(row_3, results[1])
+            self.assertEqual(row_10, results[2])
+            self.assertEqual(row_4, results[3])
+            self.assertEqual(row_12, results[4])
+            self.assertEqual(row_7, results[5])
+            self.assertEqual(row_6, results[6])
+            self.assertEqual(row_1, results[7])
+            self.assertEqual(row_8, results[8])
+            self.assertEqual(row_2, results[9])
+            self.assertEqual(row_11, results[10])
+            self.assertEqual(row_5, results[11])
+
     def test__insert__basic__success(self):
         """
         Test `INSERT` query with basic values.

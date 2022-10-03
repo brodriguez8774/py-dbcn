@@ -32,11 +32,18 @@ class BaseRecords:
         # Define provided direct parent object.
         self._parent = parent
 
-    def select(self, table_name, select_clause=None, where_clause=None, display_query=True, display_results=True):
+    def select(
+        self,
+        table_name,
+        select_clause=None, where_clause=None, order_by_clause=None,
+        display_query=True, display_results=True,
+    ):
         """Selects records from provided table.
 
         :param table_name: Name of table to select from.
         :param select_clause: Clause to choose selected columns.
+        :param where_clause: Clause to limit selected records.
+        :param order_by_clause: Clause to adjust sort order of records.
         :param display_query: Bool indicating if query should output to console. Defaults to True.
         :param display_results: Bool indicating if results should output to console. Defaults to True.
         """
@@ -57,8 +64,11 @@ class BaseRecords:
         if not self._base.validate.where_clause(where_clause):
             raise ValueError('Invalid WHERE clause of "{0}".'.format(where_clause))
 
+        # Check that provided ORDER BY clause is valid format.
+        order_by_clause = self._base.validate.sanitize_order_by_clause(order_by_clause)
+
         # Select record.
-        query = 'SELECT {0} FROM {1}{2};'.format(select_clause, table_name, where_clause)
+        query = 'SELECT {0} FROM {1}{2}{3};'.format(select_clause, table_name, where_clause, order_by_clause)
         results = self._base.query.execute(query, display_query=display_query)
         if display_results:
             self._base.display.records.select(results, logger, table_name, select_clause)
