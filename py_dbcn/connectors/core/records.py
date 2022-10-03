@@ -169,6 +169,7 @@ class BaseRecords:
             # Replace original clause.
             values_clause = updated_values_clause
 
+        orig_where_clause = where_clause
         if len(where_clause) > 0:
             where_clause = ' WHERE {0}'.format(where_clause)
 
@@ -177,9 +178,15 @@ class BaseRecords:
         UPDATE {0}
         SET {1}{2};
         """.format(table_name, values_clause, where_clause)
-        results = self._base.query.execute(query, display_query=display_query)
-        if display_results:
-            self._base.display.results('{0}'.format(results))
+        self._base.query.execute(query, display_query=display_query)
+
+        # Do a select to get the updated values as results.
+        results = self.select(
+            table_name,
+            where_clause=orig_where_clause,
+            display_query=False,
+            display_results=display_results,
+        )
 
         return results
 
