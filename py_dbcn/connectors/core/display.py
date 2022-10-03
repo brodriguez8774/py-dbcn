@@ -6,6 +6,7 @@ Should be inherited by language-specific connectors.
 """
 
 # System Imports.
+import copy
 import textwrap
 
 # Internal Imports.
@@ -317,18 +318,18 @@ class RecordDisplay:
                 ]
             else:
                 select_clause = select_clause.split(',')
+                table_cols = []
+                table_describe = self._base.tables.describe(table_name, display_query=False, display_results=False)
                 for index in range(len(select_clause)):
+                    # Sanitize select clause values.
                     clause = select_clause[index].strip()
                     if len(clause) > 1 and clause[0] == clause[-1] and clause[0] in ['`', '"', "'"]:
                         clause = clause[1:-1]
                     select_clause[index] = clause
 
                 # Calculate column header values, filtered by select clause.
-                table_cols = [
-                    x[col_name_index]
-                    for x in self._base.tables.describe(table_name, display_query=False, display_results=False)
-                    if x[col_name_index] in select_clause
-                ]
+                table_cols = copy.deepcopy(select_clause)
+
             col_len_array = []
             total_col_len = 0
             for table_col in table_cols:

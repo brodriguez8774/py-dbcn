@@ -362,6 +362,150 @@ EXPECTED__RECORD__SELECT__PT_15 = """
 +---------+-----------+------------------+
 """.strip()
 
+
+EXPECTED__RECORD__LIMITED_SELECT__BASIC__ALL = """
++----+-------------------+-------------+
+| id | name              | description |
++----+-------------------+-------------+
+| 1  | longer name value | short desc  |
++----+-------------------+-------------+
+""".strip()
+
+
+EXPECTED__RECORD__LIMITED_SELECT__BASIC__OMIT_ID = """
++-------------------+-------------+
+| name              | description |
++-------------------+-------------+
+| longer name value | short desc  |
++-------------------+-------------+
+""".strip()
+
+
+EXPECTED__RECORD__LIMITED_SELECT__BASIC__OMIT_NAME = """
++----+-------------+
+| id | description |
++----+-------------+
+| 1  | short desc  |
++----+-------------+
+""".strip()
+
+
+EXPECTED__RECORD__LIMITED_SELECT__BASIC__OMIT_DESC = """
++----+-------------------+
+| id | name              |
++----+-------------------+
+| 1  | longer name value |
++----+-------------------+
+""".strip()
+
+
+EXPECTED__RECORD__LIMITED_SELECT__BASIC__REVERSED_ALL = """
++-------------+-------------------+----+
+| description | name              | id |
++-------------+-------------------+----+
+| short desc  | longer name value | 1  |
++-------------+-------------------+----+
+""".strip()
+
+
+EXPECTED__RECORD__LIMITED_SELECT__BASIC__REVERSED_OMIT_ID = """
++-------------+-------------------+
+| description | name              |
++-------------+-------------------+
+| short desc  | longer name value |
++-------------+-------------------+
+""".strip()
+
+
+EXPECTED__RECORD__LIMITED_SELECT__BASIC__REVERSED_OMIT_NAME = """
++-------------+----+
+| description | id |
++-------------+----+
+| short desc  | 1  |
++-------------+----+
+""".strip()
+
+
+EXPECTED__RECORD__LIMITED_SELECT__BASIC__REVERSED_OMIT_DESC = """
++-------------------+----+
+| name              | id |
++-------------------+----+
+| longer name value | 1  |
++-------------------+----+
+""".strip()
+
+
+EXPECTED__RECORD__LIMITED_SELECT__DATETIME__ALL = """
++----+---------------------+------------+
+| id | test_datetime       | test_date  |
++----+---------------------+------------+
+| 1  | {0} | {1} |
++----+---------------------+------------+
+""".strip()
+
+
+EXPECTED__RECORD__LIMITED_SELECT__DATETIME__OMIT_ID = """
++---------------------+------------+
+| test_datetime       | test_date  |
++---------------------+------------+
+| {0} | {1} |
++---------------------+------------+
+""".strip()
+
+
+EXPECTED__RECORD__LIMITED_SELECT__DATETIME__OMIT_DATETIME = """
++----+------------+
+| id | test_date  |
++----+------------+
+| 1  | {0} |
++----+------------+
+""".strip()
+
+
+EXPECTED__RECORD__LIMITED_SELECT__DATETIME__OMIT_DATE = """
++----+---------------------+
+| id | test_datetime       |
++----+---------------------+
+| 1  | {0} |
++----+---------------------+
+""".strip()
+
+
+EXPECTED__RECORD__LIMITED_SELECT__DATETIME__REVERSED_ALL = """
++------------+---------------------+----+
+| test_date  | test_datetime       | id |
++------------+---------------------+----+
+| {0} | {1} | 1  |
++------------+---------------------+----+
+""".strip()
+
+
+EXPECTED__RECORD__LIMITED_SELECT__DATETIME__REVERSED_OMIT_ID = """
++------------+---------------------+
+| test_date  | test_datetime       |
++------------+---------------------+
+| {0} | {1} |
++------------+---------------------+
+""".strip()
+
+
+EXPECTED__RECORD__LIMITED_SELECT__DATETIME__REVERSED_OMIT_DATETIME = """
++------------+----+
+| test_date  | id |
++------------+----+
+| {0} | 1  |
++------------+----+
+""".strip()
+
+
+EXPECTED__RECORD__LIMITED_SELECT__DATETIME__REVERSED_OMIT_DATE = """
++---------------------+----+
+| test_datetime       | id |
++---------------------+----+
+| {0} | 1  |
++---------------------+----+
+""".strip()
+
 # endregion Record Display Output
 
 
@@ -396,6 +540,24 @@ class ExpectedOutput:
         SELECT__PT_13 = EXPECTED__RECORD__SELECT__PT_13
         SELECT__PT_14 = EXPECTED__RECORD__SELECT__PT_14
         SELECT__PT_15 = EXPECTED__RECORD__SELECT__PT_15
+
+        LIMITED_SELECT__BASIC__ALL = EXPECTED__RECORD__LIMITED_SELECT__BASIC__ALL
+        LIMITED_SELECT__BASIC__OMIT_ID = EXPECTED__RECORD__LIMITED_SELECT__BASIC__OMIT_ID
+        LIMITED_SELECT__BASIC__OMIT_NAME = EXPECTED__RECORD__LIMITED_SELECT__BASIC__OMIT_NAME
+        LIMITED_SELECT__BASIC__OMIT_DESC = EXPECTED__RECORD__LIMITED_SELECT__BASIC__OMIT_DESC
+        LIMITED_SELECT__BASIC__REVERSED_ALL = EXPECTED__RECORD__LIMITED_SELECT__BASIC__REVERSED_ALL
+        LIMITED_SELECT__BASIC__REVERSED_OMIT_ID = EXPECTED__RECORD__LIMITED_SELECT__BASIC__REVERSED_OMIT_ID
+        LIMITED_SELECT__BASIC__REVERSED_OMIT_NAME = EXPECTED__RECORD__LIMITED_SELECT__BASIC__REVERSED_OMIT_NAME
+        LIMITED_SELECT__BASIC__REVERSED_OMIT_DESC = EXPECTED__RECORD__LIMITED_SELECT__BASIC__REVERSED_OMIT_DESC
+
+        LIMITED_SELECT__DATETIME__ALL = EXPECTED__RECORD__LIMITED_SELECT__DATETIME__ALL
+        LIMITED_SELECT__DATETIME__OMIT_ID = EXPECTED__RECORD__LIMITED_SELECT__DATETIME__OMIT_ID
+        LIMITED_SELECT__DATETIME__OMIT_DATETIME = EXPECTED__RECORD__LIMITED_SELECT__DATETIME__OMIT_DATETIME
+        LIMITED_SELECT__DATETIME__OMIT_DATE = EXPECTED__RECORD__LIMITED_SELECT__DATETIME__OMIT_DATE
+        LIMITED_SELECT__DATETIME__REVERSED_ALL = EXPECTED__RECORD__LIMITED_SELECT__DATETIME__REVERSED_ALL
+        LIMITED_SELECT__DATETIME__REVERSED_OMIT_ID = EXPECTED__RECORD__LIMITED_SELECT__DATETIME__REVERSED_OMIT_ID
+        LIMITED_SELECT__DATETIME__REVERSED_OMIT_DATETIME = EXPECTED__RECORD__LIMITED_SELECT__DATETIME__REVERSED_OMIT_DATETIME
+        LIMITED_SELECT__DATETIME__REVERSED_OMIT_DATE = EXPECTED__RECORD__LIMITED_SELECT__DATETIME__REVERSED_OMIT_DATE
 
     tables = Tables()
     records = Records()

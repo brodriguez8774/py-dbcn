@@ -10,6 +10,7 @@ from .constants import (
     SHOW_TABLES_QUERY,
     COLUMNS_CLAUSE__BASIC,
     COLUMNS_CLAUSE__MINIMAL,
+    COLUMNS_CLAUSE__DATETIME,
 )
 from .test_core import TestMysqlDatabaseParent
 from .expected_display_output import ExpectedOutput
@@ -119,3 +120,4 @@ class TestMysqlDisplayRecords(TestMysqlDatabaseParent, CoreDisplayRecordsMixin):
         cls._show_tables_query = SHOW_TABLES_QUERY
         cls._columns_clause__minimal = COLUMNS_CLAUSE__MINIMAL
         cls._columns_clause__basic = COLUMNS_CLAUSE__BASIC
+        cls._columns_clause__datetime = COLUMNS_CLAUSE__DATETIME
