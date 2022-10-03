@@ -75,7 +75,7 @@ class PostgresqlDbConnector(AbstractDbConnector):
         except:
             pass
 
-        logger.info('Closed MySQL database connection.')
+        logger.info('Closed PostgreSQL database connection.')
 
     def _get_related_database_class(self):
         """
