@@ -56,6 +56,27 @@ class BaseQuery:
             results = []
         return results
 
+    def execute_many(self, query, values, display_query=True):
+        """"""
+        if display_query:
+            self._base.display.query(query)
+
+        # Create connection and execute query.
+        cursor = self._base._connection.cursor()
+        cursor.executemany(query, values)
+
+        # Get results.
+        results = self._fetch_results(cursor)
+
+        # Close connection.
+        self._base._connection.commit()
+        cursor.close()
+
+        # Return results.
+        if results is None:
+            results = []
+        return results
+
     def _fetch_results(self, cursor):
         """Helper function to fetch query results, based on database type."""
         raise NotImplementedError('Please override the connection.query._fetch_results() function.')

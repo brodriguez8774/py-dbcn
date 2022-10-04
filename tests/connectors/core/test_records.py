@@ -878,6 +878,123 @@ class CoreRecordsTestMixin:
         self.assertIn((1, test_datetime__2020.replace(microsecond=0), test_date__2020), results)
         self.assertIn((2, test_datetime__2021.replace(microsecond=0), test_date__2021), results)
 
+    def test__insert_many__success(self):
+        """
+        Test execute_many `INSERT` query.
+        """
+        table_name = 'test_queries__insert_many__success'
+
+        # Verify table exists.
+        try:
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__basic))
+        except self.connector.errors.table_already_exists:
+            # Table already exists, as we want.
+            pass
+
+        # Verify starting state.
+        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+        self.assertEqual(len(results), 0)
+
+        # Generate row values.
+        row_1 = (1, 'test_name_1', 'test_desc_1')
+        row_2 = (2, 'test_name_2', 'test_desc_2')
+        row_3 = (3, 'test_name_3', 'test_desc_3')
+        row_4 = (4, 'test_name_4', 'test_desc_4')
+        row_5 = (5, 'test_name_5', 'test_desc_5')
+        row_6 = (6, 'test_name_6', 'test_desc_6')
+        row_7 = (7, 'test_name_7', 'test_desc_7')
+        row_8 = (8, 'test_name_8', 'test_desc_8')
+        row_9 = (9, 'test_name_9', 'test_desc_9')
+        row_10 = (10, 'test_name_10', 'test_desc_10')
+
+        with self.subTest('Run with one insert'):
+            # Run test query.
+            rows = [
+                row_1,
+            ]
+            self.connector.records.insert_many(table_name, rows)
+
+            # Verify one record returned.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 1)
+            self.assertIn(row_1, results)
+
+        # Reset table.
+        self.connector.tables.drop(table_name)
+        self.connector.tables.create(table_name, self._columns_clause__basic)
+
+        with self.subTest('Run with two inserts'):
+            # Run test query.
+            rows = [
+                row_1,
+                row_2,
+            ]
+            self.connector.records.insert_many(table_name, rows)
+
+            # Verify one record returned.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 2)
+            self.assertIn(row_1, results)
+            self.assertIn(row_2, results)
+
+        # Reset table.
+        self.connector.tables.drop(table_name)
+        self.connector.tables.create(table_name, self._columns_clause__basic)
+
+        with self.subTest('Run with five inserts'):
+            # Run test query.
+            rows = [
+                row_1,
+                row_2,
+                row_3,
+                row_4,
+                row_5,
+            ]
+            self.connector.records.insert_many(table_name, rows)
+
+            # Verify five records returned.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 5)
+            self.assertIn(row_1, results)
+            self.assertIn(row_2, results)
+            self.assertIn(row_3, results)
+            self.assertIn(row_4, results)
+            self.assertIn(row_5, results)
+
+        # Reset table.
+        self.connector.tables.drop(table_name)
+        self.connector.tables.create(table_name, self._columns_clause__basic)
+
+        with self.subTest('Run with ten inserts'):
+            # Run test query.
+            rows = [
+                row_1,
+                row_2,
+                row_3,
+                row_4,
+                row_5,
+                row_6,
+                row_7,
+                row_8,
+                row_9,
+                row_10,
+            ]
+            self.connector.records.insert_many(table_name, rows)
+
+            # Verify ten records returned.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 10)
+            self.assertIn(row_1, results)
+            self.assertIn(row_2, results)
+            self.assertIn(row_3, results)
+            self.assertIn(row_4, results)
+            self.assertIn(row_5, results)
+            self.assertIn(row_6, results)
+            self.assertIn(row_7, results)
+            self.assertIn(row_8, results)
+            self.assertIn(row_9, results)
+            self.assertIn(row_10, results)
+
     def test__update__basic__success(self):
         """
         Test `UPDATE` query.

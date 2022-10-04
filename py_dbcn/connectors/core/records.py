@@ -127,6 +127,57 @@ class BaseRecords:
 
         return results
 
+    def insert_many(self, table_name, values_clause, columns_clause=None, display_query=True, display_results=True):
+        """"""
+        # Check that provided table name is valid format.
+        if not self._base.validate.table_name(table_name):
+            raise ValueError('Invalid table name of "{0}".'.format(table_name))
+
+        # Check that provided COLUMNS clause is valid format.
+        columns_clause = self._base.validate.sanitize_columns_clause(columns_clause)
+
+        # Check that provided VALUES clause is valid format.
+        # Must be array format.
+        if not isinstance(values_clause, list) and not isinstance(values_clause, tuple):
+            raise ValueError('VALUES clause for INSERT_MANY queries must be in list/tuple format.')
+        values_clause = self._base.validate.sanitize_values_clause(values_clause)
+
+        # Check for values that might need formatting.
+        # For example, if we find date/datetime objects, we automatically convert to a str value that won't error.
+        if isinstance(values_clause, list) or isinstance(values_clause, tuple):
+            updated_values_clause = ()
+
+            # Check each sub-item.
+            for item in values_clause:
+
+                if isinstance(item, datetime.datetime):
+                    # Is a datetime object. Convert to string.
+                    item = item.strftime('%Y-%m-%d %H:%M:%S')
+                elif isinstance(item, datetime.date):
+                    # Is a date object. Convert to string.
+                    item = item.strftime('%Y-%m-%d')
+
+                # Add item to updated clause.
+                updated_values_clause += (item,)
+
+            # Replace original clause.
+            values_clause = updated_values_clause
+        else:
+            raise ValueError('In an execute_many, values clause must be a list or tuple.')
+
+        values_context = ', '.join('%s' for i in range(len(values_clause[0])))
+
+        # Insert record.
+        query = """
+        INSERT INTO {0}{1}
+        VALUES ({2});
+        """.format(table_name, columns_clause, values_context)
+        results = self._base.query.execute_many(query, values_clause, display_query=display_query)
+        if display_results:
+            self._base.display.results('{0}'.format(results))
+
+        return results
+
     def update(self, table_name, values_clause, where_clause, display_query=True, display_results=True):
         """Updates record in provided table.
 
