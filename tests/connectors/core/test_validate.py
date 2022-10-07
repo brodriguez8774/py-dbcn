@@ -28,7 +28,9 @@ class CoreValidateTestMixin:
         # Initialize variables.
         cls.unallowed_char_list = [';', '\\']
         cls.unallowed_unicode_index_list = [59, 92]
-        cls._identifier_str = None
+        cls._quote_columns_format = None
+        cls._quote_select_identifier_format = None
+        cls._quote_str_literal_format = None
 
     # region Name Validation
 
@@ -492,13 +494,13 @@ class CoreValidateTestMixin:
         Tests column validation logic, using str object.
         """
         with self.subTest('Minimal value'):
-            self.assertEqual(
+            self.assertText(
                 self.connector.validate.table_columns('id INT'),
                 '( id INT )',
             )
 
         with self.subTest('Multi-value'):
-            self.assertEqual(
+            self.assertText(
                 self.connector.validate.table_columns(
                     'id INT NOT NULL AUTO_INCREMENT, '
                     'title VARCHAR(100) NOT NULL, '
@@ -520,13 +522,13 @@ class CoreValidateTestMixin:
         Tests column validation logic, using dict object.
         """
         with self.subTest('Minimal value'):
-            self.assertEqual(
+            self.assertText(
                 self.connector.validate.table_columns({'id': 'INT'}),
                 '( id INT )',
             )
 
         with self.subTest('Multi-value'):
-            self.assertEqual(
+            self.assertText(
                 self.connector.validate.table_columns({
                     'id': 'INT NOT NULL AUTO_INCREMENT',
                     'title': 'VARCHAR(100) NOT NULL',
@@ -701,460 +703,460 @@ class CoreValidateTestMixin:
         the "standard" database quote types (', ", and `), and then properly
         converts it to the actual type/format as expected by the given database.
         """
-        if self._identifier_str is None:
-            TypeError('Invalid _identifier_str variable. Is None.')
+        if self._quote_select_identifier_format is None:
+            TypeError('Invalid _select_identifier_clause_format_str variable. Is None.')
 
         # None provided. Defaults back to "*".
         result = self.connector.validate.sanitize_select_identifier_clause(None)
-        self.assertEqual(result, '*')
+        self.assertText(result, '*')
 
         # All flag provided.
         result = self.connector.validate.sanitize_select_identifier_clause('*')
-        self.assertEqual(result, '*')
+        self.assertText(result, '*')
 
         with self.subTest('Values as str - Without quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause('id')
-            self.assertEqual(result, self._identifier_str.format('id'))
+            self.assertText(result, self._quote_select_identifier_format.format('id'))
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause(' id ')
-            self.assertEqual(result, self._identifier_str.format('id'))
+            self.assertText(result, self._quote_select_identifier_format.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause('id, name')
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name')
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name')
                 ),
             )
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause(' id ,  name ')
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
                 ),
             )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause('id, name, code')
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}, {2}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
-                    self._identifier_str.format('code'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
+                    self._quote_select_identifier_format.format('code'),
                 ),
             )
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause(' id ,  name ,  code ')
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}, {2}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
-                    self._identifier_str.format('code'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
+                    self._quote_select_identifier_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as triple str - Without quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause("""id""")
-            self.assertEqual(result, self._identifier_str.format('id'))
+            self.assertText(result, self._quote_select_identifier_format.format('id'))
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause(""" id """)
-            self.assertEqual(result, self._identifier_str.format('id'))
+            self.assertText(result, self._quote_select_identifier_format.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause("""id, name""")
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
                 ),
             )
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause(""" id ,  name """)
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
                 ),
             )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause("""id, name, code""")
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}, {2}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
-                    self._identifier_str.format('code'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
+                    self._quote_select_identifier_format.format('code'),
                 ),
             )
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause(""" id ,  name ,  code """)
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}, {2}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
-                    self._identifier_str.format('code'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
+                    self._quote_select_identifier_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as list - Without quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause(['id'])
-            self.assertEqual(result, self._identifier_str.format('id'))
+            self.assertText(result, self._quote_select_identifier_format.format('id'))
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause([' id '])
-            self.assertEqual(result, self._identifier_str.format('id'))
+            self.assertText(result, self._quote_select_identifier_format.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(['id', 'name'])
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
                 ),
             )
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause([' id ', ' name '])
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
                 ),
             )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(['id', 'name', 'code'])
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}, {2}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
-                    self._identifier_str.format('code'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
+                    self._quote_select_identifier_format.format('code'),
                 ),
             )
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause([' id ', ' name ', ' code '])
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}, {2}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
-                    self._identifier_str.format('code'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
+                    self._quote_select_identifier_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as tuple - Without quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause(('id',))
-            self.assertEqual(result, self._identifier_str.format('id'))
+            self.assertText(result, self._quote_select_identifier_format.format('id'))
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause((' id ',))
-            self.assertEqual(result, self._identifier_str.format('id'))
+            self.assertText(result, self._quote_select_identifier_format.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(('id', 'name'))
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
                 ),
             )
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause((' id ', ' name '))
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
                 ),
             )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(('id', 'name', 'code'))
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}, {2}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
-                    self._identifier_str.format('code'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
+                    self._quote_select_identifier_format.format('code'),
                 ),
             )
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause((' id ', ' name ', ' code '))
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}, {2}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
-                    self._identifier_str.format('code'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
+                    self._quote_select_identifier_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as str - With single quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause("'id'")
-            self.assertEqual(result, self._identifier_str.format('id'))
+            self.assertText(result, self._quote_select_identifier_format.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause("'id', 'name'")
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
                 ),
             )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause("'id', 'name', 'code'")
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}, {2}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
-                    self._identifier_str.format('code')
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
+                    self._quote_select_identifier_format.format('code')
                 ),
             )
 
         with self.subTest('Values as list - With single quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause(["'id'"])
-            self.assertEqual(result, self._identifier_str.format('id'))
+            self.assertText(result, self._quote_select_identifier_format.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(["'id'", "'name'"])
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
                 ),
             )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(["'id'", "'name'", "'code'"])
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}, {2}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
-                    self._identifier_str.format('code'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
+                    self._quote_select_identifier_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as tuple - With single quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause(("'id'",))
-            self.assertEqual(result, self._identifier_str.format('id'))
+            self.assertText(result, self._quote_select_identifier_format.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(("'id'", "'name'"))
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
                 ),
             )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(("'id'", "'name'", "'code'"))
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}, {2}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
-                    self._identifier_str.format('code'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
+                    self._quote_select_identifier_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as str - With double quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause('"id"')
-            self.assertEqual(result, self._identifier_str.format('id'))
+            self.assertText(result, self._quote_select_identifier_format.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause('"id", "name"')
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
                 ),
             )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause('"id", "name", code')
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}, {2}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
-                    self._identifier_str.format('code'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
+                    self._quote_select_identifier_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as list - With double quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause(['"id"'])
-            self.assertEqual(result, self._identifier_str.format('id'))
+            self.assertText(result, self._quote_select_identifier_format.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(['"id"', '"name"'])
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
                 ),
             )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(['"id"', '"name"', '"code"'])
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}, {2}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
-                    self._identifier_str.format('code'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
+                    self._quote_select_identifier_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as tuple - With double quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause(('"id"',))
-            self.assertEqual(result, self._identifier_str.format('id'))
+            self.assertText(result, self._quote_select_identifier_format.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(('"id"', '"name"'))
-            self.assertEqual(
+            self.assertText(
                 result, '{0}, {1}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
                 ),
             )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(('"id"', '"name"', '"code"'))
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}, {2}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
-                    self._identifier_str.format('code'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
+                    self._quote_select_identifier_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as str - With backtick quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause('`id`')
-            self.assertEqual(result, self._identifier_str.format('id'))
+            self.assertText(result, self._quote_select_identifier_format.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause('`id`, `name`')
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
                 ),
             )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause('`id`, `name`, `code`')
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}, {2}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
-                    self._identifier_str.format('code'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
+                    self._quote_select_identifier_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as list - With backtick quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause(['`id`'])
-            self.assertEqual(result, self._identifier_str.format('id'))
+            self.assertText(result, self._quote_select_identifier_format.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(['`id`', '`name`'])
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
                 ),
             )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(['`id`', '`name`', '`code`'])
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}, {2}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
-                    self._identifier_str.format('code'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
+                    self._quote_select_identifier_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as tuple - With backtick quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause(('`id`',))
-            self.assertEqual(result, self._identifier_str.format('id'))
+            self.assertText(result, self._quote_select_identifier_format.format('id'))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(('`id`', '`name`'))
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
                 ),
             )
 
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(('`id`', '`name`', '`code`'))
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}, {2}'.format(
-                    self._identifier_str.format('id'),
-                    self._identifier_str.format('name'),
-                    self._identifier_str.format('code'),
+                    self._quote_select_identifier_format.format('id'),
+                    self._quote_select_identifier_format.format('name'),
+                    self._quote_select_identifier_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as non-standard types'):
             result = self.connector.validate.sanitize_select_identifier_clause((1, True))
-            self.assertEqual(
+            self.assertText(
                 result,
                 '{0}, {1}'.format(
-                    self._identifier_str.format(1),
-                    self._identifier_str.format(True),
+                    self._quote_select_identifier_format.format(1),
+                    self._quote_select_identifier_format.format(True),
                 ),
             )
 
         with self.subTest('Values with function calls'):
             # Uppercase.
             result = self.connector.validate.sanitize_select_identifier_clause('COUNT(*)')
-            self.assertEqual(result, 'COUNT(*)')
+            self.assertText(result, 'COUNT(*)')
 
             # Lowercase.
             result = self.connector.validate.sanitize_select_identifier_clause('count(*)')
-            self.assertEqual(result, 'COUNT(*)')
+            self.assertText(result, 'COUNT(*)')
 
     def test__sanitize_select_identifier_clause__failure(self):
         """
@@ -1163,14 +1165,14 @@ class CoreValidateTestMixin:
         # Param "*" provided with other values.
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_select_identifier_clause('* , id')
-        self.assertEqual('SELECT clause provided * with other params. * is only valid alone.', str(err.exception))
+        self.assertText('SELECT clause provided * with other params. * is only valid alone.', str(err.exception))
 
         # Mistmatching quotes - double then single.
         identifier = """\"id'"""
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_select_identifier_clause(identifier)
-        self.assertEqual(
-            'Invalid SELECT identifier. Identifier does not match acceptable characters.\n Identifier is: "id\'',
+        self.assertText(
+            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: "id\'',
             str(err.exception),
         )
 
@@ -1178,8 +1180,8 @@ class CoreValidateTestMixin:
         identifier = """'id\""""
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_select_identifier_clause(identifier)
-        self.assertEqual(
-            'Invalid SELECT identifier. Identifier does not match acceptable characters.\n Identifier is: \'id"',
+        self.assertText(
+            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: \'id"',
             str(err.exception),
         )
 
@@ -1187,8 +1189,8 @@ class CoreValidateTestMixin:
         identifier = "`id'"
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_select_identifier_clause(identifier)
-        self.assertEqual(
-            'Invalid SELECT identifier. Identifier does not match acceptable characters.\n Identifier is: `id\'',
+        self.assertText(
+            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: `id\'',
             str(err.exception),
         )
 
@@ -1196,8 +1198,8 @@ class CoreValidateTestMixin:
         identifier = "'id`"
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_select_identifier_clause(identifier)
-        self.assertEqual(
-            'Invalid SELECT identifier. Identifier does not match acceptable characters.\n Identifier is: \'id`',
+        self.assertText(
+            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: \'id`',
             str(err.exception),
         )
 
@@ -1205,8 +1207,8 @@ class CoreValidateTestMixin:
         identifier = '"id`'
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_select_identifier_clause(identifier)
-        self.assertEqual(
-            'Invalid SELECT identifier. Identifier does not match acceptable characters.\n Identifier is: "id`',
+        self.assertText(
+            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: "id`',
             str(err.exception),
         )
 
@@ -1214,10 +1216,2531 @@ class CoreValidateTestMixin:
         identifier = '`id"'
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_select_identifier_clause(identifier)
-        self.assertEqual(
-            'Invalid SELECT identifier. Identifier does not match acceptable characters.\n Identifier is: `id"',
+        self.assertText(
+            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: `id"',
             str(err.exception),
         )
+
+    def test__sanitize_columns_clause__success(self):
+        """
+        Test sanitizing a COLUMNS clause, in cases when it should succeed.
+
+        For the most part, we test that the library gracefully handles any of
+        the "standard" database quote types (', ", and `), and then properly
+        converts it to the actual type/format as expected by the given database.
+        """
+        if self._quote_columns_format is None:
+            TypeError('Invalid _columns_clause_format_str variable. Is None.')
+
+        # None provided. Defaults back to empty string.
+        result = self.connector.validate.sanitize_columns_clause(None)
+        self.assertText(result, '')
+
+        # Empty string provided (single-quote str).
+        result = self.connector.validate.sanitize_columns_clause('')
+        self.assertText(result, '')
+
+        # Empty string provided (double-quote str).
+        result = self.connector.validate.sanitize_columns_clause("")
+        self.assertText(result, '')
+
+        # Empty string provided (triple double-quote str).
+        result = self.connector.validate.sanitize_columns_clause("""""")
+        self.assertText(result, '')
+
+        with self.subTest('Values as str - Without quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_columns_clause('id')
+            self.assertText(result, self._quote_columns_format.format('id'))
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_columns_clause(' id ')
+            self.assertText(result, self._quote_columns_format.format('id'))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_columns_clause('id, name')
+            self.assertText(
+                result,
+                '{0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name')
+                ),
+            )
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_columns_clause(' id ,  name ')
+            self.assertText(
+                result,
+                '{0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_columns_clause('id, name, code')
+            self.assertText(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_columns_clause(' id ,  name ,  code ')
+            self.assertText(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as triple str - Without quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_columns_clause("""id""")
+            self.assertText(result, self._quote_columns_format.format('id'))
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_columns_clause(""" id """)
+            self.assertText(result, self._quote_columns_format.format('id'))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_columns_clause("""id, name""")
+            self.assertText(
+                result,
+                '{0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_columns_clause(""" id ,  name """)
+            self.assertText(
+                result,
+                '{0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_columns_clause("""id, name, code""")
+            self.assertText(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_columns_clause(""" id ,  name ,  code """)
+            self.assertText(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as list - Without quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_columns_clause(['id'])
+            self.assertText(result, self._quote_columns_format.format('id'))
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_columns_clause([' id '])
+            self.assertText(result, self._quote_columns_format.format('id'))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_columns_clause(['id', 'name'])
+            self.assertText(
+                result,
+                '{0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_columns_clause([' id ', ' name '])
+            self.assertText(
+                result,
+                '{0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_columns_clause(['id', 'name', 'code'])
+            self.assertText(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_columns_clause([' id ', ' name ', ' code '])
+            self.assertText(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as tuple - Without quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_columns_clause(('id',))
+            self.assertText(result, self._quote_columns_format.format('id'))
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_columns_clause((' id ',))
+            self.assertText(result, self._quote_columns_format.format('id'))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_columns_clause(('id', 'name'))
+            self.assertText(
+                result,
+                '{0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_columns_clause((' id ', ' name '))
+            self.assertText(
+                result,
+                '{0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_columns_clause(('id', 'name', 'code'))
+            self.assertText(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_columns_clause((' id ', ' name ', ' code '))
+            self.assertText(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as str - With single quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_columns_clause("'id'")
+            self.assertText(result, self._quote_columns_format.format('id'))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_columns_clause("'id', 'name'")
+            self.assertText(
+                result,
+                '{0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_columns_clause("'id', 'name', 'code'")
+            self.assertText(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code')
+                ),
+            )
+
+        with self.subTest('Values as list - With single quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_columns_clause(["'id'"])
+            self.assertText(result, self._quote_columns_format.format('id'))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_columns_clause(["'id'", "'name'"])
+            self.assertText(
+                result,
+                '{0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_columns_clause(["'id'", "'name'", "'code'"])
+            self.assertText(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as tuple - With single quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_columns_clause(("'id'",))
+            self.assertText(result, self._quote_columns_format.format('id'))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_columns_clause(("'id'", "'name'"))
+            self.assertText(
+                result,
+                '{0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_columns_clause(("'id'", "'name'", "'code'"))
+            self.assertText(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as str - With double quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_columns_clause('"id"')
+            self.assertText(result, self._quote_columns_format.format('id'))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_columns_clause('"id", "name"')
+            self.assertText(
+                result,
+                '{0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_columns_clause('"id", "name", code')
+            self.assertText(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as list - With double quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_columns_clause(['"id"'])
+            self.assertText(result, self._quote_columns_format.format('id'))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_columns_clause(['"id"', '"name"'])
+            self.assertText(
+                result,
+                '{0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_columns_clause(['"id"', '"name"', '"code"'])
+            self.assertText(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as tuple - With double quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_columns_clause(('"id"',))
+            self.assertText(result, self._quote_columns_format.format('id'))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_columns_clause(('"id"', '"name"'))
+            self.assertText(
+                result, '{0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_columns_clause(('"id"', '"name"', '"code"'))
+            self.assertText(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as str - With backtick quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_columns_clause('`id`')
+            self.assertText(result, self._quote_columns_format.format('id'))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_columns_clause('`id`, `name`')
+            self.assertText(
+                result,
+                '{0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_columns_clause('`id`, `name`, `code`')
+            self.assertText(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as list - With backtick quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_columns_clause(['`id`'])
+            self.assertText(result, self._quote_columns_format.format('id'))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_columns_clause(['`id`', '`name`'])
+            self.assertText(
+                result,
+                '{0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_columns_clause(['`id`', '`name`', '`code`'])
+            self.assertText(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as tuple - With backtick quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_columns_clause(('`id`',))
+            self.assertText(result, self._quote_columns_format.format('id'))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_columns_clause(('`id`', '`name`'))
+            self.assertText(
+                result,
+                '{0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_columns_clause(('`id`', '`name`', '`code`'))
+            self.assertText(
+                result,
+                '{0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as non-standard types'):
+            # TODO: Should these fail? These probably should fail.
+            #  I think only literal column names should work.
+            result = self.connector.validate.sanitize_columns_clause((1, True))
+            self.assertText(
+                result,
+                '{0}, {1}'.format(
+                    self._quote_columns_format.format(1),
+                    self._quote_columns_format.format(True),
+                ),
+            )
+
+    def test__sanitize_columns_clause__failure(self):
+        """
+        Test sanitizing a COLUMNS clause, in cases when it should fail.
+        """
+        # Param "*" provided.
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_columns_clause('*')
+        self.assertText('The * identifier can only be used in a SELECT clause.', str(err.exception))
+
+        # Param "*" provided with other values.
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_columns_clause('* , id')
+        self.assertText('The * identifier can only be used in a SELECT clause.', str(err.exception))
+
+        # Mistmatching quotes - double then single.
+        identifier = """\"id'"""
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_columns_clause(identifier)
+        self.assertText(
+            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: "id\'',
+            str(err.exception),
+        )
+
+        # Mistmatching quotes - single then double.
+        identifier = """'id\""""
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_columns_clause(identifier)
+        self.assertText(
+            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: \'id"',
+            str(err.exception),
+        )
+
+        # Mistmatching quotes - backtick then single.
+        identifier = "`id'"
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_columns_clause(identifier)
+        self.assertText(
+            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: `id\'',
+            str(err.exception),
+        )
+
+        # Mistmatching quotes - single then backtick.
+        identifier = "'id`"
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_columns_clause(identifier)
+        self.assertText(
+            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: \'id`',
+            str(err.exception),
+        )
+
+        # Mistmatching quotes - double then backtick.
+        identifier = '"id`'
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_columns_clause(identifier)
+        self.assertText(
+            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: "id`',
+            str(err.exception),
+        )
+
+        # Mistmatching quotes - backtick then double.
+        identifier = '`id"'
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_columns_clause(identifier)
+        self.assertText(
+            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: `id"',
+            str(err.exception),
+        )
+
+    # def test__sanitize_values_clause__success(self):
+    #     """
+    #     Test sanitizing a VALUES clause, in cases when it should succeed.
+    #
+    #     For the most part, we test that the library gracefully handles any of
+    #     the "standard" database quote types (', ", and `), and then properly
+    #     converts it to the actual type/format as expected by the given database.
+    #     """
+    #     if self._quote_columns_format is None:
+    #         TypeError('Invalid _columns_clause_format_str variable. Is None.')
+    #
+    #     with self.subTest('Values as str - Without quotes'):
+    #
+    #         with self.subTest('Single val provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause('id')
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause(' id ')
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #             # With full statement - upper, no parens.
+    #             result = self.connector.validate.sanitize_values_clause('VALUES id')
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #             # With full statement - lower, no parens.
+    #             result = self.connector.validate.sanitize_values_clause('values id')
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #             # With full statement - upper, with parens.
+    #             result = self.connector.validate.sanitize_values_clause('VALUES (id)')
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #             # With full statement - lower, with parens.
+    #             result = self.connector.validate.sanitize_values_clause('values (id)')
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #         with self.subTest('Two vals provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause('id, name')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause(' id ,  name ')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - upper, no parens.
+    #             result = self.connector.validate.sanitize_values_clause('VALUES id, name')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - lower, no parens.
+    #             result = self.connector.validate.sanitize_values_clause('values id, name')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - upper, with parens.
+    #             result = self.connector.validate.sanitize_values_clause('VALUES (id, name)')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - lower, with parens.
+    #             result = self.connector.validate.sanitize_values_clause('values (id, name)')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #         with self.subTest('Three vals provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause('id, name, code')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause(' id ,  name ,  code ')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - upper, no parens.
+    #             result = self.connector.validate.sanitize_values_clause('VALUES id, name, code')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - lower, no parens.
+    #             result = self.connector.validate.sanitize_values_clause('values id, name, code')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - upper, with parens.
+    #             result = self.connector.validate.sanitize_values_clause('VALUES (id, name, code)')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - lower, with parens.
+    #             result = self.connector.validate.sanitize_values_clause('values (id, name, code)')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #     with self.subTest('Values as triple str - Without quotes'):
+    #
+    #         with self.subTest('Single val provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause("""id""")
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause(""" id """)
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #             # With full statement - upper, no parens.
+    #             result = self.connector.validate.sanitize_values_clause("""VALUES id""")
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #             # With full statement - lower, no parens.
+    #             result = self.connector.validate.sanitize_values_clause("""values id""")
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #             # With full statement - upper, with parens.
+    #             result = self.connector.validate.sanitize_values_clause("""VALUES (id)""")
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #             # With full statement - lower, with parens.
+    #             result = self.connector.validate.sanitize_values_clause("""values (id)""")
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #         with self.subTest('Two vals provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause("""id, name""")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause(""" id , name """)
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - upper, no parens.
+    #             result = self.connector.validate.sanitize_values_clause("""VALUES id, name""")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - lower, no parens.
+    #             result = self.connector.validate.sanitize_values_clause("""values id, name""")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - upper, with parens.
+    #             result = self.connector.validate.sanitize_values_clause("""VALUES (id, name)""")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - lower, with parens.
+    #             result = self.connector.validate.sanitize_values_clause("""values (id, name)""")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #         with self.subTest('Three vals provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause("""id, name, code""")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause(""" id , name , code """)
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - upper, no parens.
+    #             result = self.connector.validate.sanitize_values_clause("""VALUES id, name, code""")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - lower, no parens.
+    #             result = self.connector.validate.sanitize_values_clause("""values id, name, code""")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - upper, with parens.
+    #             result = self.connector.validate.sanitize_values_clause("""VALUES (id, name, code)""")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - lower, with parens.
+    #             result = self.connector.validate.sanitize_values_clause("""values (id, name, code)""")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #     with self.subTest('Values as list - Without quotes'):
+    #
+    #         with self.subTest('Single val provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause(['id'])
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause([' id '])
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format(' id ')))
+    #
+    #         with self.subTest('Two vals provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause(['id', 'name'])
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause([' id ', ' name '])
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format(' id '),
+    #                     self._quote_str_literal_format.format(' name '),
+    #                 ),
+    #             )
+    #
+    #         with self.subTest('Three vals provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause(['id', 'name', 'code'])
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause([' id ', ' name ', ' code '])
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format(' id '),
+    #                     self._quote_str_literal_format.format(' name '),
+    #                     self._quote_str_literal_format.format(' code '),
+    #                 ),
+    #             )
+    #
+    #     with self.subTest('Values as tuple - Without quotes'):
+    #
+    #         with self.subTest('Single val provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause(('id',))
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause((' id ',))
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format(' id ')))
+    #
+    #         with self.subTest('Two vals provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause(('id', 'name'))
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause((' id ', ' name '))
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format(' id '),
+    #                     self._quote_str_literal_format.format(' name '),
+    #                 ),
+    #             )
+    #
+    #         with self.subTest('Three vals provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause(('id', 'name', 'code'))
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause((' id ', ' name ', ' code '))
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format(' id '),
+    #                     self._quote_str_literal_format.format(' name '),
+    #                     self._quote_str_literal_format.format(' code '),
+    #                 ),
+    #             )
+    #
+    #     with self.subTest('Values as str - With single quotes'):
+    #
+    #         with self.subTest('Single val provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause("'id'")
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause(" ' id ' ")
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format(' id ')))
+    #
+    #             # With full statement - upper, no parens.
+    #             result = self.connector.validate.sanitize_values_clause("VALUES 'id'")
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #             # With full statement - lower, no parens.
+    #             result = self.connector.validate.sanitize_values_clause("values 'id'")
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #             # With full statement - upper, with parens.
+    #             result = self.connector.validate.sanitize_values_clause("VALUES ('id')")
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #             # With full statement - lower, with parens.
+    #             result = self.connector.validate.sanitize_values_clause("values ('id')")
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #         with self.subTest('Two vals provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause("'id', 'name'")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause(" ' id ' , ' name ' ")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format(' id '),
+    #                     self._quote_str_literal_format.format(' name '),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - upper, no parens.
+    #             result = self.connector.validate.sanitize_values_clause("VALUES 'id', 'name',")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - lower, no parens.
+    #             result = self.connector.validate.sanitize_values_clause("values 'id', 'name'")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - upper, with parens.
+    #             result = self.connector.validate.sanitize_values_clause("VALUES ('id', 'name')")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - lower, with parens.
+    #             result = self.connector.validate.sanitize_values_clause("values ('id', 'name')")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #         with self.subTest('Three vals provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause("'id', 'name', 'code'")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause(" ' id ' , ' name ' , ' code ' ")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format(' id '),
+    #                     self._quote_str_literal_format.format(' name '),
+    #                     self._quote_str_literal_format.format(' code '),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - upper, no parens.
+    #             result = self.connector.validate.sanitize_values_clause("VALUES 'id', 'name', 'code'")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - lower, no parens.
+    #             result = self.connector.validate.sanitize_values_clause("values 'id', 'name', 'code'")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - upper, with parens.
+    #             result = self.connector.validate.sanitize_values_clause("VALUES ('id', 'name', 'code')")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - lower, with parens.
+    #             result = self.connector.validate.sanitize_values_clause("values ('id', 'name', 'code')")
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #     # with self.subTest('Values as list - With single quotes'):
+    #     #
+    #     #     with self.subTest('Single val provided'):
+    #     #         # Base value.
+    #     #         print('\n\n\n\n\n\n\n\n\n\n\n\n\n')
+    #     #         # All of these tokenize to the same thing? Okay then...
+    #     #         # TODO: Figure out how to tokenize this as expected.
+    #     #         result = self.connector.validate.sanitize_values_clause('id')
+    #     #         result = self.connector.validate.sanitize_values_clause("id")
+    #     #         result = self.connector.validate.sanitize_values_clause("'id'")
+    #     #         result = self.connector.validate.sanitize_values_clause(["'id'"])
+    #     #         self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format("'id'")))
+    #     #
+    #     #         # With extra whitespace.
+    #     #         result = self.connector.validate.sanitize_values_clause([" ' id ' "])
+    #     #         self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format(" ' id ' ")))
+    #     #
+    #     #     with self.subTest('Two vals provided'):
+    #     #         # Base value.
+    #     #         result = self.connector.validate.sanitize_values_clause(["'id'", "'name'"])
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1})'.format(
+    #     #                 self._quote_str_literal_format.format("'id'"),
+    #     #                 self._quote_str_literal_format.format("'name'"),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #         # With extra whitespace.
+    #     #         result = self.connector.validate.sanitize_values_clause([" ' id ' ", " ' name ' "])
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1})'.format(
+    #     #                 self._quote_str_literal_format.format(" ' id ' "),
+    #     #                 self._quote_str_literal_format.format(" ' name ' "),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #     with self.subTest('Three vals provided'):
+    #     #         # Base value.
+    #     #         result = self.connector.validate.sanitize_values_clause(["'id'", "'name'", "'code'"])
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1}, {2})'.format(
+    #     #                 self._quote_str_literal_format.format("'id'"),
+    #     #                 self._quote_str_literal_format.format("'name'"),
+    #     #                 self._quote_str_literal_format.format("'code'"),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #         # With extra whitespace.
+    #     #         result = self.connector.validate.sanitize_values_clause([" ' id ' ", " ' name ' ", " ' code ' "])
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1}, {2})'.format(
+    #     #                 self._quote_str_literal_format.format(" ' id ' "),
+    #     #                 self._quote_str_literal_format.format(" ' name ' "),
+    #     #                 self._quote_str_literal_format.format(" ' code ' "),
+    #     #             ),
+    #     #         )
+    #
+    #     # with self.subTest('Values as tuple - With single quotes'):
+    #     #
+    #     #     with self.subTest('Single val provided'):
+    #     #         # Base value.
+    #     #         result = self.connector.validate.sanitize_values_clause(("'id'",))
+    #     #         self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format("'id'")))
+    #     #
+    #     #         # With extra whitespace.
+    #     #         result = self.connector.validate.sanitize_values_clause((" ' id ' ",))
+    #     #         self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format(" ' id ' ")))
+    #     #
+    #     #     with self.subTest('Two vals provided'):
+    #     #         # Base value.
+    #     #         result = self.connector.validate.sanitize_values_clause(("'id'", "'name'"))
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1})'.format(
+    #     #                 self._quote_str_literal_format.format("'id'"),
+    #     #                 self._quote_str_literal_format.format("'name'"),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #         # With extra whitespace.
+    #     #         result = self.connector.validate.sanitize_values_clause((" ' id ' ", " ' name ' "))
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1})'.format(
+    #     #                 self._quote_str_literal_format.format(" ' id ' "),
+    #     #                 self._quote_str_literal_format.format(" ' name ' "),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #     with self.subTest('Three vals provided'):
+    #     #         # Base value.
+    #     #         result = self.connector.validate.sanitize_values_clause(("'id'", "'name'", "'code'"))
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1}, {2})'.format(
+    #     #                 self._quote_str_literal_format.format("'id'"),
+    #     #                 self._quote_str_literal_format.format("'name'"),
+    #     #                 self._quote_str_literal_format.format("'code'"),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #         # With extra whitespace.
+    #     #         result = self.connector.validate.sanitize_values_clause((" ' id ' ", " ' name ' ", " ' code ' "))
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1}, {2})'.format(
+    #     #                 self._quote_str_literal_format.format(" ' id ' "),
+    #     #                 self._quote_str_literal_format.format(" ' name ' "),
+    #     #                 self._quote_str_literal_format.format(" ' code ' "),
+    #     #             ),
+    #     #         )
+    #
+    #     with self.subTest('Values as str - With double quotes'):
+    #
+    #         with self.subTest('Single val provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause('"id"')
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause(' " id " ')
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format(' id ')))
+    #
+    #             # With full statement - upper, no parens.
+    #             result = self.connector.validate.sanitize_values_clause('VALUES "id"')
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #             # With full statement - lower, no parens.
+    #             result = self.connector.validate.sanitize_values_clause('values "id"')
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #             # With full statement - upper, with parens.
+    #             result = self.connector.validate.sanitize_values_clause('VALUES ("id")')
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #             # With full statement - lower, with parens.
+    #             result = self.connector.validate.sanitize_values_clause('values ("id")')
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('id')))
+    #
+    #         with self.subTest('Two vals provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause('"id", "name"')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause(' " id " , " name " ')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format(' id '),
+    #                     self._quote_str_literal_format.format(' name '),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - upper, no parens.
+    #             result = self.connector.validate.sanitize_values_clause('VALUES "id", "name"')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - lower, no parens.
+    #             result = self.connector.validate.sanitize_values_clause('values "id", "name"')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - upper, with parens.
+    #             result = self.connector.validate.sanitize_values_clause('VALUES ("id", "name")')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - lower, with parens.
+    #             result = self.connector.validate.sanitize_values_clause('values ("id", "name")')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                 ),
+    #             )
+    #
+    #         with self.subTest('Three vals provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause('"id", "name", "code"')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause(' " id " , " name " , " code " ')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format(' id '),
+    #                     self._quote_str_literal_format.format(' name '),
+    #                     self._quote_str_literal_format.format(' code '),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - upper, no parens.
+    #             result = self.connector.validate.sanitize_values_clause('VALUES "id", "name", "code"')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - lower, no parens.
+    #             result = self.connector.validate.sanitize_values_clause('values "id", "name", "code"')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - upper, with parens.
+    #             result = self.connector.validate.sanitize_values_clause('VALUES ("id", "name", "code")')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #             # With full statement - lower, with parens.
+    #             result = self.connector.validate.sanitize_values_clause('values ("id", "name", "code")')
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('id'),
+    #                     self._quote_str_literal_format.format('name'),
+    #                     self._quote_str_literal_format.format('code'),
+    #                 ),
+    #             )
+    #
+    #     with self.subTest('Values as list - With double quotes'):
+    #         with self.subTest('Single val provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause(['"id"'])
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('"id"')))
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause([' " id " '])
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format(' " id " ')))
+    #
+    #         with self.subTest('Two vals provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause(['"id"', '"name"'])
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('"id"'),
+    #                     self._quote_str_literal_format.format('"name"'),
+    #                 ),
+    #             )
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause([' " id " ', ' " name " '])
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format(' " id " '),
+    #                     self._quote_str_literal_format.format(' " name " '),
+    #                 ),
+    #             )
+    #
+    #         with self.subTest('Three vals provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause(['"id"', '"name"', '"code"'])
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('"id"'),
+    #                     self._quote_str_literal_format.format('"name"'),
+    #                     self._quote_str_literal_format.format('"code"'),
+    #                 ),
+    #             )
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause([' " id " ', ' " name " ', ' " code " '])
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format(' " id " '),
+    #                     self._quote_str_literal_format.format(' " name " '),
+    #                     self._quote_str_literal_format.format(' " code " '),
+    #                 ),
+    #             )
+    #
+    #     with self.subTest('Values as tuple - With double quotes'):
+    #
+    #         with self.subTest('Single val provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause(('"id"',))
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('"id"')))
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause((' " id " ',))
+    #             self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format(' " id " ')))
+    #
+    #         with self.subTest('Two vals provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause(('"id"', '"name"'))
+    #             self.assertText(
+    #                 result, '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format('"id"'),
+    #                     self._quote_str_literal_format.format('"name"'),
+    #                 ),
+    #             )
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause((' " id " ', ' " name " '))
+    #             self.assertText(
+    #                 result, '\nVALUES ({0}, {1})'.format(
+    #                     self._quote_str_literal_format.format(' " id " '),
+    #                     self._quote_str_literal_format.format(' " name " '),
+    #                 ),
+    #             )
+    #
+    #         with self.subTest('Three vals provided'):
+    #             # Base value.
+    #             result = self.connector.validate.sanitize_values_clause(('"id"', '"name"', '"code"'))
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format('"id"'),
+    #                     self._quote_str_literal_format.format('"name"'),
+    #                     self._quote_str_literal_format.format('"code"'),
+    #                 ),
+    #             )
+    #
+    #             # With extra whitespace.
+    #             result = self.connector.validate.sanitize_values_clause((' " id " ', ' " name " ', ' " code " '))
+    #             self.assertText(
+    #                 result,
+    #                 '\nVALUES ({0}, {1}, {2})'.format(
+    #                     self._quote_str_literal_format.format(' " id " '),
+    #                     self._quote_str_literal_format.format(' " name " '),
+    #                     self._quote_str_literal_format.format(' " code " '),
+    #                 ),
+    #             )
+    #
+    #     # with self.subTest('Values as str - With backtick quotes'):
+    #     #
+    #     #     with self.subTest('Single val provided'):
+    #     #         # Base value.
+    #     #         result = self.connector.validate.sanitize_values_clause('`id`')
+    #     #         self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('`id`')))
+    #     #
+    #     #         # With extra whitespace.
+    #     #         result = self.connector.validate.sanitize_values_clause(' ` id ` ')
+    #     #         self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('` id `')))
+    #     #
+    #     #         # With full statement - upper, no parens.
+    #     #         result = self.connector.validate.sanitize_values_clause('VALUES `id`')
+    #     #         self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('`id`')))
+    #     #
+    #     #         # With full statement - lower, no parens.
+    #     #         result = self.connector.validate.sanitize_values_clause('values `id`')
+    #     #         self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('`id`')))
+    #     #
+    #     #         # With full statement - upper, no parens.
+    #     #         result = self.connector.validate.sanitize_values_clause('VALUES `id`')
+    #     #         self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('`id`')))
+    #     #
+    #     #         # With full statement - lower, no parens.
+    #     #         result = self.connector.validate.sanitize_values_clause('values `id`')
+    #     #         self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('`id`')))
+    #     #
+    #     #     with self.subTest('Two vals provided'):
+    #     #         # Base value.
+    #     #         result = self.connector.validate.sanitize_values_clause('`id`, `name`')
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1})'.format(
+    #     #                 self._quote_str_literal_format.format('`id`'),
+    #     #                 self._quote_str_literal_format.format('`name`'),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #         # With extra whitespace.
+    #     #         result = self.connector.validate.sanitize_values_clause(' ` id ` , ` name ` ')
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1})'.format(
+    #     #                 self._quote_str_literal_format.format('` id `'),
+    #     #                 self._quote_str_literal_format.format('` name `'),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #         # With full statement - upper, no parens.
+    #     #         result = self.connector.validate.sanitize_values_clause('VALUES `id`, `name`')
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1})'.format(
+    #     #                 self._quote_str_literal_format.format('`id`'),
+    #     #                 self._quote_str_literal_format.format('`name`'),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #         # With full statement - lower, no parens.
+    #     #         result = self.connector.validate.sanitize_values_clause('values `id`, `name`')
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1})'.format(
+    #     #                 self._quote_str_literal_format.format('`id`'),
+    #     #                 self._quote_str_literal_format.format('`name`'),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #         # With full statement - upper, no parens.
+    #     #         result = self.connector.validate.sanitize_values_clause('VALUES `id`, `name`')
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1})'.format(
+    #     #                 self._quote_str_literal_format.format('`id`'),
+    #     #                 self._quote_str_literal_format.format('`name`'),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #         # With full statement - lower, no parens.
+    #     #         result = self.connector.validate.sanitize_values_clause('values `id`, `name`')
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1})'.format(
+    #     #                 self._quote_str_literal_format.format('`id`'),
+    #     #                 self._quote_str_literal_format.format('`name`'),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #     with self.subTest('Three vals provided'):
+    #     #         # Base value.
+    #     #         result = self.connector.validate.sanitize_values_clause('`id`, `name`, `code`')
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1}, {2})'.format(
+    #     #                 self._quote_str_literal_format.format('`id`'),
+    #     #                 self._quote_str_literal_format.format('`name`'),
+    #     #                 self._quote_str_literal_format.format('`code`'),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #         # With extra whitespace.
+    #     #         result = self.connector.validate.sanitize_values_clause(' ` id ` ,  ` name ` , ` code ` ')
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1}, {2})'.format(
+    #     #                 self._quote_str_literal_format.format('`id`'),
+    #     #                 self._quote_str_literal_format.format('`name`'),
+    #     #                 self._quote_str_literal_format.format('`code`'),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #         # With full statement - upper, no parens.
+    #     #         result = self.connector.validate.sanitize_values_clause('VALUES `id`, `name`, `code`')
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1}, {2})'.format(
+    #     #                 self._quote_str_literal_format.format('`id`'),
+    #     #                 self._quote_str_literal_format.format('`name`'),
+    #     #                 self._quote_str_literal_format.format('`code`'),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #         # With full statement - lower, no parens.
+    #     #         result = self.connector.validate.sanitize_values_clause('values `id`, `name`, `code`')
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1}, {2})'.format(
+    #     #                 self._quote_str_literal_format.format('`id`'),
+    #     #                 self._quote_str_literal_format.format('`name`'),
+    #     #                 self._quote_str_literal_format.format('`code`'),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #         # With full statement - upper, no parens.
+    #     #         result = self.connector.validate.sanitize_values_clause('VALUES `id`, `name`, `code`')
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1}, {2})'.format(
+    #     #                 self._quote_str_literal_format.format('`id`'),
+    #     #                 self._quote_str_literal_format.format('`name`'),
+    #     #                 self._quote_str_literal_format.format('`code`'),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #         # With full statement - lower, no parens.
+    #     #         result = self.connector.validate.sanitize_values_clause('values `id`, `name`, `code`')
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1}, {2})'.format(
+    #     #                 self._quote_str_literal_format.format('`id`'),
+    #     #                 self._quote_str_literal_format.format('`name`'),
+    #     #                 self._quote_str_literal_format.format('`code`'),
+    #     #             ),
+    #     #         )
+    #
+    #     # with self.subTest('Values as list - With backtick quotes'):
+    #     #
+    #     #     with self.subTest('Single val provided'):
+    #     #         # Base value.
+    #     #         result = self.connector.validate.sanitize_values_clause(['`id`'])
+    #     #         self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('`id`')))
+    #     #
+    #     #         # With extra whitespace.
+    #     #         result = self.connector.validate.sanitize_values_clause([' ` id ` '])
+    #     #         self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('` id `')))
+    #     #
+    #     #     with self.subTest('Two vals provided'):
+    #     #         # Base value.
+    #     #         result = self.connector.validate.sanitize_values_clause(['`id`', '`name`'])
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1})'.format(
+    #     #                 self._quote_str_literal_format.format('`id`'),
+    #     #                 self._quote_str_literal_format.format('`name`'),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #         # With extra whitespace.
+    #     #         result = self.connector.validate.sanitize_values_clause([' ` id ` ', ' ` name ` '])
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1})'.format(
+    #     #                 self._quote_str_literal_format.format(' ` id ` '),
+    #     #                 self._quote_str_literal_format.format(' ` name ` '),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #     with self.subTest('Three vals provided'):
+    #     #         # Base value.
+    #     #         result = self.connector.validate.sanitize_values_clause(['`id`', '`name`', '`code`'])
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1}, {2})'.format(
+    #     #                 self._quote_str_literal_format.format('`id`'),
+    #     #                 self._quote_str_literal_format.format('`name`'),
+    #     #                 self._quote_str_literal_format.format('`code`'),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #         # With extra whitespace.
+    #     #         result = self.connector.validate.sanitize_values_clause([' ` id ` ', ' ` name ` ', ' ` code ` '])
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1}, {2})'.format(
+    #     #                 self._quote_str_literal_format.format(' ` id ` '),
+    #     #                 self._quote_str_literal_format.format(' ` name ` '),
+    #     #                 self._quote_str_literal_format.format(' ` code ` '),
+    #     #             ),
+    #     #         )
+    #
+    #     # with self.subTest('Values as tuple - With backtick quotes'):
+    #     #
+    #     #     with self.subTest('Single val provided'):
+    #     #         # Base value.
+    #     #         result = self.connector.validate.sanitize_values_clause(('`id`',))
+    #     #         self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format('`id`')))
+    #     #
+    #     #         # With extra whitespace.
+    #     #         result = self.connector.validate.sanitize_values_clause((' ` id ` ',))
+    #     #         self.assertText(result, '\nVALUES ({0})'.format(self._quote_str_literal_format.format(' ` id ` ')))
+    #     #
+    #     #     with self.subTest('Two vals provided'):
+    #     #         # Base value.
+    #     #         result = self.connector.validate.sanitize_values_clause(('`id`', '`name`'))
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1})'.format(
+    #     #                 self._quote_str_literal_format.format('`id`'),
+    #     #                 self._quote_str_literal_format.format('`name`'),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #         # With extra whitespace.
+    #     #         result = self.connector.validate.sanitize_values_clause((' ` id ` ', ' ` name ` '))
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1})'.format(
+    #     #                 self._quote_str_literal_format.format(' ` id ` '),
+    #     #                 self._quote_str_literal_format.format(' ` name ` '),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #     with self.subTest('Three vals provided'):
+    #     #         # Base value.
+    #     #         result = self.connector.validate.sanitize_values_clause(('`id`', '`name`', '`code`'))
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1}, {2})'.format(
+    #     #                 self._quote_str_literal_format.format('`id`'),
+    #     #                 self._quote_str_literal_format.format('`name`'),
+    #     #                 self._quote_str_literal_format.format('`code`'),
+    #     #             ),
+    #     #         )
+    #     #
+    #     #         # With extra whitespace.
+    #     #         result = self.connector.validate.sanitize_values_clause((' ` id ` ', ' ` name ` ', ' ` code ` '))
+    #     #         self.assertText(
+    #     #             result,
+    #     #             '\nVALUES ({0}, {1}, {2})'.format(
+    #     #                 self._quote_str_literal_format.format(' ` id ` '),
+    #     #                 self._quote_str_literal_format.format(' ` name ` '),
+    #     #                 self._quote_str_literal_format.format(' ` code ` '),
+    #     #             ),
+    #     #         )
+    #
+    #     with self.subTest('Values as non-standard types'):
+    #         result = self.connector.validate.sanitize_values_clause((1, True))
+    #         self.assertText(
+    #             result,
+    #             '\nVALUES ({0}, {1})'.format(
+    #                 1,
+    #                 True,
+    #             ),
+    #         )
+    #
+    #     # # Mistmatching quotes - double then single.
+    #     # identifier = """\"id'"""
+    #     # result = self.connector.validate.sanitize_values_clause(identifier)
+    #     # self.assertText(
+    #     #     'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: "id\'',
+    #     #     result,
+    #     # )
+    #     #
+    #     # # Mistmatching quotes - single then double.
+    #     # identifier = """'id\""""
+    #     # result = self.connector.validate.sanitize_values_clause(identifier)
+    #     # self.assertText(
+    #     #     'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: \'id"',
+    #     #     result,
+    #     # )
+    #     #
+    #     # # Mistmatching quotes - backtick then single.
+    #     # identifier = "`id'"
+    #     # result = self.connector.validate.sanitize_values_clause(identifier)
+    #     # self.assertText(
+    #     #     'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: `id\'',
+    #     #     result,
+    #     # )
+    #     #
+    #     # # Mistmatching quotes - single then backtick.
+    #     # identifier = "'id`"
+    #     # result = self.connector.validate.sanitize_values_clause(identifier)
+    #     # self.assertText(
+    #     #     'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: \'id`',
+    #     #     result,
+    #     # )
+    #     #
+    #     # # Mistmatching quotes - double then backtick.
+    #     # identifier = '"id`'
+    #     # result = self.connector.validate.sanitize_values_clause(identifier)
+    #     # self.assertText(
+    #     #     'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: "id`',
+    #     #     result,
+    #     # )
+    #     #
+    #     # # Mistmatching quotes - backtick then double.
+    #     # identifier = '`id"'
+    #     # result = self.connector.validate.sanitize_values_clause(identifier)
+    #     # self.assertText(
+    #     #     'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: `id"',
+    #     #     result,
+    #     # )
+
+    # def test__sanitize_values_clause__failure(self):
+    #     """
+    #     Test sanitizing a VALUES clause, in cases when it should fail.
+    #     """
+    #     # None provided.
+    #     with self.assertRaises(ValueError) as err:
+    #         self.connector.validate.sanitize_values_clause(None)
+    #     self.assertText('Invalid VALUES clause. Must have one or more items.', str(err.exception))
+    #
+    #     # Empty string provided (single-quote str).
+    #     with self.assertRaises(ValueError) as err:
+    #         self.connector.validate.sanitize_values_clause('')
+    #     self.assertText('Invalid VALUES clause. Must have one or more items.', str(err.exception))
+    #
+    #     # Empty string provided (double-quote str).
+    #     with self.assertRaises(ValueError) as err:
+    #         self.connector.validate.sanitize_values_clause("")
+    #     self.assertText('Invalid VALUES clause. Must have one or more items.', str(err.exception))
+    #
+    #     # Empty string provided (triple double-quote str).
+    #     with self.assertRaises(ValueError) as err:
+    #         self.connector.validate.sanitize_values_clause("""""")
+    #     self.assertText('Invalid VALUES clause. Must have one or more items.', str(err.exception))
+    #
+    #     # "VALUES" provided without any additional values.
+    #     with self.assertRaises(ValueError) as err:
+    #         self.connector.validate.sanitize_values_clause('VALUES')
+    #     self.assertText('Invalid VALUES clause. Must have one or more items.', str(err.exception))
+    #     with self.assertRaises(ValueError) as err:
+    #         self.connector.validate.sanitize_values_clause('   VALUES   ')
+    #     self.assertText('Invalid VALUES clause. Must have one or more items.', str(err.exception))
+    #
+    #     # Param "*" provided.
+    #     with self.assertRaises(ValueError) as err:
+    #         self.connector.validate.sanitize_values_clause('*')
+    #     self.assertText('The * identifier can only be used in a SELECT clause.', str(err.exception))
+    #
+    #     # Param "*" provided with other values.
+    #     with self.assertRaises(ValueError) as err:
+    #         self.connector.validate.sanitize_values_clause('* , id')
+    #     self.assertText('The * identifier can only be used in a SELECT clause.', str(err.exception))
+
+    def test__sanitize_order_by_clause__success(self):
+        """
+        Test sanitizing an ORDER BY clause, in cases when it should succeed.
+
+        For the most part, we test that the library gracefully handles any of
+        the "standard" database quote types (', ", and `), and then properly
+        converts it to the actual type/format as expected by the given database.
+        """
+        if self._quote_columns_format is None:
+            TypeError('Invalid _columns_clause_format_str variable. Is None.')
+
+        # None provided. Defaults back to empty string.
+        result = self.connector.validate.sanitize_order_by_clause(None)
+        self.assertText(result, '')
+
+        # Empty string provided (single-quote str).
+        result = self.connector.validate.sanitize_order_by_clause('')
+        self.assertText(result, '')
+
+        # Empty string provided (double-quote str).
+        result = self.connector.validate.sanitize_order_by_clause("")
+        self.assertText(result, '')
+
+        # Empty string provided (triple double-quote str).
+        result = self.connector.validate.sanitize_order_by_clause("""""")
+        self.assertText(result, '')
+
+        with self.subTest('Values as str - Without quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_order_by_clause('id')
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_order_by_clause(' id ')
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            # With full statement - upper.
+            result = self.connector.validate.sanitize_order_by_clause('ORDER BY id')
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            # With full statement - lower.
+            result = self.connector.validate.sanitize_order_by_clause('order by id')
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_order_by_clause('id, name')
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name')
+                ),
+            )
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_order_by_clause(' id ,  name ')
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_order_by_clause('id, name, code')
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_order_by_clause(' id ,  name ,  code ')
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as triple str - Without quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_order_by_clause("""id""")
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_order_by_clause(""" id """)
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            # With full statement - upper.
+            result = self.connector.validate.sanitize_order_by_clause("""ORDER BY id""")
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            # With full statement - lower.
+            result = self.connector.validate.sanitize_order_by_clause("""order by id""")
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_order_by_clause("""id, name""")
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_order_by_clause(""" id ,  name """)
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_order_by_clause("""id, name, code""")
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_order_by_clause(""" id ,  name ,  code """)
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as list - Without quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_order_by_clause(['id'])
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_order_by_clause([' id '])
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_order_by_clause(['id', 'name'])
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_order_by_clause([' id ', ' name '])
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_order_by_clause(['id', 'name', 'code'])
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_order_by_clause([' id ', ' name ', ' code '])
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as tuple - Without quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_order_by_clause(('id',))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_order_by_clause((' id ',))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_order_by_clause(('id', 'name'))
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_order_by_clause((' id ', ' name '))
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_order_by_clause(('id', 'name', 'code'))
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_order_by_clause((' id ', ' name ', ' code '))
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as str - With single quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_order_by_clause("'id'")
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            # With full statement - upper.
+            result = self.connector.validate.sanitize_order_by_clause("ORDER BY 'id'")
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            # With full statement - lower.
+            result = self.connector.validate.sanitize_order_by_clause("order by 'id'")
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_order_by_clause("'id', 'name'")
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_order_by_clause("'id', 'name', 'code'")
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code')
+                ),
+            )
+
+        with self.subTest('Values as list - With single quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_order_by_clause(["'id'"])
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_order_by_clause(["'id'", "'name'"])
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_order_by_clause(["'id'", "'name'", "'code'"])
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as tuple - With single quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_order_by_clause(("'id'",))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_order_by_clause(("'id'", "'name'"))
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_order_by_clause(("'id'", "'name'", "'code'"))
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as str - With double quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_order_by_clause('"id"')
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            # With full statement - upper.
+            result = self.connector.validate.sanitize_order_by_clause('ORDER BY "id"')
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            # With full statement - lower.
+            result = self.connector.validate.sanitize_order_by_clause('order by "id"')
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_order_by_clause('"id", "name"')
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_order_by_clause('"id", "name", code')
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as list - With double quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_order_by_clause(['"id"'])
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_order_by_clause(['"id"', '"name"'])
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_order_by_clause(['"id"', '"name"', '"code"'])
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as tuple - With double quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_order_by_clause(('"id"',))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_order_by_clause(('"id"', '"name"'))
+            self.assertText(
+                result, '\nORDER BY {0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_order_by_clause(('"id"', '"name"', '"code"'))
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as str - With backtick quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_order_by_clause('`id`')
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            # With full statement - upper.
+            result = self.connector.validate.sanitize_order_by_clause('ORDER BY `id`')
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            # With full statement - lower.
+            result = self.connector.validate.sanitize_order_by_clause('order by `id`')
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_order_by_clause('`id`, `name`')
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_order_by_clause('`id`, `name`, `code`')
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as list - With backtick quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_order_by_clause(['`id`'])
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_order_by_clause(['`id`', '`name`'])
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_order_by_clause(['`id`', '`name`', '`code`'])
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as tuple - With backtick quotes'):
+            # Single val provided.
+            result = self.connector.validate.sanitize_order_by_clause(('`id`',))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+
+            # Two vals provided.
+            result = self.connector.validate.sanitize_order_by_clause(('`id`', '`name`'))
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                ),
+            )
+
+            # Three vals provided.
+            result = self.connector.validate.sanitize_order_by_clause(('`id`', '`name`', '`code`'))
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}, {2}'.format(
+                    self._quote_columns_format.format('id'),
+                    self._quote_columns_format.format('name'),
+                    self._quote_columns_format.format('code'),
+                ),
+            )
+
+        with self.subTest('Values as non-standard types'):
+            # TODO: Should these fail? These probably should fail.
+            #  I think only literal column names should work.
+            result = self.connector.validate.sanitize_order_by_clause((1, True))
+            self.assertText(
+                result,
+                '\nORDER BY {0}, {1}'.format(
+                    self._quote_columns_format.format(1),
+                    self._quote_columns_format.format(True),
+                ),
+            )
+
+    def test__sanitize_order_by_clause__failure(self):
+        """
+        Test sanitizing an ORDER BY clause, in cases when it should fail.
+        """
+        # "ORDER BY" provided without any additional values.
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_order_by_clause('ORDER BY')
+        self.assertText('Invalid ORDER BY clause.', str(err.exception))
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_order_by_clause('   ORDER BY   ')
+        self.assertText('Invalid ORDER BY clause.', str(err.exception))
+
+        # Param "*" provided.
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_order_by_clause('*')
+        self.assertText('The * identifier can only be used in a SELECT clause.', str(err.exception))
+
+        # Param "*" provided with other values.
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_order_by_clause('* , id')
+        self.assertText('The * identifier can only be used in a SELECT clause.', str(err.exception))
+
+        # Mistmatching quotes - double then single.
+        identifier = """\"id'"""
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_order_by_clause(identifier)
+        self.assertText(
+            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: "id\'',
+            str(err.exception),
+        )
+
+        # Mistmatching quotes - single then double.
+        identifier = """'id\""""
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_order_by_clause(identifier)
+        self.assertText(
+            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: \'id"',
+            str(err.exception),
+        )
+
+        # Mistmatching quotes - backtick then single.
+        identifier = "`id'"
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_order_by_clause(identifier)
+        self.assertText(
+            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: `id\'',
+            str(err.exception),
+        )
+
+        # Mistmatching quotes - single then backtick.
+        identifier = "'id`"
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_order_by_clause(identifier)
+        self.assertText(
+            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: \'id`',
+            str(err.exception),
+        )
+
+        # Mistmatching quotes - double then backtick.
+        identifier = '"id`'
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_order_by_clause(identifier)
+        self.assertText(
+            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: "id`',
+            str(err.exception),
+        )
+
+        # Mistmatching quotes - backtick then double.
+        identifier = '`id"'
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_order_by_clause(identifier)
+        self.assertText(
+            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: `id"',
+            str(err.exception),
+        )
+
+    def test__sanitize_limit_clause__success(self):
+        """
+        Test sanitizing a LIMIT clause, in cases when it should succeed.
+        """
+        # None provided. Defaults back to empty string.
+        result = self.connector.validate.sanitize_limit_clause(None)
+        self.assertText(result, '')
+
+        # Empty string provided (single-quote str).
+        result = self.connector.validate.sanitize_limit_clause('')
+        self.assertText(result, '')
+
+        # Empty string provided (double-quote str).
+        result = self.connector.validate.sanitize_limit_clause("")
+        self.assertText(result, '')
+
+        # Empty string provided (triple double-quote str).
+        result = self.connector.validate.sanitize_limit_clause("""""")
+        self.assertText(result, '')
+
+        with self.subTest('Limit of 1 (lowest acceptable limit)'):
+            # As int.
+            result = self.connector.validate.sanitize_limit_clause(1)
+            self.assertText(result, ' LIMIT 1')
+
+            # As str.
+            result = self.connector.validate.sanitize_limit_clause('1')
+            self.assertText(result, ' LIMIT 1')
+
+            # As full str (upper).
+            result = self.connector.validate.sanitize_limit_clause('LIMIT 1')
+            self.assertText(result, ' LIMIT 1')
+
+            # As full str (lower).
+            result = self.connector.validate.sanitize_limit_clause('limit 1')
+            self.assertText(result, ' LIMIT 1')
+
+        with self.subTest('Limit of 2'):
+            # As int.
+            result = self.connector.validate.sanitize_limit_clause(2)
+            self.assertText(result, ' LIMIT 2')
+
+            # As str.
+            result = self.connector.validate.sanitize_limit_clause('2')
+            self.assertText(result, ' LIMIT 2')
+
+            # As full str (upper).
+            result = self.connector.validate.sanitize_limit_clause('LIMIT 2')
+            self.assertText(result, ' LIMIT 2')
+
+            # As full str (lower).
+            result = self.connector.validate.sanitize_limit_clause('limit 2')
+            self.assertText(result, ' LIMIT 2')
+
+        with self.subTest('Limit of 100'):
+            # As int.
+            result = self.connector.validate.sanitize_limit_clause(100)
+            self.assertText(result, ' LIMIT 100')
+
+            # As str.
+            result = self.connector.validate.sanitize_limit_clause('100')
+            self.assertText(result, ' LIMIT 100')
+
+            # As full str (upper).
+            result = self.connector.validate.sanitize_limit_clause('LIMIT 100')
+            self.assertText(result, ' LIMIT 100')
+
+            # As full str (lower).
+            result = self.connector.validate.sanitize_limit_clause('limit 100')
+            self.assertText(result, ' LIMIT 100')
+
+    def test__sanitize_limit_clause__failure(self):
+        """
+        Test sanitizing a LIMIT clause, in cases when it should fail.
+        """
+        # Zero provided.
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_limit_clause(0)
+        self.assertText('The LIMIT clause must return at least one record.', str(err.exception))
+
+        # Negative provided.
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_limit_clause(-1)
+        self.assertText('The LIMIT clause must return at least one record.', str(err.exception))
+
+        # Non-integer.
+        with self.assertRaises(ValueError) as err:
+            self.connector.validate.sanitize_limit_clause('abc')
+        self.assertText('The LIMIT clause expects a positive integer.', str(err.exception))
 
     # endregion Clause Validation
 

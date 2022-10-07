@@ -7,6 +7,16 @@ Should be inherited by language-specific connectors.
 
 # System Imports.
 import copy, re
+from io import StringIO
+from tokenize import (
+    generate_tokens,
+    ENDMARKER,
+    NAME,
+    NEWLINE,
+    NUMBER,
+    OP,
+    STRING,
+)
 
 # Internal Imports.
 from py_dbcn.logging import init_logging
@@ -75,8 +85,6 @@ class BaseValidate:
         # Check acceptable patterns.
         if is_quoted is False:
             # Check against "unquoted patterns".
-            '0-9a-zA-Z$_'
-            # Check against "quoted patterns".
             pattern = re.compile('^([0-9a-zA-Z$_])+$')
             if not re.match(pattern, identifier):
                 return (False, """does not match acceptable characters.\n Identifier is: {0}""".format(identifier))
@@ -149,41 +157,10 @@ class BaseValidate:
         # Passed checks.
         return True
 
-    def table_column(self, identifier):
-        """Validates that provided table column uses set of acceptable characters.
-
-        Differs from validate.table_columns() in that this checks a singular column, and that one checks a set.
-        Aka, validate.table_columns() is a parent method that calls this function.
-
-        :param identifier: Potential column of table to validate.
-        :return: True if valid | False otherwise.
-        """
-        # Run basic sanitation against provided param.
-        if identifier is None:
-            raise TypeError('Invalid table column. Is None.')
-        identifier = str(identifier).strip()
-
-        # Check if value is quoted.
-        is_quoted = self._is_quoted(identifier)
-
-        # Validate using "general identifier" logic.
-        results = self._identifier(identifier)
-
-        if results[0] is False:
-            if is_quoted:
-                raise ValueError(u'Invalid table column of {0}. Column {1}'.format(str(identifier), results[1]))
-            else:
-                raise ValueError(u'Invalid table column of "{0}". Column {1}'.format(str(identifier), results[1]))
-
-        # Passed checks.
-        return True
-
-    # endregion Name Validation
-
     def table_columns(self, columns):
         """Validates that provided column values match expected syntax.
 
-        Differs from validate.table_column() in that this checks a set of columns, and that one checks a singular.
+        Differs from validate.table_column() in that this checks a set of columns, and that function checks a singular.
         Aka, validate.table_column() is a child method that is called by this function.
 
         :param columns: Str or dict of columns to validate.
@@ -239,27 +216,309 @@ class BaseValidate:
         # For now, always return as valid.
         return columns
 
+    def table_column(self, identifier):
+        """Validates that provided table column uses set of acceptable characters.
+
+        Differs from validate.table_columns() in that this checks a singular column, and that one checks a set.
+        Aka, validate.table_columns() is a parent method that calls this function.
+
+        :param identifier: Potential column of table to validate.
+        :return: True if valid | False otherwise.
+        """
+        # Run basic sanitation against provided param.
+        if identifier is None:
+            raise TypeError('Invalid table column. Is None.')
+        identifier = str(identifier).strip()
+
+        # Check if value is quoted.
+        is_quoted = self._is_quoted(identifier)
+
+        # Validate using "general identifier" logic.
+        results = self._identifier(identifier)
+
+        if results[0] is False:
+            if is_quoted:
+                raise ValueError(u'Invalid table column of {0}. Column {1}'.format(str(identifier), results[1]))
+            else:
+                raise ValueError(u'Invalid table column of "{0}". Column {1}'.format(str(identifier), results[1]))
+
+        # Passed checks.
+        return True
+
+    # endregion Name Validation
+
     # region Clause Validation
 
-    def sanitize_select_clause(self, clause):
+    def sanitize_select_identifier_clause(self, clause):
         """
         Validates that provided clause follows acceptable format.
         :param clause: SELECT clause to validate.
-        :return: True if valid | False otherwise.
+        :return: Properly formatted clause if possible, otherwise error.
         """
         if not self._reserved_function_names:
             raise ValueError('Reserved keyword list is not defined.')
 
+        # Validate.
+        return self._inner_sanitize_columns(clause, allow_wildcard=True)
+
+    def sanitize_where_clause(self, clause):
+        """
+        Validates that provided clause follows acceptable format.
+        :param clause: WHERE clause to validate.
+        :return: Properly formatted clause if possible, otherwise error.
+        """
+        # TODO: Implement proper sanitization.
+
+        # Handle if none.
+        if clause is None:
+            clause = ''
+
+        # Convert to str.
+        clause = str(clause).strip()
+
+        # Remove prefix, if present.
+        if clause.lower().startswith('where'):
+            clause = clause[5:]
+
+        # Strip now that prefix is gone.
+        clause = clause.strip()
+
+        # Put into expected format.
+        if len(clause) > 1:
+            clause = '\nWHERE {0}'.format(clause)
+
+        return clause
+
+    def sanitize_columns_clause(self, clause):
+        """
+        Validates that provided clause follows acceptable format.
+        :param clause: COLUMNS clause to validate.
+        :return: Properly formatted clause if possible, otherwise error.
+        """
+        if not self._reserved_function_names:
+            raise ValueError('Reserved keyword list is not defined.')
+
+        # Validate.
+        return self._inner_sanitize_columns(clause, allow_wildcard=False)
+
+    def sanitize_values_clause(self, clause):
+        """
+        Validates that provided clause follows acceptable format.
+
+        :param clause: VALUES clause to validate.
+        :return: Properly formatted clause if possible, otherwise error.
+        """
+        # For now, always return as valid.
+        return clause
+
+        # # TODO: Attempted to have full, dynamic validation of entire clause and all inner values.
+        # #   However, had too many cases where it would break, due to being able to essentially put in anything.
+        # #   It may be possible to magically validate the "values clause", but it's too much time/work
+        # #   to implement right now. Potentially look into again in the future.
+        # #
+        # #   Also, due to the nature of this logic, it almost seems like this should either do the
+        # #   "full dynamic validation" or have no validation at all for this clause. Unsure how best to handle this
+        # #   at the current date...
+        # #
+        # print('\n\n\n\n')
+        # print('orig clause: "{0}"'.format(clause))
+        #
+        # if not self._reserved_function_names:
+        #     raise ValueError('Reserved keyword list is not defined.')
+        #
+        # # Convert to array format.
+        # if isinstance(clause, list) or isinstance(clause, tuple):
+        #     # Format we want.
+        #     pass
+        # else:
+        #     print('as str: {0}')
+        #
+        #     # Handle for None type.
+        #     if clause is None:
+        #         clause = ''
+        #     else:
+        #         clause = str(clause).strip()
+        #
+        #     # Remove clause starting value.
+        #     if clause.lower().startswith('values'):
+        #         clause = clause[6:].strip()
+        #
+        #     # Ensure not empty when prefix was provided.
+        #     if len(clause) < 1:
+        #         raise ValueError('Invalid VALUES clause. Must have one or more items.')
+        #
+        #     # Due to possible amount of variation (particularly in quoted string values),
+        #     # we have to tokenize in order to attempt to properly parse.
+        #     # Via tokenization, we can effectively avoid outer parens.
+        #     tokens = generate_tokens(StringIO(clause).readline)
+        #     print('\nas tokens:')
+        #     clause = []
+        #     for token in tokens:
+        #         print('    {0}'.format(token))
+        #         if token.exact_type == 1:
+        #             # Direct value, missing quotes.
+        #             token = str(token.string).strip()
+        #             clause.append('{0}{1}{0}'.format(self._quote_str_literal_format, token))
+        #         elif token.exact_type == 3:
+        #             # String type. Convert to expected quote type.
+        #             token = str(token.string).strip()[1:-1]
+        #             clause.append('{0}{1}{0}'.format(self._quote_str_literal_format, token))
+        #
+        # print('as array: {0}'.format(clause))
+        #
+        # # Loop through each item in array and ensure proper formatting.
+        # updated_clause = []
+        # for index in range(len(clause)):
+        #     item = clause[index]
+        #     print('    type: {0}    val: {1}'.format(type(item), item))
+        #
+        #     # Sanitize for null.
+        #     if item is None:
+        #         item = 'Null'
+        #
+        #     # Sanitize str outer quoting.
+        #     elif isinstance(item, str):
+        #         print('    formatted: {0}'.format("""{0}""".format(item)))
+        #
+        #         # TODO: Unsure of if this part is required? Seemed to be having issues parsing when multiple quotes are
+        #         # put in a row.
+        #         tokens = generate_tokens(StringIO("""{0}""".format(item)).readline)
+        #         print('    tokens:')
+        #         for token in tokens:
+        #             print('        {0}'.format(token))
+        #
+        #         if len(item) > 1:
+        #             if item[0] != self._quote_str_literal_format or item[-1] != self._quote_str_literal_format:
+        #                 item = '{0}{1}{0}'.format(self._quote_str_literal_format, item)
+        #
+        #     # Set all others to str equivalent.
+        #     else:
+        #         item = str(item)
+        #
+        #     # Append item.
+        #     updated_clause.append(item)
+        # clause = updated_clause
+        #
+        # # Handle empty clause.
+        # if clause == '':
+        #     return ''
+        #
+        # # Return formatted clause.
+        # return ' VALUES ({0})'.format(', '.join(clause))
+
+    def sanitize_order_by_clause(self, clause):
+        """
+        Validates that provided clause follows acceptable format.
+        :param clause: ORDER_BY clause to validate.
+        :return: Properly formatted clause if possible, otherwise error.
+        """
+        if not self._reserved_function_names:
+            raise ValueError('Reserved keyword list is not defined.')
+
+        # Quickly sanitize if string format.
+        if isinstance(clause, str):
+            clause = clause.strip()
+
+            # Remove clause starting value.
+            if clause.lower().startswith('order by'):
+                clause = clause[8:].strip()
+
+                # Ensure not empty when prefix was provided.
+                if len(clause) < 1:
+                    raise ValueError('Invalid ORDER BY clause.')
+
+        # Validate.
+        clause = self._inner_sanitize_columns(clause, allow_wildcard=False)
+
+        # Handle empty clause.
+        if clause == '':
+            return ''
+
+        # Return formatted clause.
+        return '\nORDER BY {0}'.format(clause)
+
+    def sanitize_limit_clause(self, clause):
+        """
+        Validates that provided clause follows acceptable format.
+        :param clause: LIMIT clause to validate.
+        :return: Properly formatted clause if possible, otherwise error.
+        """
+        if clause is None:
+            clause = ''
+
+        # Strip any potential whitespace.
+        clause = str(clause).strip()
+
+        # Handle if clause is not empty.
+        if clause != '':
+            # Remove prefix, if present.
+            if clause.lower().startswith('limit'):
+                clause = clause[5:]
+
+            # Strip again, with prefix removed.
+            clause = clause.strip()
+
+            # Check that value can be safely converted to int.
+            try:
+                clause = int(clause)
+            except ValueError:
+                raise ValueError('The LIMIT clause expects a positive integer.')
+
+            # Verify is a positive integer.
+            if clause < 1:
+                raise ValueError('The LIMIT clause must return at least one record.')
+
+            # Put in expected format.
+            clause = ' LIMIT {0}'.format(clause)
+
+        # Return formatted clause.
+        return clause
+
+    # endregion Clause Validation
+
+    # region Helper Functions
+
+    def _is_quoted(self, value):
+        """Checks if provided value is quoted.
+
+        Aka, these are three "quoted" values:   "id", `first_name`, 'last_name'
+        These are three not "quoted" values:    id, first_name, last_name
+        """
+        is_quoted = False
+        if isinstance(value, str):
+            # Only attempt to check if str type.
+            value = value.strip()
+
+            # Must have matching outer quotes, plus at least one inner character.
+            if len(value) > 1 and value[0] == value[-1] and value[0] in ['`', '"', "'"]:
+                is_quoted = True
+
+        return is_quoted
+
+    def _inner_sanitize_columns(self, clause, allow_wildcard=False):
+        """"""
+        if allow_wildcard:
+            quote_format = self._quote_identifier_format
+        else:
+            quote_format = self._quote_column_format
+
+        # Convert to array format.
         if isinstance(clause, list) or isinstance(clause, tuple):
             # Format we want.
             pass
         else:
-            # Handle for None type. Default to "all".
+
+            # Handle for None type.
             if clause is None:
-                clause = '*'
+                # If wildcards allowed, then default to "all".
+                if allow_wildcard:
+                    clause = '*'
+                else:
+                    # Wildcard not allowed. Empty instead.
+                    clause = ''
             else:
                 # Handle for all other types.
-                clause = str(clause)
+                clause = str(clause).strip()
 
             # Check for outer parens.
             if (
@@ -274,14 +533,20 @@ class BaseValidate:
             # Convert to list.
             clause = clause.split(',')
             for index in range(len(clause)):
-                item = clause[index].strip()
-                if item == '*':
-                    clause[index] = item
-                clause[index] = '{0}'.format(item)
+                clause[index] = str(clause[index]).strip()
 
-        # Handle for "all" star.
-        if len(clause) == 1 and clause[0] == '*':
-            return '*'
+            # Remove potential trailing deadspace.
+            if len(clause) > 1 and clause[-1] == '':
+                clause = clause[:-1]
+
+        # Check if "all" star wildcard is allowed.
+        if allow_wildcard:
+            # Handle for SELECT all.
+            if len(clause) == 1 and clause[0] == '*':
+                return '*'
+        # Handle for empty otherwise.
+        elif len(clause) == 1 and clause[0] == '':
+            return ''
 
         # Validate each item in clause, now that it's an array.
         new_clause = []
@@ -311,26 +576,31 @@ class BaseValidate:
                         item = item[length:-1].strip()
                     index += 1
 
-            # Error if "all" star. Should not pass this in addition to other values.
-            if item == '*' and not found_functions:
-                raise ValueError('SELECT clause provided * with other params. * is only valid alone.')
+            # Errors on "all" wildcard star.
+            if item == '*':
+                # Wildcard only acceptable in SELECT clauses.
+                if not allow_wildcard:
+                    raise ValueError('The * identifier can only be used in a SELECT clause.')
+                # Is SELECT clause. However, should not pass wildcard in addition to other values.
+                if not found_functions:
+                    raise ValueError('SELECT clause provided * with other params. * is only valid alone.')
 
             # Validate individual identifier.
             if item != '*':
                 results = self._identifier(item)
                 if results[0] is False:
-                    raise ValueError('Invalid SELECT identifier. Identifier {0}'.format(results[1]))
+                    raise ValueError('Invalid identifier. Identifier {0}'.format(results[1]))
 
             # If we made it this far, item is valid. Escape with backticks and readd.
             is_quoted = self._is_quoted(item)
             if is_quoted:
                 # Was already quoted, but may not be with expected format. Reformat to guaranteed use expected format.
-                item = '{1}{0}{1}'.format(item[1:-1], self._quote_identifier_format)
+                item = '{1}{0}{1}'.format(item[1:-1], quote_format)
             elif item == '*':
                 pass
             else:
                 # Was not quoted. Add quotes.
-                item = '{1}{0}{1}'.format(item, self._quote_identifier_format)
+                item = '{1}{0}{1}'.format(item, quote_format)
 
             # Re-add function values.
             item = stripped_left.upper() + item + stripped_right
@@ -344,110 +614,4 @@ class BaseValidate:
         # Return validated and sanitized SELECT clause.
         return clause
 
-    def columns_clause(self, clause):
-        """
-        Validates that provided clause follows acceptable format.
-        :param clause: COLUMNS clause to validate.
-        :return: True if valid | False otherwise.
-        """
-        # For now, always return as valid.
-        return True
-
-    def values_clause(self, clause):
-        """
-        Validates that provided clause follows acceptable format.
-        :param clause: VALUES clause to validate.
-        :return: True if valid | False otherwise.
-        """
-        # For now, always return as valid.
-        return True
-
-    def where_clause(self, clause):
-        """
-        Validates that provided clause follows acceptable format.
-        :param clause: WHERE clause to validate.
-        :return: True if valid | False otherwise.
-        """
-        # For now, always return as valid.
-        return True
-
-    def sanitize_order_by_clause(self, clause):
-        """
-        Validates that provided clause follows acceptable format.
-        :param clause: ORDER_BY clause to validate.
-        :return: Properly formatted clause if possible, otherwise error.
-        """
-        # TODO: Implement proper sanitization checks.
-
-        if clause is None:
-            clause = ''
-
-        # Strip any potential whitespace.
-        clause = str(clause).strip()
-
-        # Handle if clause is not empty.
-        if clause != '':
-            # Remove prefix, if present.
-            if clause.lower().startswith('order by'):
-                clause = clause[8:]
-
-            # Strip again, with prefix removed.
-            clause = clause.strip()
-
-            # Prevent wildcard use.
-            if clause == '*':
-                raise ValueError('ORDER BY clause cannot use wildcard.')
-
-            # Put in expected format.
-            clause = ' ORDER BY {0}'.format(clause)
-
-        # Return formatted clause.
-        return clause
-
-    def sanitize_limit_clause(self, clause):
-        """
-        Validates that provided clause follows acceptable format.
-        :param clause: LIMIT clause to validate.
-        :return: Properly formatted clause if possible, otherwise error.
-        """
-        # TODO: Implement proper sanitization checks.
-
-        if clause is None:
-            clause = ''
-
-        # Strip any potential whitespace.
-        clause = str(clause).strip()
-
-        # Handle if clause is not empty.
-        if clause != '':
-            # Remove prefix, if present.
-            if clause.lower().startswith('limit'):
-                clause = clause[5:]
-
-            # Strip again, with prefix removed.
-            clause = clause.strip()
-
-            # Put in expected format.
-            clause = ' LIMIT {0}'.format(clause)
-
-        # Return formatted clause.
-        return clause
-
-    # endregion Clause Validation
-
-    def _is_quoted(self, value):
-        """Checks if provided value is quoted.
-
-        Aka, these are three "quoted" values:   "id", `first_name`, 'last_name'
-        These are three not "quoted" values:    id, first_name, last_name
-        """
-        is_quoted = False
-        if isinstance(value, str):
-            # Only attempt to check if str type.
-            value = value.strip()
-
-            # Must have matching outer quotes, plus at least one inner character.
-            if len(value) > 1 and value[0] == value[-1] and value[0] in ['`', '"', "'"]:
-                is_quoted = True
-
-        return is_quoted
+    # endregion Helper Functions

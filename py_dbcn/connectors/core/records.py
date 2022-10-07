@@ -53,7 +53,7 @@ class BaseRecords:
             raise ValueError('Invalid table name of "{0}".'.format(table_name))
 
         # Check that provided SELECT clause is valid format.
-        select_clause = self._base.validate.sanitize_select_clause(select_clause)
+        select_clause = self._base.validate.sanitize_select_identifier_clause(select_clause)
 
         # Check that provided WHERE clause is valid format.
         # TODO: Implement proper clause sanitization.
