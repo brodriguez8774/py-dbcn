@@ -40,7 +40,7 @@ class TestPostgresqlValidate(TestPostgresqlDatabaseParent, CoreValidateTestMixin
         # Initialize variables.
         cls._identifier_str = '{0}{1}{0}'.format(QUOTE_IDENTIFIER_FORMAT, '{0}')
 
-    def test__sanitize_select_clause__success(self):
+    def test__sanitize_select_identifier_clause__success(self):
         """
         Test sanitizing a SELECT clause, in cases when it should succeed.
         """
@@ -48,4 +48,4 @@ class TestPostgresqlValidate(TestPostgresqlDatabaseParent, CoreValidateTestMixin
         self.assertText('"{0}"', self._identifier_str)
 
         # Call parent logic.
-        super().test__sanitize_select_clause__success()
+        super().test__sanitize_select_identifier_clause__success()

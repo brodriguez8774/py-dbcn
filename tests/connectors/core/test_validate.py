@@ -30,6 +30,8 @@ class CoreValidateTestMixin:
         cls.unallowed_unicode_index_list = [59, 92]
         cls._identifier_str = None
 
+    # region Name Validation
+
     def test__identifier__success(self):
         """
         Test "general identifier" validation, when it should succeed.
@@ -465,6 +467,86 @@ class CoreValidateTestMixin:
                 self.assertIn('Invalid table name of ', str(err.exception))
                 self.assertIn('. Name does not match acceptable characters.', str(err.exception))
 
+    def test__validate_columns__invalid_type(self):
+        """
+        Tests column validation logic, using invalid type.
+        """
+        with self.subTest('With None type'):
+            with self.assertRaises(TypeError):
+                self.connector.validate.table_columns(None)
+
+        with self.subTest('With int type'):
+            with self.assertRaises(TypeError):
+                self.connector.validate.table_columns(1)
+
+        with self.subTest('With list type'):
+            with self.assertRaises(TypeError):
+                self.connector.validate.table_columns(['id INT'])
+
+        with self.subTest('With tuple type'):
+            with self.assertRaises(TypeError):
+                self.connector.validate.table_columns(('id INT',))
+
+    def test__validate_columns__str(self):
+        """
+        Tests column validation logic, using str object.
+        """
+        with self.subTest('Minimal value'):
+            self.assertEqual(
+                self.connector.validate.table_columns('id INT'),
+                '( id INT )',
+            )
+
+        with self.subTest('Multi-value'):
+            self.assertEqual(
+                self.connector.validate.table_columns(
+                    'id INT NOT NULL AUTO_INCREMENT, '
+                    'title VARCHAR(100) NOT NULL, '
+                    'description VARCHAR(255) NOT NULL'
+                ),
+                '( '
+                'id INT NOT NULL AUTO_INCREMENT, '
+                'title VARCHAR(100) NOT NULL, '
+                'description VARCHAR(255) NOT NULL '
+                ')'
+            )
+
+        with self.subTest('With bad value'):
+            with self.assertRaises(ValueError):
+                self.connector.validate.table_columns('id INT;')
+
+    def test__validate_columns__dict(self):
+        """
+        Tests column validation logic, using dict object.
+        """
+        with self.subTest('Minimal value'):
+            self.assertEqual(
+                self.connector.validate.table_columns({'id': 'INT'}),
+                '( id INT )',
+            )
+
+        with self.subTest('Multi-value'):
+            self.assertEqual(
+                self.connector.validate.table_columns({
+                    'id': 'INT NOT NULL AUTO_INCREMENT',
+                    'title': 'VARCHAR(100) NOT NULL',
+                    'description': 'VARCHAR(255) NOT NULL',
+                }),
+                '( '
+                'id INT NOT NULL AUTO_INCREMENT, '
+                'title VARCHAR(100) NOT NULL, '
+                'description VARCHAR(255) NOT NULL '
+                ')'
+            )
+
+        with self.subTest('With bad key'):
+            with self.assertRaises(ValueError):
+                self.connector.validate.table_columns({'id;': 'INT'})
+
+        with self.subTest('With bad value'):
+            with self.assertRaises(ValueError):
+                self.connector.validate.table_columns({'id': 'INT;'})
+
     def test__table_column__success(self):
         """
         Test "table column" validation, when it should succeed.
@@ -607,87 +689,11 @@ class CoreValidateTestMixin:
                 self.assertIn('Invalid table column of ', str(err.exception))
                 self.assertIn('. Column does not match acceptable characters.', str(err.exception))
 
-    def test__validate_columns__invalid_type(self):
-        """
-        Tests column validation logic, using invalid type.
-        """
-        with self.subTest('With None type'):
-            with self.assertRaises(TypeError):
-                self.connector.validate.table_columns(None)
+    # endregion Name Validation
 
-        with self.subTest('With int type'):
-            with self.assertRaises(TypeError):
-                self.connector.validate.table_columns(1)
+    # region Clause Validation
 
-        with self.subTest('With list type'):
-            with self.assertRaises(TypeError):
-                self.connector.validate.table_columns(['id INT'])
-
-        with self.subTest('With tuple type'):
-            with self.assertRaises(TypeError):
-                self.connector.validate.table_columns(('id INT',))
-
-    def test__validate_columns__str(self):
-        """
-        Tests column validation logic, using str object.
-        """
-        with self.subTest('Minimal value'):
-            self.assertEqual(
-                self.connector.validate.table_columns('id INT'),
-                '( id INT )',
-            )
-
-        with self.subTest('Multi-value'):
-            self.assertEqual(
-                self.connector.validate.table_columns(
-                    'id INT NOT NULL AUTO_INCREMENT, '
-                    'title VARCHAR(100) NOT NULL, '
-                    'description VARCHAR(255) NOT NULL'
-                ),
-                '( '
-                'id INT NOT NULL AUTO_INCREMENT, '
-                'title VARCHAR(100) NOT NULL, '
-                'description VARCHAR(255) NOT NULL '
-                ')'
-            )
-
-        with self.subTest('With bad value'):
-            with self.assertRaises(ValueError):
-                self.connector.validate.table_columns('id INT;')
-
-    def test__validate_columns__dict(self):
-        """
-        Tests column validation logic, using dict object.
-        """
-        with self.subTest('Minimal value'):
-            self.assertEqual(
-                self.connector.validate.table_columns({'id': 'INT'}),
-                '( id INT )',
-            )
-
-        with self.subTest('Multi-value'):
-            self.assertEqual(
-                self.connector.validate.table_columns({
-                    'id': 'INT NOT NULL AUTO_INCREMENT',
-                    'title': 'VARCHAR(100) NOT NULL',
-                    'description': 'VARCHAR(255) NOT NULL',
-                }),
-                '( '
-                'id INT NOT NULL AUTO_INCREMENT, '
-                'title VARCHAR(100) NOT NULL, '
-                'description VARCHAR(255) NOT NULL '
-                ')'
-            )
-
-        with self.subTest('With bad key'):
-            with self.assertRaises(ValueError):
-                self.connector.validate.table_columns({'id;': 'INT'})
-
-        with self.subTest('With bad value'):
-            with self.assertRaises(ValueError):
-                self.connector.validate.table_columns({'id': 'INT;'})
-
-    def test__sanitize_select_clause__success(self):
+    def test__sanitize_select_identifier_clause__success(self):
         """
         Test sanitizing a SELECT clause, in cases when it should succeed.
 
@@ -699,23 +705,23 @@ class CoreValidateTestMixin:
             TypeError('Invalid _identifier_str variable. Is None.')
 
         # None provided. Defaults back to "*".
-        result = self.connector.validate.sanitize_select_clause(None)
+        result = self.connector.validate.sanitize_select_identifier_clause(None)
         self.assertEqual(result, '*')
 
         # All flag provided.
-        result = self.connector.validate.sanitize_select_clause('*')
+        result = self.connector.validate.sanitize_select_identifier_clause('*')
         self.assertEqual(result, '*')
 
         with self.subTest('Values as str - Without quotes'):
             # Single val provided.
-            result = self.connector.validate.sanitize_select_clause('id')
+            result = self.connector.validate.sanitize_select_identifier_clause('id')
             self.assertEqual(result, self._identifier_str.format('id'))
             # With extra whitespace.
-            result = self.connector.validate.sanitize_select_clause(' id ')
+            result = self.connector.validate.sanitize_select_identifier_clause(' id ')
             self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
-            result = self.connector.validate.sanitize_select_clause('id, name')
+            result = self.connector.validate.sanitize_select_identifier_clause('id, name')
             self.assertEqual(
                 result,
                 '{0}, {1}'.format(
@@ -724,7 +730,7 @@ class CoreValidateTestMixin:
                 ),
             )
             # With extra whitespace.
-            result = self.connector.validate.sanitize_select_clause(' id ,  name ')
+            result = self.connector.validate.sanitize_select_identifier_clause(' id ,  name ')
             self.assertEqual(
                 result,
                 '{0}, {1}'.format(
@@ -734,7 +740,7 @@ class CoreValidateTestMixin:
             )
 
             # Three vals provided.
-            result = self.connector.validate.sanitize_select_clause('id, name, code')
+            result = self.connector.validate.sanitize_select_identifier_clause('id, name, code')
             self.assertEqual(
                 result,
                 '{0}, {1}, {2}'.format(
@@ -744,7 +750,7 @@ class CoreValidateTestMixin:
                 ),
             )
             # With extra whitespace.
-            result = self.connector.validate.sanitize_select_clause(' id ,  name ,  code ')
+            result = self.connector.validate.sanitize_select_identifier_clause(' id ,  name ,  code ')
             self.assertEqual(
                 result,
                 '{0}, {1}, {2}'.format(
@@ -756,14 +762,14 @@ class CoreValidateTestMixin:
 
         with self.subTest('Values as triple str - Without quotes'):
             # Single val provided.
-            result = self.connector.validate.sanitize_select_clause("""id""")
+            result = self.connector.validate.sanitize_select_identifier_clause("""id""")
             self.assertEqual(result, self._identifier_str.format('id'))
             # With extra whitespace.
-            result = self.connector.validate.sanitize_select_clause(""" id """)
+            result = self.connector.validate.sanitize_select_identifier_clause(""" id """)
             self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
-            result = self.connector.validate.sanitize_select_clause("""id, name""")
+            result = self.connector.validate.sanitize_select_identifier_clause("""id, name""")
             self.assertEqual(
                 result,
                 '{0}, {1}'.format(
@@ -772,7 +778,7 @@ class CoreValidateTestMixin:
                 ),
             )
             # With extra whitespace.
-            result = self.connector.validate.sanitize_select_clause(""" id ,  name """)
+            result = self.connector.validate.sanitize_select_identifier_clause(""" id ,  name """)
             self.assertEqual(
                 result,
                 '{0}, {1}'.format(
@@ -782,7 +788,7 @@ class CoreValidateTestMixin:
             )
 
             # Three vals provided.
-            result = self.connector.validate.sanitize_select_clause("""id, name, code""")
+            result = self.connector.validate.sanitize_select_identifier_clause("""id, name, code""")
             self.assertEqual(
                 result,
                 '{0}, {1}, {2}'.format(
@@ -792,7 +798,7 @@ class CoreValidateTestMixin:
                 ),
             )
             # With extra whitespace.
-            result = self.connector.validate.sanitize_select_clause(""" id ,  name ,  code """)
+            result = self.connector.validate.sanitize_select_identifier_clause(""" id ,  name ,  code """)
             self.assertEqual(
                 result,
                 '{0}, {1}, {2}'.format(
@@ -804,14 +810,14 @@ class CoreValidateTestMixin:
 
         with self.subTest('Values as list - Without quotes'):
             # Single val provided.
-            result = self.connector.validate.sanitize_select_clause(['id'])
+            result = self.connector.validate.sanitize_select_identifier_clause(['id'])
             self.assertEqual(result, self._identifier_str.format('id'))
             # With extra whitespace.
-            result = self.connector.validate.sanitize_select_clause([' id '])
+            result = self.connector.validate.sanitize_select_identifier_clause([' id '])
             self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
-            result = self.connector.validate.sanitize_select_clause(['id', 'name'])
+            result = self.connector.validate.sanitize_select_identifier_clause(['id', 'name'])
             self.assertEqual(
                 result,
                 '{0}, {1}'.format(
@@ -820,7 +826,7 @@ class CoreValidateTestMixin:
                 ),
             )
             # With extra whitespace.
-            result = self.connector.validate.sanitize_select_clause([' id ', ' name '])
+            result = self.connector.validate.sanitize_select_identifier_clause([' id ', ' name '])
             self.assertEqual(
                 result,
                 '{0}, {1}'.format(
@@ -830,7 +836,7 @@ class CoreValidateTestMixin:
             )
 
             # Three vals provided.
-            result = self.connector.validate.sanitize_select_clause(['id', 'name', 'code'])
+            result = self.connector.validate.sanitize_select_identifier_clause(['id', 'name', 'code'])
             self.assertEqual(
                 result,
                 '{0}, {1}, {2}'.format(
@@ -840,7 +846,7 @@ class CoreValidateTestMixin:
                 ),
             )
             # With extra whitespace.
-            result = self.connector.validate.sanitize_select_clause([' id ', ' name ', ' code '])
+            result = self.connector.validate.sanitize_select_identifier_clause([' id ', ' name ', ' code '])
             self.assertEqual(
                 result,
                 '{0}, {1}, {2}'.format(
@@ -852,14 +858,14 @@ class CoreValidateTestMixin:
 
         with self.subTest('Values as tuple - Without quotes'):
             # Single val provided.
-            result = self.connector.validate.sanitize_select_clause(('id',))
+            result = self.connector.validate.sanitize_select_identifier_clause(('id',))
             self.assertEqual(result, self._identifier_str.format('id'))
             # With extra whitespace.
-            result = self.connector.validate.sanitize_select_clause((' id ',))
+            result = self.connector.validate.sanitize_select_identifier_clause((' id ',))
             self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
-            result = self.connector.validate.sanitize_select_clause(('id', 'name'))
+            result = self.connector.validate.sanitize_select_identifier_clause(('id', 'name'))
             self.assertEqual(
                 result,
                 '{0}, {1}'.format(
@@ -868,7 +874,7 @@ class CoreValidateTestMixin:
                 ),
             )
             # With extra whitespace.
-            result = self.connector.validate.sanitize_select_clause((' id ', ' name '))
+            result = self.connector.validate.sanitize_select_identifier_clause((' id ', ' name '))
             self.assertEqual(
                 result,
                 '{0}, {1}'.format(
@@ -878,7 +884,7 @@ class CoreValidateTestMixin:
             )
 
             # Three vals provided.
-            result = self.connector.validate.sanitize_select_clause(('id', 'name', 'code'))
+            result = self.connector.validate.sanitize_select_identifier_clause(('id', 'name', 'code'))
             self.assertEqual(
                 result,
                 '{0}, {1}, {2}'.format(
@@ -888,7 +894,7 @@ class CoreValidateTestMixin:
                 ),
             )
             # With extra whitespace.
-            result = self.connector.validate.sanitize_select_clause((' id ', ' name ', ' code '))
+            result = self.connector.validate.sanitize_select_identifier_clause((' id ', ' name ', ' code '))
             self.assertEqual(
                 result,
                 '{0}, {1}, {2}'.format(
@@ -900,11 +906,11 @@ class CoreValidateTestMixin:
 
         with self.subTest('Values as str - With single quotes'):
             # Single val provided.
-            result = self.connector.validate.sanitize_select_clause("'id'")
+            result = self.connector.validate.sanitize_select_identifier_clause("'id'")
             self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
-            result = self.connector.validate.sanitize_select_clause("'id', 'name'")
+            result = self.connector.validate.sanitize_select_identifier_clause("'id', 'name'")
             self.assertEqual(
                 result,
                 '{0}, {1}'.format(
@@ -914,7 +920,7 @@ class CoreValidateTestMixin:
             )
 
             # Three vals provided.
-            result = self.connector.validate.sanitize_select_clause("'id', 'name', 'code'")
+            result = self.connector.validate.sanitize_select_identifier_clause("'id', 'name', 'code'")
             self.assertEqual(
                 result,
                 '{0}, {1}, {2}'.format(
@@ -926,11 +932,11 @@ class CoreValidateTestMixin:
 
         with self.subTest('Values as list - With single quotes'):
             # Single val provided.
-            result = self.connector.validate.sanitize_select_clause(["'id'"])
+            result = self.connector.validate.sanitize_select_identifier_clause(["'id'"])
             self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
-            result = self.connector.validate.sanitize_select_clause(["'id'", "'name'"])
+            result = self.connector.validate.sanitize_select_identifier_clause(["'id'", "'name'"])
             self.assertEqual(
                 result,
                 '{0}, {1}'.format(
@@ -940,7 +946,7 @@ class CoreValidateTestMixin:
             )
 
             # Three vals provided.
-            result = self.connector.validate.sanitize_select_clause(["'id'", "'name'", "'code'"])
+            result = self.connector.validate.sanitize_select_identifier_clause(["'id'", "'name'", "'code'"])
             self.assertEqual(
                 result,
                 '{0}, {1}, {2}'.format(
@@ -952,11 +958,11 @@ class CoreValidateTestMixin:
 
         with self.subTest('Values as tuple - With single quotes'):
             # Single val provided.
-            result = self.connector.validate.sanitize_select_clause(("'id'",))
+            result = self.connector.validate.sanitize_select_identifier_clause(("'id'",))
             self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
-            result = self.connector.validate.sanitize_select_clause(("'id'", "'name'"))
+            result = self.connector.validate.sanitize_select_identifier_clause(("'id'", "'name'"))
             self.assertEqual(
                 result,
                 '{0}, {1}'.format(
@@ -966,7 +972,7 @@ class CoreValidateTestMixin:
             )
 
             # Three vals provided.
-            result = self.connector.validate.sanitize_select_clause(("'id'", "'name'", "'code'"))
+            result = self.connector.validate.sanitize_select_identifier_clause(("'id'", "'name'", "'code'"))
             self.assertEqual(
                 result,
                 '{0}, {1}, {2}'.format(
@@ -978,11 +984,11 @@ class CoreValidateTestMixin:
 
         with self.subTest('Values as str - With double quotes'):
             # Single val provided.
-            result = self.connector.validate.sanitize_select_clause('"id"')
+            result = self.connector.validate.sanitize_select_identifier_clause('"id"')
             self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
-            result = self.connector.validate.sanitize_select_clause('"id", "name"')
+            result = self.connector.validate.sanitize_select_identifier_clause('"id", "name"')
             self.assertEqual(
                 result,
                 '{0}, {1}'.format(
@@ -992,7 +998,7 @@ class CoreValidateTestMixin:
             )
 
             # Three vals provided.
-            result = self.connector.validate.sanitize_select_clause('"id", "name", code')
+            result = self.connector.validate.sanitize_select_identifier_clause('"id", "name", code')
             self.assertEqual(
                 result,
                 '{0}, {1}, {2}'.format(
@@ -1004,11 +1010,11 @@ class CoreValidateTestMixin:
 
         with self.subTest('Values as list - With double quotes'):
             # Single val provided.
-            result = self.connector.validate.sanitize_select_clause(['"id"'])
+            result = self.connector.validate.sanitize_select_identifier_clause(['"id"'])
             self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
-            result = self.connector.validate.sanitize_select_clause(['"id"', '"name"'])
+            result = self.connector.validate.sanitize_select_identifier_clause(['"id"', '"name"'])
             self.assertEqual(
                 result,
                 '{0}, {1}'.format(
@@ -1018,7 +1024,7 @@ class CoreValidateTestMixin:
             )
 
             # Three vals provided.
-            result = self.connector.validate.sanitize_select_clause(['"id"', '"name"', '"code"'])
+            result = self.connector.validate.sanitize_select_identifier_clause(['"id"', '"name"', '"code"'])
             self.assertEqual(
                 result,
                 '{0}, {1}, {2}'.format(
@@ -1030,11 +1036,11 @@ class CoreValidateTestMixin:
 
         with self.subTest('Values as tuple - With double quotes'):
             # Single val provided.
-            result = self.connector.validate.sanitize_select_clause(('"id"',))
+            result = self.connector.validate.sanitize_select_identifier_clause(('"id"',))
             self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
-            result = self.connector.validate.sanitize_select_clause(('"id"', '"name"'))
+            result = self.connector.validate.sanitize_select_identifier_clause(('"id"', '"name"'))
             self.assertEqual(
                 result, '{0}, {1}'.format(
                     self._identifier_str.format('id'),
@@ -1043,7 +1049,7 @@ class CoreValidateTestMixin:
             )
 
             # Three vals provided.
-            result = self.connector.validate.sanitize_select_clause(('"id"', '"name"', '"code"'))
+            result = self.connector.validate.sanitize_select_identifier_clause(('"id"', '"name"', '"code"'))
             self.assertEqual(
                 result,
                 '{0}, {1}, {2}'.format(
@@ -1055,11 +1061,11 @@ class CoreValidateTestMixin:
 
         with self.subTest('Values as str - With backtick quotes'):
             # Single val provided.
-            result = self.connector.validate.sanitize_select_clause('`id`')
+            result = self.connector.validate.sanitize_select_identifier_clause('`id`')
             self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
-            result = self.connector.validate.sanitize_select_clause('`id`, `name`')
+            result = self.connector.validate.sanitize_select_identifier_clause('`id`, `name`')
             self.assertEqual(
                 result,
                 '{0}, {1}'.format(
@@ -1069,7 +1075,7 @@ class CoreValidateTestMixin:
             )
 
             # Three vals provided.
-            result = self.connector.validate.sanitize_select_clause('`id`, `name`, `code`')
+            result = self.connector.validate.sanitize_select_identifier_clause('`id`, `name`, `code`')
             self.assertEqual(
                 result,
                 '{0}, {1}, {2}'.format(
@@ -1081,11 +1087,11 @@ class CoreValidateTestMixin:
 
         with self.subTest('Values as list - With backtick quotes'):
             # Single val provided.
-            result = self.connector.validate.sanitize_select_clause(['`id`'])
+            result = self.connector.validate.sanitize_select_identifier_clause(['`id`'])
             self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
-            result = self.connector.validate.sanitize_select_clause(['`id`', '`name`'])
+            result = self.connector.validate.sanitize_select_identifier_clause(['`id`', '`name`'])
             self.assertEqual(
                 result,
                 '{0}, {1}'.format(
@@ -1095,7 +1101,7 @@ class CoreValidateTestMixin:
             )
 
             # Three vals provided.
-            result = self.connector.validate.sanitize_select_clause(['`id`', '`name`', '`code`'])
+            result = self.connector.validate.sanitize_select_identifier_clause(['`id`', '`name`', '`code`'])
             self.assertEqual(
                 result,
                 '{0}, {1}, {2}'.format(
@@ -1107,11 +1113,11 @@ class CoreValidateTestMixin:
 
         with self.subTest('Values as tuple - With backtick quotes'):
             # Single val provided.
-            result = self.connector.validate.sanitize_select_clause(('`id`',))
+            result = self.connector.validate.sanitize_select_identifier_clause(('`id`',))
             self.assertEqual(result, self._identifier_str.format('id'))
 
             # Two vals provided.
-            result = self.connector.validate.sanitize_select_clause(('`id`', '`name`'))
+            result = self.connector.validate.sanitize_select_identifier_clause(('`id`', '`name`'))
             self.assertEqual(
                 result,
                 '{0}, {1}'.format(
@@ -1121,7 +1127,7 @@ class CoreValidateTestMixin:
             )
 
             # Three vals provided.
-            result = self.connector.validate.sanitize_select_clause(('`id`', '`name`', '`code`'))
+            result = self.connector.validate.sanitize_select_identifier_clause(('`id`', '`name`', '`code`'))
             self.assertEqual(
                 result,
                 '{0}, {1}, {2}'.format(
@@ -1132,7 +1138,7 @@ class CoreValidateTestMixin:
             )
 
         with self.subTest('Values as non-standard types'):
-            result = self.connector.validate.sanitize_select_clause((1, True))
+            result = self.connector.validate.sanitize_select_identifier_clause((1, True))
             self.assertEqual(
                 result,
                 '{0}, {1}'.format(
@@ -1143,26 +1149,26 @@ class CoreValidateTestMixin:
 
         with self.subTest('Values with function calls'):
             # Uppercase.
-            result = self.connector.validate.sanitize_select_clause('COUNT(*)')
+            result = self.connector.validate.sanitize_select_identifier_clause('COUNT(*)')
             self.assertEqual(result, 'COUNT(*)')
 
             # Lowercase.
-            result = self.connector.validate.sanitize_select_clause('count(*)')
+            result = self.connector.validate.sanitize_select_identifier_clause('count(*)')
             self.assertEqual(result, 'COUNT(*)')
 
-    def test__sanitize_select_clause__failure(self):
+    def test__sanitize_select_identifier_clause__failure(self):
         """
         Test sanitizing a SELECT clause, in cases when it should fail.
         """
         # Param "*" provided with other values.
         with self.assertRaises(ValueError) as err:
-            self.connector.validate.sanitize_select_clause('* , id')
+            self.connector.validate.sanitize_select_identifier_clause('* , id')
         self.assertEqual('SELECT clause provided * with other params. * is only valid alone.', str(err.exception))
 
         # Mistmatching quotes - double then single.
         identifier = """\"id'"""
         with self.assertRaises(ValueError) as err:
-            self.connector.validate.sanitize_select_clause(identifier)
+            self.connector.validate.sanitize_select_identifier_clause(identifier)
         self.assertEqual(
             'Invalid SELECT identifier. Identifier does not match acceptable characters.\n Identifier is: "id\'',
             str(err.exception),
@@ -1171,7 +1177,7 @@ class CoreValidateTestMixin:
         # Mistmatching quotes - single then double.
         identifier = """'id\""""
         with self.assertRaises(ValueError) as err:
-            self.connector.validate.sanitize_select_clause(identifier)
+            self.connector.validate.sanitize_select_identifier_clause(identifier)
         self.assertEqual(
             'Invalid SELECT identifier. Identifier does not match acceptable characters.\n Identifier is: \'id"',
             str(err.exception),
@@ -1180,7 +1186,7 @@ class CoreValidateTestMixin:
         # Mistmatching quotes - backtick then single.
         identifier = "`id'"
         with self.assertRaises(ValueError) as err:
-            self.connector.validate.sanitize_select_clause(identifier)
+            self.connector.validate.sanitize_select_identifier_clause(identifier)
         self.assertEqual(
             'Invalid SELECT identifier. Identifier does not match acceptable characters.\n Identifier is: `id\'',
             str(err.exception),
@@ -1189,7 +1195,7 @@ class CoreValidateTestMixin:
         # Mistmatching quotes - single then backtick.
         identifier = "'id`"
         with self.assertRaises(ValueError) as err:
-            self.connector.validate.sanitize_select_clause(identifier)
+            self.connector.validate.sanitize_select_identifier_clause(identifier)
         self.assertEqual(
             'Invalid SELECT identifier. Identifier does not match acceptable characters.\n Identifier is: \'id`',
             str(err.exception),
@@ -1198,7 +1204,7 @@ class CoreValidateTestMixin:
         # Mistmatching quotes - double then backtick.
         identifier = '"id`'
         with self.assertRaises(ValueError) as err:
-            self.connector.validate.sanitize_select_clause(identifier)
+            self.connector.validate.sanitize_select_identifier_clause(identifier)
         self.assertEqual(
             'Invalid SELECT identifier. Identifier does not match acceptable characters.\n Identifier is: "id`',
             str(err.exception),
@@ -1207,11 +1213,15 @@ class CoreValidateTestMixin:
         # Mistmatching quotes - backtick then double.
         identifier = '`id"'
         with self.assertRaises(ValueError) as err:
-            self.connector.validate.sanitize_select_clause(identifier)
+            self.connector.validate.sanitize_select_identifier_clause(identifier)
         self.assertEqual(
             'Invalid SELECT identifier. Identifier does not match acceptable characters.\n Identifier is: `id"',
             str(err.exception),
         )
+
+    # endregion Clause Validation
+
+    # region Helper Functions
 
     def test__is_quoted__true(self):
         """
@@ -1251,3 +1261,4 @@ class CoreValidateTestMixin:
         # And commas.
         self.assertFalse(self.connector.validate._is_quoted('True, False'))
 
+    # endregion Helper Functions
