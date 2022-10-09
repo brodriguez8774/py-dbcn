@@ -32,6 +32,18 @@ class CoreValidateTestMixin:
         cls._quote_select_identifier_format = None
         cls._quote_str_literal_format = None
 
+    def test__column_quote_format(self):
+        raise NotImplementedError('Check for column quote formatting not implemented.')
+
+    def test__select_identifier_quote_format(self):
+        raise NotImplementedError('Check for SELECT identifier quote formatting not implemented.')
+
+    def test__order_by_quote_format(self):
+        raise NotImplementedError('Check for order by quote formatting not implemented.')
+
+    def test__str_literal_quote_format(self):
+        raise NotImplementedError('Check for str literal quote formatting not implemented.')
+
     # region Name Validation
 
     def test__identifier__success(self):
@@ -3112,24 +3124,24 @@ class CoreValidateTestMixin:
         with self.subTest('Values as str - Without quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_order_by_clause('id')
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
             # With extra whitespace.
             result = self.connector.validate.sanitize_order_by_clause(' id ')
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
             # With full statement - upper.
             result = self.connector.validate.sanitize_order_by_clause('ORDER BY id')
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
             # With full statement - lower.
             result = self.connector.validate.sanitize_order_by_clause('order by id')
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_order_by_clause('id, name')
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name')
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name')
                 ),
             )
             # With extra whitespace.
@@ -3137,8 +3149,8 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
                 ),
             )
 
@@ -3147,9 +3159,9 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}, {2}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
-                    self._quote_columns_format.format('code'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
+                    self._quote_order_by_format.format('code'),
                 ),
             )
             # With extra whitespace.
@@ -3157,33 +3169,33 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}, {2}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
-                    self._quote_columns_format.format('code'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
+                    self._quote_order_by_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as triple str - Without quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_order_by_clause("""id""")
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
             # With extra whitespace.
             result = self.connector.validate.sanitize_order_by_clause(""" id """)
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
             # With full statement - upper.
             result = self.connector.validate.sanitize_order_by_clause("""ORDER BY id""")
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
             # With full statement - lower.
             result = self.connector.validate.sanitize_order_by_clause("""order by id""")
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_order_by_clause("""id, name""")
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
                 ),
             )
             # With extra whitespace.
@@ -3191,8 +3203,8 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
                 ),
             )
 
@@ -3201,9 +3213,9 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}, {2}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
-                    self._quote_columns_format.format('code'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
+                    self._quote_order_by_format.format('code'),
                 ),
             )
             # With extra whitespace.
@@ -3211,27 +3223,27 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}, {2}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
-                    self._quote_columns_format.format('code'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
+                    self._quote_order_by_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as list - Without quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_order_by_clause(['id'])
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
             # With extra whitespace.
             result = self.connector.validate.sanitize_order_by_clause([' id '])
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_order_by_clause(['id', 'name'])
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
                 ),
             )
             # With extra whitespace.
@@ -3239,8 +3251,8 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
                 ),
             )
 
@@ -3249,9 +3261,9 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}, {2}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
-                    self._quote_columns_format.format('code'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
+                    self._quote_order_by_format.format('code'),
                 ),
             )
             # With extra whitespace.
@@ -3259,27 +3271,27 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}, {2}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
-                    self._quote_columns_format.format('code'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
+                    self._quote_order_by_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as tuple - Without quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_order_by_clause(('id',))
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
             # With extra whitespace.
             result = self.connector.validate.sanitize_order_by_clause((' id ',))
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_order_by_clause(('id', 'name'))
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
                 ),
             )
             # With extra whitespace.
@@ -3287,8 +3299,8 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
                 ),
             )
 
@@ -3297,9 +3309,9 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}, {2}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
-                    self._quote_columns_format.format('code'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
+                    self._quote_order_by_format.format('code'),
                 ),
             )
             # With extra whitespace.
@@ -3307,30 +3319,30 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}, {2}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
-                    self._quote_columns_format.format('code'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
+                    self._quote_order_by_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as str - With single quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_order_by_clause("'id'")
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
             # With full statement - upper.
             result = self.connector.validate.sanitize_order_by_clause("ORDER BY 'id'")
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
             # With full statement - lower.
             result = self.connector.validate.sanitize_order_by_clause("order by 'id'")
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_order_by_clause("'id', 'name'")
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
                 ),
             )
 
@@ -3339,24 +3351,24 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}, {2}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
-                    self._quote_columns_format.format('code')
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
+                    self._quote_order_by_format.format('code')
                 ),
             )
 
         with self.subTest('Values as list - With single quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_order_by_clause(["'id'"])
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_order_by_clause(["'id'", "'name'"])
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
                 ),
             )
 
@@ -3365,24 +3377,24 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}, {2}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
-                    self._quote_columns_format.format('code'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
+                    self._quote_order_by_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as tuple - With single quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_order_by_clause(("'id'",))
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_order_by_clause(("'id'", "'name'"))
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
                 ),
             )
 
@@ -3391,30 +3403,30 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}, {2}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
-                    self._quote_columns_format.format('code'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
+                    self._quote_order_by_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as str - With double quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_order_by_clause('"id"')
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
             # With full statement - upper.
             result = self.connector.validate.sanitize_order_by_clause('ORDER BY "id"')
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
             # With full statement - lower.
             result = self.connector.validate.sanitize_order_by_clause('order by "id"')
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_order_by_clause('"id", "name"')
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
                 ),
             )
 
@@ -3423,24 +3435,24 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}, {2}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
-                    self._quote_columns_format.format('code'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
+                    self._quote_order_by_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as list - With double quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_order_by_clause(['"id"'])
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_order_by_clause(['"id"', '"name"'])
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
                 ),
             )
 
@@ -3449,23 +3461,23 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}, {2}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
-                    self._quote_columns_format.format('code'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
+                    self._quote_order_by_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as tuple - With double quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_order_by_clause(('"id"',))
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_order_by_clause(('"id"', '"name"'))
             self.assertText(
                 result, '\nORDER BY {0}, {1}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
                 ),
             )
 
@@ -3474,30 +3486,30 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}, {2}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
-                    self._quote_columns_format.format('code'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
+                    self._quote_order_by_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as str - With backtick quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_order_by_clause('`id`')
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
             # With full statement - upper.
             result = self.connector.validate.sanitize_order_by_clause('ORDER BY `id`')
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
             # With full statement - lower.
             result = self.connector.validate.sanitize_order_by_clause('order by `id`')
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_order_by_clause('`id`, `name`')
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
                 ),
             )
 
@@ -3506,24 +3518,24 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}, {2}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
-                    self._quote_columns_format.format('code'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
+                    self._quote_order_by_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as list - With backtick quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_order_by_clause(['`id`'])
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_order_by_clause(['`id`', '`name`'])
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
                 ),
             )
 
@@ -3532,24 +3544,24 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}, {2}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
-                    self._quote_columns_format.format('code'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
+                    self._quote_order_by_format.format('code'),
                 ),
             )
 
         with self.subTest('Values as tuple - With backtick quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_order_by_clause(('`id`',))
-            self.assertText(result, '\nORDER BY {0}'.format(self._quote_columns_format.format('id')))
+            self.assertText(result, '\nORDER BY {0}'.format(self._quote_order_by_format.format('id')))
 
             # Two vals provided.
             result = self.connector.validate.sanitize_order_by_clause(('`id`', '`name`'))
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
                 ),
             )
 
@@ -3558,9 +3570,9 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}, {2}'.format(
-                    self._quote_columns_format.format('id'),
-                    self._quote_columns_format.format('name'),
-                    self._quote_columns_format.format('code'),
+                    self._quote_order_by_format.format('id'),
+                    self._quote_order_by_format.format('name'),
+                    self._quote_order_by_format.format('code'),
                 ),
             )
 
@@ -3571,8 +3583,8 @@ class CoreValidateTestMixin:
             self.assertText(
                 result,
                 '\nORDER BY {0}, {1}'.format(
-                    self._quote_columns_format.format(1),
-                    self._quote_columns_format.format(True),
+                    self._quote_order_by_format.format(1),
+                    self._quote_order_by_format.format(True),
                 ),
             )
 

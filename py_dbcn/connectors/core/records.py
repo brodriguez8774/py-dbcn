@@ -56,17 +56,7 @@ class BaseRecords:
         select_clause = self._base.validate.sanitize_select_identifier_clause(select_clause)
 
         # Check that provided WHERE clause is valid format.
-        # TODO: Implement proper clause sanitization.
-        if where_clause is None:
-            where_clause = ''
-        where_clause = str(where_clause).strip()
-        if where_clause.lower().startswith('where'):
-            where_clause = where_clause[5:]
-        where_clause = where_clause.strip()
-        if len(where_clause) > 1:
-            where_clause = '\nWHERE ({0})'.format(where_clause)
-        if not self._base.validate.where_clause(where_clause):
-            raise ValueError('Invalid WHERE clause of "{0}".'.format(where_clause))
+        where_clause = self._base.validate.sanitize_where_clause(where_clause)
 
         # Check that provided ORDER BY clause is valid format.
         order_by_clause = self._base.validate.sanitize_order_by_clause(order_by_clause)
@@ -102,15 +92,10 @@ class BaseRecords:
             raise ValueError('Invalid table name of "{0}".'.format(table_name))
 
         # Check that provided COLUMNS clause is valid format.
-        if columns_clause is None:
-            columns_clause = ''
-        columns_clause = str(columns_clause).strip()
-        if not self._base.validate.columns_clause(columns_clause):
-            raise ValueError('Invalid COLUMNS clause of "{0}".'.format(columns_clause))
+        columns_clause = self._base.validate.sanitize_columns_clause(columns_clause)
 
         # Check that provided VALUES clause is valid format.
-        if not self._base.validate.values_clause(values_clause):
-            raise ValueError('Invalid VALUES clause of "{0}".'.format(values_clause))
+        values_clause = self._base.validate.sanitize_values_clause(values_clause)
 
         # Check for values that might need formatting.
         # For example, if we find date/datetime objects, we automatically convert to a str value that won't error.
@@ -156,12 +141,10 @@ class BaseRecords:
             raise ValueError('Invalid table name of "{0}".'.format(table_name))
 
         # Check that provided VALUES clause is valid format.
-        if not self._base.validate.values_clause(values_clause):
-            raise ValueError('Invalid VALUES clause of "{0}".'.format(values_clause))
+        values_clause = self._base.validate.sanitize_values_clause(values_clause)
 
         # Check that provided WHERE clause is valid format.
-        if not self._base.validate.columns_clause(where_clause):
-            raise ValueError('Invalid WHERE clause of "{0}".'.format(where_clause))
+        where_clause = self._base.validate.sanitize_where_clause(where_clause)
 
         # Check for values that might need formatting.
         # For example, if we find date/datetime objects, we automatically convert to a str value that won't error.
@@ -182,10 +165,6 @@ class BaseRecords:
             # Replace original clause.
             values_clause = updated_values_clause
 
-        orig_where_clause = where_clause
-        if len(where_clause) > 0:
-            where_clause = ' WHERE {0}'.format(where_clause)
-
         # Update record.
         query = """
         UPDATE {0}
@@ -196,7 +175,7 @@ class BaseRecords:
         # Do a select to get the updated values as results.
         results = self.select(
             table_name,
-            where_clause=orig_where_clause,
+            where_clause=where_clause,
             display_query=False,
             display_results=display_results,
         )
@@ -216,11 +195,7 @@ class BaseRecords:
             raise ValueError('Invalid table name of "{0}".'.format(table_name))
 
         # Check that provided WHERE clause is valid format.
-        if not self._base.validate.columns_clause(where_clause):
-            raise ValueError('Invalid WHERE clause of "{0}".'.format(where_clause))
-
-        if len(where_clause) > 0:
-            where_clause = ' WHERE {0}'.format(where_clause)
+        where_clause = self._base.validate.sanitize_where_clause(where_clause)
 
         # Delete record.
         query = 'DELETE FROM {0}{1};'.format(table_name, where_clause)

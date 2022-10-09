@@ -18,6 +18,7 @@ logger = init_logging(__name__)
 # Module Variables.
 QUOTE_COLUMN_FORMAT = """`"""           # Used for quoting table columns.
 QUOTE_IDENTIFIER_FORMAT = """`"""       # Used for quoting identifiers (such as SELECT clause field id's).
+QUOTE_ORDER_BY_FORMAT = """`"""    # Used for quoting values in ORDER BY clause.
 QUOTE_STR_LITERAL_FORMAT = """\""""     # Used for quoting actual strings.
 
 
@@ -139,4 +140,5 @@ class MysqlValidate(BaseValidate):
         # Aka, what the database says is "okay" to surround string values with.
         self._quote_column_format = QUOTE_COLUMN_FORMAT
         self._quote_identifier_format = QUOTE_IDENTIFIER_FORMAT
+        self._quote_order_by_format = QUOTE_ORDER_BY_FORMAT
         self._quote_str_literal_format = QUOTE_STR_LITERAL_FORMAT

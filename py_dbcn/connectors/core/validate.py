@@ -45,8 +45,9 @@ class BaseValidate:
         # Define inheritance variables.
         self._reserved_function_names = None
         self._quote_column_format = None
-        self._quote_str_literal_format = None
         self._quote_identifier_format = None
+        self._quote_order_by_format = None
+        self._quote_str_literal_format = None
 
     # region Name Validation
 
@@ -428,7 +429,7 @@ class BaseValidate:
                     raise ValueError('Invalid ORDER BY clause.')
 
         # Validate.
-        clause = self._inner_sanitize_columns(clause, allow_wildcard=False)
+        clause = self._inner_sanitize_columns(clause, allow_wildcard=False, order_by=True)
 
         # Handle empty clause.
         if clause == '':
@@ -495,10 +496,12 @@ class BaseValidate:
 
         return is_quoted
 
-    def _inner_sanitize_columns(self, clause, allow_wildcard=False):
+    def _inner_sanitize_columns(self, clause, allow_wildcard=False, order_by=False):
         """"""
         if allow_wildcard:
             quote_format = self._quote_identifier_format
+        elif order_by:
+            quote_format = self._quote_order_by_format
         else:
             quote_format = self._quote_column_format
 
@@ -586,8 +589,24 @@ class BaseValidate:
                     raise ValueError('SELECT clause provided * with other params. * is only valid alone.')
 
             # Validate individual identifier.
+            item_identifier = item
+            order_by_descriptor = ''
             if item != '*':
-                results = self._identifier(item)
+                if order_by:
+                    # To check identifier, trim possible ASC/DESC values.
+                    if item_identifier.lower().endswith(' asc'):
+                        # Handle for ASC syntax.
+                        item_identifier = item_identifier[:-4].rstrip()
+                        item = item_identifier
+                        order_by_descriptor = ' ASC'
+                    if item_identifier.lower().endswith(' desc'):
+                        # Handle for DESC syntax.
+                        item_identifier = item_identifier[:-5].rstrip()
+                        item = item_identifier
+                        order_by_descriptor = ' DESC'
+
+                # Check for valid identifier.
+                results = self._identifier(item_identifier)
                 if results[0] is False:
                     raise ValueError('Invalid identifier. Identifier {0}'.format(results[1]))
 
@@ -595,12 +614,12 @@ class BaseValidate:
             is_quoted = self._is_quoted(item)
             if is_quoted:
                 # Was already quoted, but may not be with expected format. Reformat to guaranteed use expected format.
-                item = '{1}{0}{1}'.format(item[1:-1], quote_format)
+                item = '{1}{0}{1}{2}'.format(item[1:-1], quote_format, order_by_descriptor)
             elif item == '*':
                 pass
             else:
                 # Was not quoted. Add quotes.
-                item = '{1}{0}{1}'.format(item, quote_format)
+                item = '{1}{0}{1}{2}'.format(item, quote_format, order_by_descriptor)
 
             # Re-add function values.
             item = stripped_left.upper() + item + stripped_right

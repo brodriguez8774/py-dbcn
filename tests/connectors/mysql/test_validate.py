@@ -38,20 +38,28 @@ class TestMysqlValidate(TestMysqlDatabaseParent, CoreValidateTestMixin):
         from py_dbcn.connectors.mysql.validate import (
             QUOTE_COLUMN_FORMAT,
             QUOTE_IDENTIFIER_FORMAT,
+            QUOTE_ORDER_BY_FORMAT,
             QUOTE_STR_LITERAL_FORMAT,
         )
 
         # Initialize variables.
         cls._quote_columns_format = '{0}{1}{0}'.format(QUOTE_COLUMN_FORMAT, '{0}')
         cls._quote_select_identifier_format = '{0}{1}{0}'.format(QUOTE_IDENTIFIER_FORMAT, '{0}')
+        cls._quote_order_by_format = '{0}{1}{0}'.format(QUOTE_ORDER_BY_FORMAT, '{0}')
         cls._quote_str_literal_format = '{0}{1}{0}'.format(QUOTE_STR_LITERAL_FORMAT, '{0}')
 
-    def test__sanitize_select_identifier_clause__success(self):
-        """
-        Test sanitizing a SELECT clause, in cases when it should succeed.
-        """
-        # Verify identifier str is as we expect.
+    def test__column_quote_format(self):
+        # Verify quote str is as we expect.
+        self.assertText('`{0}`', self._quote_columns_format)
+
+    def test__select_identifier_quote_format(self):
+        # Verify quote str is as we expect.
         self.assertText('`{0}`', self._quote_select_identifier_format)
 
-        # Call parent logic.
-        super().test__sanitize_select_identifier_clause__success()
+    def test__order_by_quote_format(self):
+        # Verify quote str is as we expect.
+        self.assertText('`{0}`', self._quote_order_by_format)
+
+    def test__str_literal_quote_format(self):
+        # Verify quote str is as we expect.
+        self.assertText('"{0}"', self._quote_str_literal_format)
