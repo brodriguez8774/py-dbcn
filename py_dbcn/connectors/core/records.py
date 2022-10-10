@@ -341,8 +341,6 @@ class BaseRecords:
         #     display_results=display_results,
         # )
 
-        self.select(table_name)
-
         return results
 
     def delete(self, table_name, where_clause, display_query=True, display_results=True):

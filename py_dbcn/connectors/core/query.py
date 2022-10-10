@@ -42,6 +42,9 @@ class BaseQuery:
 
         # Create connection and execute query.
         cursor = self._base._connection.cursor()
+        # Improve query speed if PostgreSQL (supposedly. Needs more research).
+        if self._base._config.db_type == 'PostgreSQL':
+            query = cursor.mogrify(query)
         cursor.execute(query)
 
         # Get results.
@@ -57,12 +60,20 @@ class BaseQuery:
         return results
 
     def execute_many(self, query, data, display_query=True):
-        """"""
+        """Execute method to run multiple queries in one call.
+
+        :param query: Query to execute.
+        :param data: One or more sets of data to pass into query.
+        :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
+        """
         if display_query:
             self._base.display.query(query)
 
         # Create connection and execute query.
         cursor = self._base._connection.cursor()
+        # Improve query speed if PostgreSQL (supposedly. Needs more research).
+        if self._base._config.db_type == 'PostgreSQL':
+            query = cursor.mogrify(query)
         cursor.executemany(query, data)
 
         # Get results.
