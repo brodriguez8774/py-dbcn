@@ -7,6 +7,7 @@ Should be inherited by language-specific connectors.
 
 # System Imports.
 import datetime
+import textwrap
 
 # Internal Imports.
 from py_dbcn.logging import init_logging
@@ -117,10 +118,12 @@ class BaseRecords:
             values_clause = updated_values_clause
 
         # Insert record.
-        query = """
-        INSERT INTO {0}{1}
-        VALUES {2};
-        """.format(table_name, columns_clause, values_clause)
+        query = textwrap.dedent(
+            """
+            INSERT INTO {0}{1}
+            VALUES {2};
+            """.format(table_name, columns_clause, values_clause)
+        )
         results = self._base.query.execute(query, display_query=display_query)
         if display_results:
             self._base.display.results('{0}'.format(results))
@@ -168,10 +171,12 @@ class BaseRecords:
         values_context = ', '.join('%s' for i in range(len(values_clause[0])))
 
         # Insert record.
-        query = """
-        INSERT INTO {0}{1}
-        VALUES ({2});
-        """.format(table_name, columns_clause, values_context)
+        query = textwrap.dedent(
+            """
+            INSERT INTO {0}{1}
+            VALUES ({2});
+            """.format(table_name, columns_clause, values_context)
+        )
         results = self._base.query.execute_many(query, values_clause, display_query=display_query)
         if display_results:
             self._base.display.results('{0}'.format(results))
@@ -217,10 +222,12 @@ class BaseRecords:
             values_clause = updated_values_clause
 
         # Update record.
-        query = """
-        UPDATE {0}
-        SET {1}{2};
-        """.format(table_name, values_clause, where_clause)
+        query = textwrap.dedent(
+            """
+            UPDATE {0}
+            SET {1}{2};
+            """.format(table_name, values_clause, where_clause)
+        )
         self._base.query.execute(query, display_query=display_query)
 
         # Do a select to get the updated values as results.
@@ -302,10 +309,10 @@ class BaseRecords:
             '    {0}'.format(x)
             for x in values_clause
         ])
-        columns_clause = ', '.join(
+        columns_clause = ', '.join([
             x.strip(self._base.validate._quote_column_format)
             for x in columns_clause
-        )
+        ])
         where_columns_clause = ',\n'.join([
             '    pydbcn_update_table.{0} = pydbcn_temp.{0}'.format(x.strip(self._base.validate._quote_column_format))
             for x in where_columns_clause
@@ -319,16 +326,18 @@ class BaseRecords:
         # print('\ncolumns_clause:\n{0}'.format(columns_clause))
 
         # Update records.
-        query = """
-        UPDATE {0} AS pydbcn_update_table SET
-        {1}
-        FROM (VALUES
-        {2}
-        ) AS pydbcn_temp ({3})
-        WHERE (
-        {4}
-        );
-        """.format(table_name, set_clause, values_clause, columns_clause, where_columns_clause)
+        query = textwrap.dedent(
+            """
+            UPDATE {0} AS pydbcn_update_table SET
+            {1}
+            FROM (VALUES
+            {2}
+            ) AS pydbcn_temp ({3})
+            WHERE (
+            {4}
+            );
+            """.format(table_name, set_clause, values_clause, columns_clause, where_columns_clause)
+        )
 
         results = self._base.query.execute(query, display_query=display_query)
 

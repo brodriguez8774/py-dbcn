@@ -26,6 +26,8 @@ class PostgresqlDisplay(BaseDisplay):
 
         logger.debug('Generating related (PostgreSQL) Display class.')
 
-        self.max_col_length_query = textwrap.dedent("""
+        self.max_col_length_query = textwrap.dedent(
+            """
             SELECT MAX(LENGTH(CAST({2}{0}{2} as text))) FROM {1};
-        """.strip())
+            """.strip()
+        )

@@ -26,6 +26,8 @@ class MysqlDisplay(BaseDisplay):
 
         logger.debug('Generating related (MySQL) Display class.')
 
-        self.max_col_length_query = textwrap.dedent("""
+        self.max_col_length_query = textwrap.dedent(
+            """
             SELECT MAX(LENGTH({2}{0}{2})) FROM {1};
-        """.strip())
+            """.strip()
+        )

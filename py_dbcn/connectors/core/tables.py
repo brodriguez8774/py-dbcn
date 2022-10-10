@@ -6,6 +6,7 @@ Should be inherited by language-specific connectors.
 """
 
 # System Imports.
+import textwrap
 
 # Internal Imports.
 from py_dbcn.logging import init_logging
@@ -154,10 +155,12 @@ class BaseTables:
             raise ValueError('Invalid table columns of "{0}".'.format(column_clause))
 
         # Modify table.
-        query = """
-        ALTER TABLE {0}
-        {1} {2};
-        """.format(table_name, modify_clause, column_clause)
+        query = textwrap.dedent(
+            """
+            ALTER TABLE {0}
+            {1} {2};
+            """.format(table_name, modify_clause, column_clause)
+        )
         self._base.query.execute(query, display_query=display_query)
         if display_results:
             self._base.display.results('Created table "{0}".'.format(table_name))
