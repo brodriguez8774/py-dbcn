@@ -420,6 +420,9 @@ Example:
 INSERT new Records
 ------------------
 
+INSERT single Record
+^^^^^^^^^^^^^^^^^^^^
+
 ``connector.records.insert(table_name, values_clause, columns_clause=None)``
 
 :param table_name: Name of table to select records from.
@@ -453,13 +456,64 @@ Example:
     # some kind of reliable default value).
     connector.records.insert(
         'my_table',
-        values_clause='"Regal Red Towel", "Red towel with yellow embroidery."',
+        "Regal Red Towel", "Red towel with yellow embroidery."',
+        columns_clause='name, description',
+    )
+
+
+INSERT multiple Records
+^^^^^^^^^^^^^^^^^^^^^^^
+
+``connector.records.insert_many(table_name, values_clause, columns_clause=None)``
+
+:param table_name: Name of table to select records from.
+
+:param values_clause: Clause to provide values for new record(s).
+
+:param columns_clause: Optional clause to indicate what columns are being
+                       provided, as well as what order they're in. If not
+                       present, then query will assume all columns are being
+                       provided, in the order they were originally added to the
+                       table.
+
+:return: TODO: Honestly unsure of what this provides. Double check.
+
+
+Example:
+
+.. code-block:: python
+
+    # Import MySQL connector.
+    from py_dbcn.connectors import MysqlDbConnector
+
+    ...
+
+    # Initialize MySQL database connection.
+    connector = MysqlDbConnector(host, port, user, password, db_name)
+
+    # Generate new record values.
+    rows = [
+        ('Blue Towel', 'Soft blue towel.'),
+        ('Red Towel', 'Soft red towel.'),
+        ('Regal Red Towel', 'Red towel with yellow embroidery.'),
+    ]
+
+    # Run query.
+    # In this case, we insert records by giving a set of "name"s and "description"s.
+    # We omit "id" so it will be auto-provided (assuming it's a field with
+    # some kind of reliable default value).
+    connector.records.insert_many(
+        'my_table',
+        rows,
         columns_clause='name, description',
     )
 
 
 UPDATE existing Records
 -----------------------
+
+UPDATE Single Record
+^^^^^^^^^^^^^^^^^^^^
 
 ``connector.records.update(table_name, values_clause, where_clause)``
 
@@ -494,8 +548,70 @@ Example:
     # some kind of reliable default value).
     connector.records.update(
         'my_table',
-        values_clause='description = "Refurbished item"',
-        where_clause='name = "Refurbished"',
+        'description = "Refurbished item"',
+        'name = "Refurbished"',
+    )
+
+
+UPDATE Multiple Records
+^^^^^^^^^^^^^^^^^^^^^^^
+
+``connector.records.update_many(table_name, columns_clause, values_clause, where_columns_clause)``
+
+:param table_name: Name of table to update records within.
+
+:param columns_clause: Clause to indicate what columns are being provided, as
+                        well as what order they're in.
+
+:param values_clause: Clause to provide values for updated record.
+
+:param where_clause: NOT the standard WHERE clause used in other queries.
+
+                    Clause to indicate what columns are being filtered on. All
+                    columns present here should also be present in the
+                    ``columns_clause`` param.
+
+:return: TODO: Honestly unsure of what this provides. Double check.
+
+
+Example:
+
+.. code-block:: python
+
+    # Import MySQL connector.
+    from py_dbcn.connectors import MysqlDbConnector
+
+    ...
+
+    # Initialize MySQL database connection.
+    connector = MysqlDbConnector(host, port, user, password, db_name)
+
+    # Columns to update with/on.
+    columns_clause = ['id', 'name']
+
+    # Desired values after query runs.
+    # Note: Since we match on "id", this should match what already exists
+    # in the database. The "name" field is not included in the WHERE so it can
+    # be set to whatever new value we want it to be. Meanwhile, record fields
+    # that are not used to match or update can be excluded.
+    values_clause = [
+        # (id, name)
+        (1599, 'Refurbished Item 1001'),
+        (16782, 'Refurbished Item 1002'),
+        (20909, 'Refurbished Item 1003'),
+    ]
+
+    # Columns to use to find existing record data.
+    where_columns_clause = ['id']
+
+    # Run query.
+    # In this case, we update record "name" values, using the id to match
+    # against existing records.
+    connector.records.update(
+        'my_table',
+        columns_clause,
+        values_clause,
+        where_columns_clause,
     )
 
 
