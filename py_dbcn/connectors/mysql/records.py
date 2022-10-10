@@ -24,3 +24,6 @@ class MysqlRecords(BaseRecords):
         super().__init__(parent, *args, **kwargs)
 
         logger.debug('Generating related (MySQL) Records class.')
+
+    def update_many(self, *args, **kwargs):
+        raise NotImplementedError('Currently not implemented for MySQL.')

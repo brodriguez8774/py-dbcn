@@ -1246,6 +1246,220 @@ class CoreRecordsTestMixin:
             self.assertNotIn(old_row_2, results)
             self.assertNotIn(old_row_3, results)
 
+    def test__update_many__success(self):
+        """
+        Test execute_many `UPDATE` query.
+        """
+        table_name = 'test_queries__update_many__success'
+
+        # Verify table exists.
+        try:
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__basic))
+        except self.connector.errors.table_already_exists:
+            # Table already exists, as we want.
+            pass
+
+        # Verify starting state.
+        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+        self.assertEqual(len(results), 0)
+
+        # Generate row values.
+        row_1 = (1, 'test_name_1', 'test_desc_1')
+        row_2 = (2, 'test_name_2', 'test_desc_2')
+        row_3 = (3, 'test_name_3', 'test_desc_3')
+        row_4 = (4, 'test_name_4', 'test_desc_4')
+        row_5 = (5, 'test_name_5', 'test_desc_5')
+        row_6 = (6, 'test_name_6', 'test_desc_6')
+        row_7 = (7, 'test_name_7', 'test_desc_7')
+        row_8 = (8, 'test_name_8', 'test_desc_8')
+        row_9 = (9, 'test_name_9', 'test_desc_9')
+        row_10 = (10, 'test_name_10', 'test_desc_10')
+
+        # Generate initial rows.
+        rows = [
+            row_1,
+            row_2,
+            row_3,
+            row_4,
+            row_5,
+            row_6,
+            row_7,
+            row_8,
+            row_9,
+            row_10,
+        ]
+        self.connector.records.insert_many(table_name, rows)
+
+        # Verify expected state.
+        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+        self.assertEqual(len(results), 10)
+        self.assertIn(row_1, results)
+        self.assertIn(row_2, results)
+        self.assertIn(row_3, results)
+        self.assertIn(row_4, results)
+        self.assertIn(row_5, results)
+        self.assertIn(row_6, results)
+        self.assertIn(row_7, results)
+        self.assertIn(row_8, results)
+        self.assertIn(row_9, results)
+        self.assertIn(row_10, results)
+
+        with self.subTest('Run with one update'):
+            # Run test query.
+            updated_row_1 = (1, 'test_name_1_updated', 'test_desc_1')
+            columns_clause = ['id', 'name', 'description']
+            values_clause = [
+                updated_row_1,
+            ]
+            where_columns_clause = ['id']
+            self.connector.records.update_many(table_name, columns_clause, values_clause, where_columns_clause)
+
+            # Verify one record returned.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 10)
+            self.assertIn(updated_row_1, results)
+            self.assertIn(row_2, results)
+            self.assertIn(row_3, results)
+            self.assertIn(row_4, results)
+            self.assertIn(row_5, results)
+            self.assertIn(row_6, results)
+            self.assertIn(row_7, results)
+            self.assertIn(row_8, results)
+            self.assertIn(row_9, results)
+            self.assertIn(row_10, results)
+            self.assertNotIn(row_1, results)
+
+            # Update row variables.
+            row_1 = updated_row_1
+
+        with self.subTest('Run with two updates'):
+            # Run test query. Update by PK.
+            updated_row_2 = (2, 'aaa', 'test_desc_2')
+            updated_row_3 = (3, 'bbb', 'test_desc_3')
+            columns_clause = ['id', 'name', 'description']
+            values_clause = [
+                updated_row_2,
+                updated_row_3,
+            ]
+            where_columns_clause = ['id']
+            self.connector.records.update_many(table_name, columns_clause, values_clause, where_columns_clause)
+
+            # Verify one record returned.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 10)
+            self.assertIn(row_1, results)
+            self.assertIn(updated_row_2, results)
+            self.assertIn(updated_row_3, results)
+            self.assertIn(row_4, results)
+            self.assertIn(row_5, results)
+            self.assertIn(row_6, results)
+            self.assertIn(row_7, results)
+            self.assertIn(row_8, results)
+            self.assertIn(row_9, results)
+            self.assertIn(row_10, results)
+            self.assertNotIn(row_2, results)
+            self.assertNotIn(row_3, results)
+
+            # Update row variables.
+            row_2 = updated_row_2
+            row_3 = updated_row_3
+
+        with self.subTest('Run with five updates'):
+            # Run test query. Update by non-PK.
+            updated_row_4 = (4, 'test_name_4', 'four')
+            updated_row_5 = (5, 'test_name_5', 'five')
+            updated_row_6 = (6, 'test_name_6', 'six')
+            updated_row_7 = (7, 'test_name_7', 'seven')
+            updated_row_8 = (8, 'test_name_8', 'eight')
+            columns_clause = ['id', 'name', 'description']
+            values_clause = [
+                updated_row_4,
+                updated_row_5,
+                updated_row_6,
+                updated_row_7,
+                updated_row_8,
+            ]
+            where_columns_clause = ['name']
+            self.connector.records.update_many(table_name, columns_clause, values_clause, where_columns_clause)
+
+            # Verify five records returned.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 10)
+            self.assertIn(row_1, results)
+            self.assertIn(row_2, results)
+            self.assertIn(row_3, results)
+            self.assertIn(updated_row_4, results)
+            self.assertIn(updated_row_5, results)
+            self.assertIn(updated_row_6, results)
+            self.assertIn(updated_row_7, results)
+            self.assertIn(updated_row_8, results)
+            self.assertIn(row_9, results)
+            self.assertIn(row_10, results)
+            self.assertNotIn(row_4, results)
+            self.assertNotIn(row_5, results)
+            self.assertNotIn(row_6, results)
+            self.assertNotIn(row_7, results)
+            self.assertNotIn(row_8, results)
+
+            # Update row variables.
+            row_4 = updated_row_4
+            row_5 = updated_row_5
+            row_6 = updated_row_6
+            row_7 = updated_row_7
+            row_8 = updated_row_8
+
+        with self.subTest('Run with ten updates'):
+            # Run test query.
+            updated_row_1 = (1, '"110"', '"10010"')
+            updated_row_2 = (2, '"109"', '"10009"')
+            updated_row_3 = (3, '"108"', '"10008"')
+            updated_row_4 = (4, '"107"', '"10007"')
+            updated_row_5 = (5, '"106"', '"10006"')
+            updated_row_6 = (6, '"105"', '"10005"')
+            updated_row_7 = (7, '"104"', '"10004"')
+            updated_row_8 = (8, '"103"', '"10003"')
+            updated_row_9 = (9, '"102"', '"10002"')
+            updated_row_10 = (10, '"101"', '"10001"')
+            columns_clause = 'id, name, description'
+            values_clause = [
+                updated_row_1,
+                updated_row_2,
+                updated_row_3,
+                updated_row_4,
+                updated_row_5,
+                updated_row_6,
+                updated_row_7,
+                updated_row_8,
+                updated_row_9,
+                updated_row_10,
+            ]
+            where_columns_clause = 'id'
+            self.connector.records.update_many(table_name, columns_clause, values_clause, where_columns_clause)
+
+            # Verify ten records returned.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 10)
+            self.assertIn(updated_row_1, results)
+            self.assertIn(updated_row_2, results)
+            self.assertIn(updated_row_3, results)
+            self.assertIn(updated_row_4, results)
+            self.assertIn(updated_row_5, results)
+            self.assertIn(updated_row_6, results)
+            self.assertIn(updated_row_7, results)
+            self.assertIn(updated_row_8, results)
+            self.assertIn(updated_row_9, results)
+            self.assertIn(updated_row_10, results)
+            self.assertNotIn(row_1, results)
+            self.assertNotIn(row_2, results)
+            self.assertNotIn(row_3, results)
+            self.assertNotIn(row_4, results)
+            self.assertNotIn(row_5, results)
+            self.assertNotIn(row_6, results)
+            self.assertNotIn(row_7, results)
+            self.assertNotIn(row_8, results)
+            self.assertNotIn(row_9, results)
+            self.assertNotIn(row_10, results)
+
     def test__delete__success(self):
         """
         Test `DELETE` query.
