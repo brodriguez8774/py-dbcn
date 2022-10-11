@@ -337,7 +337,7 @@ class BaseRecords:
             x.strip(self._base.validate._quote_column_format)
             for x in columns_clause
         ])
-        where_columns_clause = ',\n'.join([
+        where_columns_clause = ' AND\n'.join([
             '    pydbcn_update_table.{0} = pydbcn_temp.{0}'.format(x.strip(self._base.validate._quote_column_format))
             for x in where_columns_clause
         ])

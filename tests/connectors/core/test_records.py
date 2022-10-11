@@ -1502,14 +1502,14 @@ class CoreRecordsTestMixin:
 
         with self.subTest('With skipping unused columns'):
             # Run test query.
-            updated_row_5 = (5, 'this is')
-            updated_row_6 = (6, 'a')
-            updated_row_7 = (7, 'test')
+            updated_row_5 = (5, row_5[1], 'this is')
+            updated_row_6 = (6, row_6[1], 'a')
+            updated_row_7 = (7, row_7[1], 'test')
             columns_clause = ['id', 'description']
             values_clause = [
-                updated_row_5,
-                updated_row_6,
-                updated_row_7,
+                (updated_row_5[0], updated_row_5[2]),
+                (updated_row_6[0], updated_row_6[2]),
+                (updated_row_7[0], updated_row_7[2]),
             ]
             where_columns_clause = ['id']
             self.connector.records.update_many(table_name, columns_clause, values_clause, where_columns_clause)
@@ -1521,9 +1521,9 @@ class CoreRecordsTestMixin:
             self.assertIn(row_2, results)
             self.assertIn(row_3, results)
             self.assertIn(row_4, results)
-            self.assertIn((updated_row_5[0], row_5[1], updated_row_5[1]), results)
-            self.assertIn((updated_row_6[0], row_6[1], updated_row_6[1]), results)
-            self.assertIn((updated_row_7[0], row_7[1], updated_row_7[1]), results)
+            self.assertIn(updated_row_5, results)
+            self.assertIn(updated_row_6, results)
+            self.assertIn(updated_row_7, results)
             self.assertIn(row_8, results)
             self.assertIn(row_9, results)
             self.assertIn(row_10, results)
@@ -1535,6 +1535,34 @@ class CoreRecordsTestMixin:
             row_5 = updated_row_5
             row_6 = updated_row_6
             row_7 = updated_row_7
+
+        with self.subTest('With multiple values in WHERE clause'):
+            # Run test query.
+            updated_row_8 = (row_8[0], row_8[1], 'Some Descriptor Here for 8')
+            columns_clause = ['id', 'name', 'description']
+            values_clause = [
+                updated_row_8,
+            ]
+            where_columns_clause = ['id', 'name']
+            self.connector.records.update_many(table_name, columns_clause, values_clause, where_columns_clause)
+
+            # Verify one record returned.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 10)
+            self.assertIn(row_1, results)
+            self.assertIn(row_2, results)
+            self.assertIn(row_3, results)
+            self.assertIn(row_4, results)
+            self.assertIn(row_5, results)
+            self.assertIn(row_6, results)
+            self.assertIn(row_7, results)
+            self.assertIn(updated_row_8, results)
+            self.assertIn(row_9, results)
+            self.assertIn(row_10, results)
+            self.assertNotIn(row_8, results)
+
+            # Update row variables.
+            row_8 = updated_row_8
 
     def test__update_many__datetime__success(self):
         """
