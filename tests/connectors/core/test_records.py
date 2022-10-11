@@ -907,7 +907,7 @@ class CoreRecordsTestMixin:
         row_9 = (9, 'test_name_9', 'test_desc_9')
         row_10 = (10, 'test_name_10', 'test_desc_10')
 
-        with self.subTest('Run with one insert'):
+        with self.subTest('With one insert'):
             # Run test query.
             rows = [
                 row_1,
@@ -923,7 +923,7 @@ class CoreRecordsTestMixin:
         self.connector.tables.drop(table_name)
         self.connector.tables.create(table_name, self._columns_clause__basic)
 
-        with self.subTest('Run with two inserts'):
+        with self.subTest('With two inserts'):
             # Run test query.
             rows = [
                 row_1,
@@ -941,7 +941,7 @@ class CoreRecordsTestMixin:
         self.connector.tables.drop(table_name)
         self.connector.tables.create(table_name, self._columns_clause__basic)
 
-        with self.subTest('Run with five inserts'):
+        with self.subTest('With five inserts'):
             # Run test query.
             rows = [
                 row_1,
@@ -965,7 +965,7 @@ class CoreRecordsTestMixin:
         self.connector.tables.drop(table_name)
         self.connector.tables.create(table_name, self._columns_clause__basic)
 
-        with self.subTest('Run with ten inserts'):
+        with self.subTest('With ten inserts'):
             # Run test query.
             rows = [
                 row_1,
@@ -1304,7 +1304,7 @@ class CoreRecordsTestMixin:
         self.assertIn(row_9, results)
         self.assertIn(row_10, results)
 
-        with self.subTest('Run with one update'):
+        with self.subTest('With one update'):
             # Run test query.
             updated_row_1 = (1, 'test_name_1_updated', 'test_desc_1')
             columns_clause = ['id', 'name', 'description']
@@ -1332,7 +1332,7 @@ class CoreRecordsTestMixin:
             # Update row variables.
             row_1 = updated_row_1
 
-        with self.subTest('Run with two updates'):
+        with self.subTest('With two updates'):
             # Run test query. Update by PK.
             updated_row_2 = (2, 'aaa', 'test_desc_2')
             updated_row_3 = (3, 'bbb', 'test_desc_3')
@@ -1364,7 +1364,7 @@ class CoreRecordsTestMixin:
             row_2 = updated_row_2
             row_3 = updated_row_3
 
-        with self.subTest('Run with five updates and alternate where column'):
+        with self.subTest('With five updates and alternate where column'):
             # Run test query. Update by non-PK.
             updated_row_4 = (4, 'test_name_4', 'four')
             updated_row_5 = (5, 'test_name_5', 'five')
@@ -1408,7 +1408,7 @@ class CoreRecordsTestMixin:
             row_7 = updated_row_7
             row_8 = updated_row_8
 
-        with self.subTest('Run with ten updates'):
+        with self.subTest('With ten updates'):
             # Run test query.
             updated_row_1 = (1, '"110"', '"10010"')
             updated_row_2 = (2, '"109"', '"10009"')
@@ -1472,7 +1472,7 @@ class CoreRecordsTestMixin:
             row_9 = updated_row_9
             row_10 = updated_row_10
 
-        with self.subTest('Run with columns in alternate order'):
+        with self.subTest('With columns in alternate order'):
             # Run test query.
             updated_row_3 = (3, 'name as first', 'desc as second')
             columns_clause = ['name', 'description', 'id']
@@ -1500,7 +1500,7 @@ class CoreRecordsTestMixin:
             # Update row variables.
             row_3 = updated_row_3
 
-        with self.subTest('Run with skipping unused columns'):
+        with self.subTest('With skipping unused columns'):
             # Run test query.
             updated_row_5 = (5, 'this is')
             updated_row_6 = (6, 'a')
@@ -1605,7 +1605,7 @@ class CoreRecordsTestMixin:
         column_types_clause = ('integer', 'timestamp', 'date')
         where_columns_clause = ['id']
 
-        with self.subTest('Run with one update'):
+        with self.subTest('With one update'):
             # Run test query.
             updated_row_1 = (1, test_datetime__2020.replace(month=1), test_date__2020.replace(month=2))
             values_clause = [
@@ -1630,7 +1630,7 @@ class CoreRecordsTestMixin:
             # Update row variables.
             row_1 = updated_row_1
 
-        with self.subTest('Run with all updated'):
+        with self.subTest('With all updated'):
             # Run test query.
             updated_row_1 = (1, test_datetime__2020.replace(day=20), test_date__2020.replace(day=10))
             updated_row_2 = (2, test_datetime__2021.replace(day=20), test_date__2021.replace(day=10))
@@ -1663,7 +1663,7 @@ class CoreRecordsTestMixin:
             row_2 = updated_row_2
             row_3 = updated_row_3
 
-        with self.subTest('Run with columns in alternate order'):
+        with self.subTest('With columns in alternate order'):
             # Run test query.
             columns_clause = ['test_date', 'id', 'test_datetime']
             column_types_clause = ['date', 'integer', 'timestamp']
@@ -1694,7 +1694,7 @@ class CoreRecordsTestMixin:
             row_2 = updated_row_2
             row_3 = updated_row_3
 
-        with self.subTest('Run with skipping unused columns'):
+        with self.subTest('With skipping unused columns'):
             # Run test query.
             columns_clause = ['id', 'test_datetime']
             column_types_clause = ['integer', 'timestamp']
