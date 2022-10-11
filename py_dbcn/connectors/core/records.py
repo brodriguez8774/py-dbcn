@@ -143,6 +143,8 @@ class BaseRecords:
         # Must be array format.
         if not isinstance(values_clause, list) and not isinstance(values_clause, tuple):
             raise ValueError('VALUES clause for INSERT_MANY queries must be in list/tuple format.')
+        if len(values_clause) < 1:
+            raise ValueError('VALUES clause cannot be empty for INSERT_MANY queries.')
         values_clause = self._base.validate.sanitize_values_clause(values_clause)
 
         # Check for values that might need formatting.
@@ -243,6 +245,7 @@ class BaseRecords:
     def update_many(
         self,
         table_name, columns_clause, values_clause, where_columns_clause,
+        column_types_clause=None,
         display_query=True, display_results=True,
     ):
         """Updates record in provided table.
@@ -251,6 +254,8 @@ class BaseRecords:
         :param columns_clause: Clause to specify columns to insert into.
         :param values_clause: Clause to specify values to insert.
         :param where_columns_clause: NOT STANDARD WHERE CLAUSE. Columns to use as WHERE in provided values.
+        :param column_types_clause: Optional clause to provide type hinting for column types. Not required if all
+                                    columns are basic types such as text or integer.
         :param display_query: Bool indicating if query should output to console. Defaults to True.
         :param display_results: Bool indicating if results should output to console. Defaults to True.
         """
@@ -262,6 +267,8 @@ class BaseRecords:
         # Must be array format.
         if not isinstance(values_clause, list) and not isinstance(values_clause, tuple):
             raise ValueError('VALUES clause for INSERT_MANY queries must be in list/tuple format.')
+        if len(values_clause) < 1:
+            raise ValueError('VALUES clause cannot be empty for UPDATE_MANY queries.')
         values_clause = self._base.validate.sanitize_values_clause(values_clause)
 
         # Check that provided WHERE clause is valid format.
@@ -285,26 +292,43 @@ class BaseRecords:
         # For example, if we find date/datetime objects, we automatically convert to a str value that won't error.
         if isinstance(values_clause, list) or isinstance(values_clause, tuple):
             updated_values_clause = ()
-            for item in values_clause:
+            for value_set in values_clause:
+                updated_values_set = ()
+                for item in value_set:
 
-                if isinstance(item, datetime.datetime):
-                    # Is a datetime object. Convert to string.
-                    item = item.strftime('%Y-%m-%d %H:%M:%S')
-                elif isinstance(item, datetime.date):
-                    # Is a date object. Convert to string.
-                    item = item.strftime('%Y-%m-%d')
+                    if isinstance(item, datetime.datetime):
+                        # Is a datetime object. Convert to string.
+                        item = item.strftime('%Y-%m-%d %H:%M:%S')
+                    elif isinstance(item, datetime.date):
+                        # Is a date object. Convert to string.
+                        item = item.strftime('%Y-%m-%d')
+
+                    # Add item to updated inner set.
+                    updated_values_set += (item,)
 
                 # Add item to updated clause.
-                updated_values_clause += (item,)
+                updated_values_clause += (updated_values_set,)
 
             # Replace original clause.
             values_clause = updated_values_clause
 
         # Now format our clauses for query.
-        set_clause = ',\n'.join([
-            '    {0} = pydbcn_temp.{0}'.format(x.strip(self._base.validate._quote_column_format))
-            for x in columns_clause
-        ])
+        if column_types_clause is not None:
+            # Provide type hinting for columns.
+            set_clause = ''
+            for index in range(len(columns_clause)):
+                if set_clause != '':
+                    set_clause += ',\n'
+                set_clause += '    {0} = pydbcn_temp.{0}::{1}'.format(
+                    columns_clause[index].strip(self._base.validate._quote_column_format),
+                    column_types_clause[index],
+                )
+        else:
+            # No type hinting. Provide columns as-is.
+            set_clause = ',\n'.join([
+                '    {0} = pydbcn_temp.{0}'.format(x.strip(self._base.validate._quote_column_format))
+                for x in columns_clause
+            ])
         values_clause = ',\n'.join([
             '    {0}'.format(x)
             for x in values_clause
@@ -338,6 +362,7 @@ class BaseRecords:
             );
             """.format(table_name, set_clause, values_clause, columns_clause, where_columns_clause)
         )
+        # print('\n\nquery:\n{0}'.format(query))
 
         results = self._base.query.execute(query, display_query=display_query)
 

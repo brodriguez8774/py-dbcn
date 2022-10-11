@@ -997,7 +997,7 @@ class CoreRecordsTestMixin:
 
     def test__update__basic__success(self):
         """
-        Test `UPDATE` query.
+        Test `UPDATE` query with basic values.
         """
         table_name = 'test_queries__update__basic__success'
 
@@ -1097,7 +1097,7 @@ class CoreRecordsTestMixin:
 
     def test__update__datetime__success(self):
         """
-        Test `UPDATE` query.
+        Test `UPDATE` query with datetime values.
         """
         table_name = 'test_queries__update__datetime__success'
 
@@ -1246,11 +1246,11 @@ class CoreRecordsTestMixin:
             self.assertNotIn(old_row_2, results)
             self.assertNotIn(old_row_3, results)
 
-    def test__update_many__success(self):
+    def test__update_many__basic__success(self):
         """
-        Test execute_many `UPDATE` query.
+        Test execute_many `UPDATE` query with basic values.
         """
-        table_name = 'test_queries__update_many__success'
+        table_name = 'test_queries__update_many__basic__success'
 
         # Verify table exists.
         try:
@@ -1364,7 +1364,7 @@ class CoreRecordsTestMixin:
             row_2 = updated_row_2
             row_3 = updated_row_3
 
-        with self.subTest('Run with five updates'):
+        with self.subTest('Run with five updates and alternate where column'):
             # Run test query. Update by non-PK.
             updated_row_4 = (4, 'test_name_4', 'four')
             updated_row_5 = (5, 'test_name_5', 'five')
@@ -1459,6 +1459,275 @@ class CoreRecordsTestMixin:
             self.assertNotIn(row_8, results)
             self.assertNotIn(row_9, results)
             self.assertNotIn(row_10, results)
+
+            # Update row variables.
+            row_1 = updated_row_1
+            row_2 = updated_row_2
+            row_3 = updated_row_3
+            row_4 = updated_row_4
+            row_5 = updated_row_5
+            row_6 = updated_row_6
+            row_7 = updated_row_7
+            row_8 = updated_row_8
+            row_9 = updated_row_9
+            row_10 = updated_row_10
+
+        with self.subTest('Run with columns in alternate order'):
+            # Run test query.
+            updated_row_3 = (3, 'name as first', 'desc as second')
+            columns_clause = ['name', 'description', 'id']
+            values_clause = [
+                ('name as first', 'desc as second', 3)
+            ]
+            where_columns_clause = ['id']
+            self.connector.records.update_many(table_name, columns_clause, values_clause, where_columns_clause)
+
+            # Verify one record returned.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 10)
+            self.assertIn(row_1, results)
+            self.assertIn(row_2, results)
+            self.assertIn(updated_row_3, results)
+            self.assertIn(row_4, results)
+            self.assertIn(row_5, results)
+            self.assertIn(row_6, results)
+            self.assertIn(row_7, results)
+            self.assertIn(row_8, results)
+            self.assertIn(row_9, results)
+            self.assertIn(row_10, results)
+            self.assertNotIn(row_3, results)
+
+            # Update row variables.
+            row_3 = updated_row_3
+
+        with self.subTest('Run with skipping unused columns'):
+            # Run test query.
+            updated_row_5 = (5, 'this is')
+            updated_row_6 = (6, 'a')
+            updated_row_7 = (7, 'test')
+            columns_clause = ['id', 'description']
+            values_clause = [
+                updated_row_5,
+                updated_row_6,
+                updated_row_7,
+            ]
+            where_columns_clause = ['id']
+            self.connector.records.update_many(table_name, columns_clause, values_clause, where_columns_clause)
+
+            # Verify one record returned.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 10)
+            self.assertIn(row_1, results)
+            self.assertIn(row_2, results)
+            self.assertIn(row_3, results)
+            self.assertIn(row_4, results)
+            self.assertIn((updated_row_5[0], row_5[1], updated_row_5[1]), results)
+            self.assertIn((updated_row_6[0], row_6[1], updated_row_6[1]), results)
+            self.assertIn((updated_row_7[0], row_7[1], updated_row_7[1]), results)
+            self.assertIn(row_8, results)
+            self.assertIn(row_9, results)
+            self.assertIn(row_10, results)
+            self.assertNotIn(row_5, results)
+            self.assertNotIn(row_6, results)
+            self.assertNotIn(row_7, results)
+
+            # Update row variables.
+            row_5 = updated_row_5
+            row_6 = updated_row_6
+            row_7 = updated_row_7
+
+    def test__update_many__datetime__success(self):
+        """
+        Test execute_many `UPDATE` query with datetime values.
+        """
+        table_name = 'test_queries__update_many__datetime__success'
+
+        # Verify table exists.
+        try:
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__datetime))
+        except self.connector.errors.table_already_exists:
+            # Table already exists, as we want.
+            pass
+
+        # Generate datetime objects.
+        test_datetime__2020 = datetime.datetime(
+            year=2020,
+            month=6,
+            day=15,
+            hour=7,
+            minute=12,
+            second=52,
+            microsecond=0,
+        )
+        test_date__2020 = test_datetime__2020.date()
+        test_datetime__2021 = datetime.datetime(
+            year=2021,
+            month=7,
+            day=16,
+            hour=8,
+            minute=13,
+            second=53,
+            microsecond=0,
+        )
+        test_date__2021 = test_datetime__2021.date()
+        test_datetime__2022 = datetime.datetime(
+            year=2022,
+            month=8,
+            day=17,
+            hour=9,
+            minute=14,
+            second=54,
+            microsecond=0,
+        )
+        test_date__2022 = test_datetime__2022.date()
+
+        # Generate row values.
+        row_1 = (1, test_datetime__2020, test_date__2020)
+        row_2 = (2, test_datetime__2021, test_date__2021)
+        row_3 = (3, test_datetime__2022, test_date__2022)
+
+        # Generate initial rows.
+        rows = [
+            row_1,
+            row_2,
+            row_3,
+        ]
+        self.connector.records.insert_many(table_name, rows)
+
+        # Verify expected state.
+        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+        self.assertEqual(len(results), 3)
+        self.assertIn(row_1, results)
+        self.assertIn(row_2, results)
+        self.assertIn(row_3, results)
+
+        columns_clause = ['id', 'test_datetime', 'test_date']
+        column_types_clause = ('integer', 'timestamp', 'date')
+        where_columns_clause = ['id']
+
+        with self.subTest('Run with one update'):
+            # Run test query.
+            updated_row_1 = (1, test_datetime__2020.replace(month=1), test_date__2020.replace(month=2))
+            values_clause = [
+                updated_row_1,
+            ]
+            self.connector.records.update_many(
+                table_name,
+                columns_clause,
+                values_clause,
+                where_columns_clause,
+                column_types_clause=column_types_clause,
+            )
+
+            # Verify one record returned.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 3)
+            self.assertIn(updated_row_1, results)
+            self.assertIn(row_2, results)
+            self.assertIn(row_3, results)
+            self.assertNotIn(row_1, results)
+
+            # Update row variables.
+            row_1 = updated_row_1
+
+        with self.subTest('Run with all updated'):
+            # Run test query.
+            updated_row_1 = (1, test_datetime__2020.replace(day=20), test_date__2020.replace(day=10))
+            updated_row_2 = (2, test_datetime__2021.replace(day=20), test_date__2021.replace(day=10))
+            updated_row_3 = (3, test_datetime__2022.replace(day=20), test_date__2022.replace(day=10))
+            values_clause = [
+                updated_row_1,
+                updated_row_2,
+                updated_row_3,
+            ]
+            self.connector.records.update_many(
+                table_name,
+                columns_clause,
+                values_clause,
+                where_columns_clause,
+                column_types_clause=column_types_clause,
+            )
+
+            # Verify one record returned.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 3)
+            self.assertIn(updated_row_1, results)
+            self.assertIn(updated_row_2, results)
+            self.assertIn(updated_row_3, results)
+            self.assertNotIn(row_1, results)
+            self.assertNotIn(row_2, results)
+            self.assertNotIn(row_3, results)
+
+            # Update row variables.
+            row_1 = updated_row_1
+            row_2 = updated_row_2
+            row_3 = updated_row_3
+
+        with self.subTest('Run with columns in alternate order'):
+            # Run test query.
+            columns_clause = ['test_date', 'id', 'test_datetime']
+            column_types_clause = ['date', 'integer', 'timestamp']
+            updated_row_2 = (2, test_datetime__2021.replace(month=3), test_date__2021.replace(month=4))
+            updated_row_3 = (3, test_datetime__2022.replace(month=6), test_date__2022.replace(month=5))
+            values_clause = [
+                (updated_row_2[2], updated_row_2[0], updated_row_2[1]),
+                (updated_row_3[2], updated_row_3[0], updated_row_3[1]),
+            ]
+            self.connector.records.update_many(
+                table_name,
+                columns_clause,
+                values_clause,
+                where_columns_clause,
+                column_types_clause=column_types_clause,
+            )
+
+            # Verify one record returned.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 3)
+            self.assertIn(row_1, results)
+            self.assertIn(updated_row_2, results)
+            self.assertIn(updated_row_3, results)
+            self.assertNotIn(row_2, results)
+            self.assertNotIn(row_3, results)
+
+            # Update row variables.
+            row_2 = updated_row_2
+            row_3 = updated_row_3
+
+        with self.subTest('Run with skipping unused columns'):
+            # Run test query.
+            columns_clause = ['id', 'test_datetime']
+            column_types_clause = ['integer', 'timestamp']
+            updated_row_1 = (1, test_datetime__2020)
+            updated_row_2 = (2, test_datetime__2021)
+            updated_row_3 = (3, test_datetime__2022)
+            values_clause = [
+                updated_row_1,
+                updated_row_2,
+                updated_row_3,
+            ]
+            self.connector.records.update_many(
+                table_name,
+                columns_clause,
+                values_clause,
+                where_columns_clause,
+                column_types_clause=column_types_clause,
+            )
+
+            # Verify one record returned.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertEqual(len(results), 3)
+            self.assertIn(updated_row_1 + (row_1[2],), results)
+            self.assertIn(updated_row_2 + (row_2[2],), results)
+            self.assertIn(updated_row_3 + (row_3[2],), results)
+            self.assertNotIn(row_1, results)
+            self.assertNotIn(row_2, results)
+            self.assertNotIn(row_3, results)
+
+            # Update row variables.
+            row_1 = updated_row_1
+            row_2 = updated_row_2
+            row_3 = updated_row_3
 
     def test__delete__success(self):
         """
