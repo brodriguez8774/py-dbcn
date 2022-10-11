@@ -259,6 +259,26 @@ class BaseRecords:
         :param display_query: Bool indicating if query should output to console. Defaults to True.
         :param display_results: Bool indicating if results should output to console. Defaults to True.
         """
+        # Check provided size.
+        upper_limit = 10000     # 10,000 limit for now.
+        if len(values_clause) > upper_limit:
+            print('Subdividing query.')
+            # Exceeds upper limit. Recursively call self on smaller subsets.
+            for index in range(0, len(values_clause), upper_limit):
+                print('    Range [{0}:{1}]'.format(index, index + upper_limit))
+                self.update_many(
+                    table_name,
+                    columns_clause,
+                    values_clause[index:index + upper_limit],
+                    where_columns_clause,
+                    column_types_clause=column_types_clause,
+                    display_query=display_query,
+                    display_results=display_results,
+                )
+
+            # Terminate once all recursive calls have finished.
+            return
+
         # Check that provided table name is valid format.
         if not self._base.validate.table_name(table_name):
             raise ValueError('Invalid table name of "{0}".'.format(table_name))
