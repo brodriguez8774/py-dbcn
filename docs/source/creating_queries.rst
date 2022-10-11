@@ -631,6 +631,7 @@ Example:
         columns_clause,
         values_clause,
         where_columns_clause,
+        column_types_clause=column_types_clause,
     )
 
 
