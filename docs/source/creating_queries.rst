@@ -435,7 +435,8 @@ INSERT single Record
                        provided, in the order they were originally added to the
                        table.
 
-:return: TODO: Honestly unsure of what this provides. Double check.
+:return: TODO: Honestly unsure of what this provides. Probably empty array?
+        Double check.
 
 
 Example:
@@ -476,7 +477,7 @@ INSERT multiple Records
                        provided, in the order they were originally added to the
                        table.
 
-:return: TODO: Honestly unsure of what this provides. Double check.
+:return: None
 
 
 Example:
@@ -527,7 +528,7 @@ UPDATE Single Record
                      BUT if an empty string is provided, then the query will
                      still select all records.
 
-:return: TODO: Honestly unsure of what this provides. Double check.
+:return: Returns set of all updated values.
 
 
 Example:
@@ -565,13 +566,25 @@ UPDATE Multiple Records
 
 :param values_clause: Clause to provide values for updated record.
 
-:param where_clause: NOT the standard WHERE clause used in other queries.
+                    Columns indicated in the below ``where_columns_clause``
+                    should match values already present in the database.
 
-                    Clause to indicate what columns are being filtered on. All
-                    columns present here should also be present in the
-                    ``columns_clause`` param.
+                    All other columns will update to the new values provided
+                    here.
 
-:return: TODO: Honestly unsure of what this provides. Double check.
+:param where_columns_clause: NOT the standard WHERE clause used in other queries.
+
+                            Clause to indicate what columns are being filtered
+                            on. All columns present here should also be present
+                            in the ``columns_clause`` param.
+
+:param column_types_clause: Optional clause to provide type hinting to column
+                            types.
+
+                            Can be skipped when all columns are basic types,
+                            such as text or integer.
+
+:return: None
 
 
 Example:
@@ -589,11 +602,17 @@ Example:
     # Columns to update with/on.
     columns_clause = ['id', 'name']
 
+    # Type hinting for columns.
+    # Note: This is NOT required in this instance, and only shown here for
+    # example. But this IS required in instances with more complicated data
+    # types, such as dates or timestamps.
+    column_types_clause = ['integer', 'varchar(200)']
+
     # Desired values after query runs.
-    # Note: Since we match on "id", this should match what already exists
-    # in the database. The "name" field is not included in the WHERE so it can
-    # be set to whatever new value we want it to be. Meanwhile, record fields
-    # that are not used to match or update can be excluded.
+    # Note: In this case, we match on "id" by including it in the
+    # WHERE clause. Meanwhile, the "name" field is not included in the
+    # WHERE, so this field is set to the desired update value. Any fields
+    # that are not used to match/update should be excluded.
     values_clause = [
         # (id, name)
         (1599, 'Refurbished Item 1001'),
