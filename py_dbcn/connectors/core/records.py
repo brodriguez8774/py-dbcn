@@ -350,20 +350,14 @@ class BaseRecords:
         # print('\ncolumns_clause:\n{0}'.format(columns_clause))
 
         # Update records.
-        query = textwrap.dedent(
-            """
-            UPDATE {0} AS pydbcn_update_table SET
-            {1}
-            FROM (VALUES
-            {2}
-            ) AS pydbcn_temp ({3})
-            WHERE (
-            {4}
-            );
-            """.format(table_name, set_clause, values_clause, columns_clause, where_columns_clause)
-        )
-        # print('\n\nquery:\n{0}'.format(query))
-
+        query = f'UPDATE {table_name} AS pydbcn_update_table SET\n'
+        query += f'{set_clause}\n'
+        query += f'FROM (VALUES\n'
+        query += f'{values_clause}\n'
+        query += f') AS pydbcn_temp ({columns_clause})\n'
+        query += f'WHERE (\n'
+        query += f'{where_columns_clause}\n'
+        query += f');'
         results = self._base.query.execute(query, display_query=display_query)
 
         # # Do a select to get the updated values as results.
