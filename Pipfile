@@ -19,9 +19,7 @@ python_version = "3.9"
  # General packages, installed via `pipenv sync`.
  ##
 [packages]
-mysqlclient = "*"               # For connecting to mysql.
-psycopg2-binary = "*"           # For connecting to PostgreSQL.
-pytz = "*"                      # For datetime shenanigans.
+# No required sub-dependencies at the moment.
 
 
 ###
@@ -59,3 +57,6 @@ twine = "*"                     # For pushing/publishing packages.
  ##
 [optional-packages]
 colorama = "*"                  # Console coloring package.
+mysqlclient = "*"               # For connecting to mysql.
+psycopg2-binary = "*"           # For connecting to PostgreSQL.
+pytz = "*"                      # For datetime shenanigans.
