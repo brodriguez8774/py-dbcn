@@ -264,6 +264,39 @@ class BaseTables:
         """
         self.drop(table_name, display_query=display_query, display_results=display_results)
 
+    def truncate(self, table_name, cascade=False, display_query=True, display_results=True):
+        """Truncates all records from table with provided name.
+
+        :param table_name: Name of table to truncate.
+        :param cascade: Bool indicating if truncation should cascade to related tables. Defaults to False.
+        :param display_query: Bool indicating if query should output to console. Defaults to True.
+        :param display_results: Bool indicating if results should output to console. Defaults to True.
+        """
+        # First, check that provided name is valid format.
+        if not self._base.validate.table_name(table_name):
+            raise ValueError('Invalid table name of "{0}".'.format(table_name))
+
+        # Get list of valid tables.
+        available_tables = self._get()
+
+        # Check if provided tables matches value in list.
+        if table_name not in available_tables:
+            # Table does not exist. Raise error.
+            raise ValueError('Table with name "{0}" already exists'.format(table_name))
+
+        # Get count of records in table, before operation.
+        record_count = self.count(table_name, display_query=False, display_results=False)
+
+        # Remove table.
+        if cascade:
+            cascade = ' CASCADE'
+        else:
+            cascade = ''
+        query = 'TRUNCATE {0}{1};'.format(table_name, cascade)
+        self._base.query.execute(query, display_query=display_query)
+        if display_results:
+            self._base.display.results('Truncated {0} records from table "{1}".'.format(record_count, table_name))
+
     def count(self, table_name, display_query=True, display_results=True):
         """Returns number of all records present in provided table.
 
