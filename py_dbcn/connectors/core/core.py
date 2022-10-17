@@ -31,7 +31,11 @@ class AbstractDbConnector(ABC):
     and then be gradually moved to specific connectors as needed.)
     """
     @abstractmethod
-    def __init__(self, db_host, db_port, db_user, db_pass, db_name, *args, debug=False, **kwargs):
+    def __init__(
+        self,
+        db_host, db_port, db_user, db_pass, db_name, *args,
+        display_connection_output=True, debug=False, **kwargs,
+    ):
         logger.debug('Generating (core) Connector class.')
         db_port = int(db_port)
 
@@ -47,6 +51,7 @@ class AbstractDbConnector(ABC):
         # Initialize config.
         self._config = Config()
         # Values for connecting.
+        self._config.display_connection_output = display_connection_output
         self._config.db_host = db_host
         self._config.db_port = db_port
         self._config.db_user = db_user
@@ -100,13 +105,17 @@ class AbstractDbConnector(ABC):
         raise NotImplementedError('Please override the connection.create_connection() function.')
 
     def close_connection(self):
-        """Attempts to close database connection, if open."""
+        """Attempts to close database connection, if open.
+
+        :param display_output: Bool indicating if output should display.
+        """
         try:
             self._connection.close()
         except:
             pass
 
-        logger.info('Closed {0} database connection.'.format(self.db_type))
+        if self._config.display_connection_output:
+            logger.info('Closed {0} database connection.'.format(self._config.db_type))
 
     def _get_related_database_class(self):
         """

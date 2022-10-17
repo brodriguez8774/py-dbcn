@@ -45,7 +45,10 @@ class MysqlDbConnector(AbstractDbConnector):
         self.create_connection()
 
     def create_connection(self, db_name=None):
-        """Attempts to create database connection, using config values."""
+        """Attempts to create database connection, using config values.
+
+        :param db_name: Name of database to connect to.
+        """
         if db_name is None or str(db_name).strip() == '':
             # Empty value provided. Fallback to config value.
             db_name = self._config.db_name
@@ -61,16 +64,8 @@ class MysqlDbConnector(AbstractDbConnector):
             db=db_name,
         )
 
-        logger.info('Created MySQL database connection.')
-
-    def close_connection(self):
-        """Attempts to close database connection, if open."""
-        try:
-            self._connection.close()
-        except:
-            pass
-
-        logger.info('Closed MySQL database connection.')
+        if self._config.display_connection_output:
+            logger.info('Created MySQL database connection.')
 
     def _get_related_database_class(self):
         """
