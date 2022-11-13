@@ -560,7 +560,6 @@ class BaseValidate:
             # Strip out function values.
             # First check against regex matches.
             func_call_regex = (r'\(*|'.join(self._reserved_function_names))
-
             matches = re.match(func_call_regex, item, flags=re.IGNORECASE)
 
             # Proceed if at least one match is found.
@@ -578,6 +577,20 @@ class BaseValidate:
                         stripped_right += ')'
                         item = item[length:-1].strip()
                     index += 1
+
+            # Ignore potential type casting syntax.
+            cast_identifier = ''
+            if self._base._config.db_type == 'PostgreSQL':
+                # Handle for PostgreSQL casting.
+                cast_split = item.split('::')
+                if len(cast_split) > 2:
+                    raise ValueError('Invalid casting identifier "{0}"'.format(item))
+                elif len(cast_split) > 1:
+                    cast_identifier = cast_split[1]
+                    if not re.match(r'[A-Za-z0-9]+', cast_identifier):
+                        raise ValueError('Invalid casting identifier "{0}"'.format(cast_identifier))
+                    cast_identifier = '::{0}'.format(cast_identifier)
+                item = cast_split[0]
 
             # Errors on "all" wildcard star.
             if item == '*':
@@ -614,12 +627,12 @@ class BaseValidate:
             is_quoted = self._is_quoted(item)
             if is_quoted:
                 # Was already quoted, but may not be with expected format. Reformat to guaranteed use expected format.
-                item = '{1}{0}{1}{2}'.format(item[1:-1], quote_format, order_by_descriptor)
+                item = '{1}{0}{1}{2}{3}'.format(item[1:-1], quote_format, cast_identifier, order_by_descriptor)
             elif item == '*':
                 pass
             else:
                 # Was not quoted. Add quotes.
-                item = '{1}{0}{1}{2}'.format(item, quote_format, order_by_descriptor)
+                item = '{1}{0}{1}{2}{3}'.format(item, quote_format, cast_identifier, order_by_descriptor)
 
             # Re-add function values.
             item = stripped_left.upper() + item + stripped_right
