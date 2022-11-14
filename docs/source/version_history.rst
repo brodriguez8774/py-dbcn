@@ -2,6 +2,35 @@ Version History
 ***************
 
 
+0.3.0 - Stable PostgreSQL Querying
+==================================
+
+* **MySQL** and **PostgreSQL** are both implemented and thoroughly tested. Both
+  databases implement the following query types (at each of the
+  Database/Table/Record levels, where appropriate):
+
+    * CREATE
+    * SHOW
+    * DESCRIBE
+    * USE
+    * SELECT
+    * INSERT
+    * INSERT MANY
+    * UPDATE
+    * UPDATE MANY
+    * DELETE
+    * TRUNCATE
+
+* Basic aggregation functions have been confirmed to work in both database
+  types.
+* Syntax to call either database from this package is the same. Aka, goal of
+  being database-agnostic is currently being met.
+* Query validation logic is in a better state than version 0.2.0, but still not
+  as robust as desired.
+* Documentation describes most relevant end-user functionality. But is still not
+  100% complete as of writing this.
+
+
 0.2.0 - Stable MySQL Querying
 =============================
 
