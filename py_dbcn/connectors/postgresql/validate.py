@@ -16,7 +16,7 @@ logger = init_logging(__name__)
 
 
 # Module Variables.
-QUOTE_COLUMN_FORMAT = """'"""       # Used for quoting table columns.
+QUOTE_COLUMN_FORMAT = """\""""       # Used for quoting table columns.
 QUOTE_IDENTIFIER_FORMAT = """\""""  # Used for quoting identifiers (such as SELECT clause field id's).
 QUOTE_ORDER_BY_FORMAT = """\""""    # Used for quoting values in ORDER BY clause.
 QUOTE_STR_LITERAL_FORMAT = """'"""  # Used for quoting actual strings.
@@ -38,8 +38,12 @@ class PostgresqlValidate(BaseValidate):
         # https://www.postgresql.org/docs/current/sql-keywords-appendix.html
         self._reserved_function_names = [
             'ABS',
-            'AVG,'
+            'AVG',
+            'BIT_AND',
+            'BIT_OR',
             'BIT_LENGTH',
+            'BOOL_AND',
+            'BOOL_OR',
             'CASE',
             'CAST',
             'CEIL',
@@ -82,6 +86,7 @@ class PostgresqlValidate(BaseValidate):
             'SESSION_USER',
             'SPACE',
             'SQRT',
+            'STDDEV',
             'STDDEV_POP',
             'STDDEV_SAMP',
             'SUBSTRING',
@@ -91,6 +96,7 @@ class PostgresqlValidate(BaseValidate):
             'UPPER',
             'VAR_POP',
             'VAR_SAMP',
+            'VARIANCE',
             'YEAR',
         ]
 

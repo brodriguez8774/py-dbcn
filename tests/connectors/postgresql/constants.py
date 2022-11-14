@@ -38,3 +38,13 @@ COLUMNS_CLAUSE__DATETIME = """
     test_date DATE
 )
 """.strip()
+
+
+COLUMNS_CLAUSE__AGGREGATES = """
+(
+    id serial PRIMARY KEY,
+    test_str VARCHAR(100),
+    test_int INTEGER,
+    test_bool BOOLEAN
+)
+""".strip()

@@ -50,7 +50,7 @@ class TestPostgresqlValidate(TestPostgresqlDatabaseParent, CoreValidateTestMixin
 
     def test__column_quote_format(self):
         # Verify quote str is as we expect.
-        self.assertText("'{0}'", self._quote_columns_format)
+        self.assertText('"{0}"', self._quote_columns_format)
 
     def test__select_identifier_quote_format(self):
         # Verify quote str is as we expect.

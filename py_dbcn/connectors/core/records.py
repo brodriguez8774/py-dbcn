@@ -131,13 +131,15 @@ class BaseRecords:
         return results
 
     def insert_many(self, table_name, values_clause, columns_clause=None, display_query=True, display_results=True):
-        """"""
+        """"Inserts multiple records into provided table with one query."""
         # Check that provided table name is valid format.
         if not self._base.validate.table_name(table_name):
             raise ValueError('Invalid table name of "{0}".'.format(table_name))
 
         # Check that provided COLUMNS clause is valid format.
         columns_clause = self._base.validate.sanitize_columns_clause(columns_clause)
+        if columns_clause != '':
+            columns_clause = ' ({0})'.format(columns_clause)
 
         # Check that provided VALUES clause is valid format.
         # Must be array format.

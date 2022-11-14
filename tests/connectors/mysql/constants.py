@@ -39,3 +39,14 @@ COLUMNS_CLAUSE__DATETIME = """
     PRIMARY KEY ( id )
 )
 """.strip()
+
+
+COLUMNS_CLAUSE__AGGREGATES = """
+(
+    id INT NOT NULL AUTO_INCREMENT,
+    test_str VARCHAR(100),
+    test_int INT,
+    test_bool TINYINT,
+    PRIMARY KEY ( id )
+)
+""".strip()

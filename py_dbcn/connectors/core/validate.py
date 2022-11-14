@@ -48,6 +48,7 @@ class BaseValidate:
         self._quote_identifier_format = None
         self._quote_order_by_format = None
         self._quote_str_literal_format = None
+        self._reserved_function_names = None
 
     # region Name Validation
 

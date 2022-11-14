@@ -334,14 +334,18 @@ class RecordDisplay:
             total_col_len = 0
             for table_col in table_cols:
                 col_len = len(table_col)
-                record_len = self._base.query.execute(
-                    self._parent.max_col_length_query .format(
-                        table_col,
-                        table_name,
-                        self._base.validate._quote_identifier_format,
-                    ),
-                    display_query=False,
-                )[0][0]
+                if not any(keyword_str in table_col for keyword_str in self._base.validate._reserved_function_names):
+                    record_len = self._base.query.execute(
+                        self._parent.max_col_length_query.format(
+                            table_col,
+                            table_name,
+                            self._base.validate._quote_identifier_format,
+                        ),
+                        display_query=False,
+                    )[0][0]
+                else:
+                    # Keyword found in str. For now, to prevent errors, default to size of 19 and skip query.
+                    record_len = 19
                 length = max(col_len, record_len or 0)
                 col_len_array.append(length)
                 total_col_len += length + 2
