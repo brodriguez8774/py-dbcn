@@ -92,27 +92,25 @@ class CoreTestParent(unittest.TestCase):
         # Run parent teardown logic.
         super().tearDownClass()
 
-    def assertText(self, actual_text, expected_text, strip=True):
+    def assertText(self, expected_text, actual_text, strip=True):
         """Wrapper for assertEqual(), that prints full values to console on mismatch.
 
-        NOTE: Outer whitespace is stripped if either strip or standardize params are set to True.
-
-        :param actual_text: Actual text value to compare.
         :param expected_text: Expected text value to check against.
+        :param actual_text: Actual text value to compare.
         :param strip: Bool indicating if outer whitespace should be stripped. Defaults to True.
         """
         # Enforce str type.
-        actual_text = str(actual_text)
         expected_text = str(expected_text)
+        actual_text = str(actual_text)
 
         # Handle optional cleaning params.
         if strip:
-            actual_text = actual_text.strip()
             expected_text = expected_text.strip()
+            actual_text = actual_text.strip()
 
         # Attempt assertion.
         try:
-            self.assertEqual(actual_text, expected_text)
+            self.assertEqual(expected_text, actual_text)
         except AssertionError as err:
             # Assertion failed. Provide debug output.
 
@@ -134,8 +132,8 @@ class CoreTestParent(unittest.TestCase):
             else:
                 max_lines = len(split_expected)
 
-            formatted_actual_output = ''
             formatted_expected_output = ''
+            formatted_actual_output = ''
             for line_index in range(max_lines):
                 try:
                     curr_expected_line = split_expected[line_index]
@@ -153,8 +151,8 @@ class CoreTestParent(unittest.TestCase):
 
                 if curr_expected_line == curr_actual_line:
                     # Line is full match and correct.
-                    curr_actual_line = '{0}{1}{2}\n'.format(OUTPUT_ACTUALS_MATCH, curr_actual_line, OUTPUT_RESET)
                     curr_expected_line = '{0}{1}{2}\n'.format(OUTPUT_EXPECTED_MATCH, curr_expected_line, OUTPUT_RESET)
+                    curr_actual_line = '{0}{1}{2}\n'.format(OUTPUT_ACTUALS_MATCH, curr_actual_line, OUTPUT_RESET)
                 elif curr_expected_line is None:
                     # "Actual" output is longer than "expected" output. Impossible to match current line.
                     curr_expected_line = ''
@@ -180,10 +178,10 @@ class CoreTestParent(unittest.TestCase):
                         max_chars = len(curr_expected_line)
 
                     # Check each character and determine where non-match happens.
-                    curr_actual_color = OUTPUT_RESET
                     curr_expected_color = OUTPUT_RESET
-                    curr_actual_char_line = ''
+                    curr_actual_color = OUTPUT_RESET
                     curr_expected_char_line = ''
+                    curr_actual_char_line = ''
                     for char_index in range(max_chars):
                         # Grab current character.
                         try:
@@ -198,30 +196,26 @@ class CoreTestParent(unittest.TestCase):
                         # Format based on match.
                         if expected_char == actual_char:
                             # Match.
-                            if curr_actual_color != OUTPUT_ACTUALS_MATCH:
-                                curr_actual_color = OUTPUT_ACTUALS_MATCH
-                                curr_actual_char_line += curr_actual_color
                             if curr_expected_color != OUTPUT_EXPECTED_MATCH:
                                 curr_expected_color = OUTPUT_EXPECTED_MATCH
                                 curr_expected_char_line += curr_expected_color
+                            if curr_actual_color != OUTPUT_ACTUALS_MATCH:
+                                curr_actual_color = OUTPUT_ACTUALS_MATCH
+                                curr_actual_char_line += curr_actual_color
                         else:
                             # Non-match.
-                            if curr_actual_color != OUTPUT_ACTUALS_ERROR:
-                                curr_actual_color = OUTPUT_ACTUALS_ERROR
-                                curr_actual_char_line += curr_actual_color
                             if curr_expected_color != OUTPUT_EXPECTED_ERROR:
                                 curr_expected_color = OUTPUT_EXPECTED_ERROR
                                 curr_expected_char_line += curr_expected_color
+                            if curr_actual_color != OUTPUT_ACTUALS_ERROR:
+                                curr_actual_color = OUTPUT_ACTUALS_ERROR
+                                curr_actual_char_line += curr_actual_color
 
-                        curr_actual_char_line += '{0}'.format(actual_char)
                         curr_expected_char_line += '{0}'.format(expected_char)
+                        curr_actual_char_line += '{0}'.format(actual_char)
 
                     # Update output strings.
                     append_newline = True
-                    if not curr_expected_char_line.endswith(str(OUTPUT_RESET)):
-                        curr_expected_line += str(OUTPUT_RESET)
-                    if not curr_actual_char_line.endswith(str(OUTPUT_RESET)):
-                        curr_actual_line += str(OUTPUT_RESET)
                     formatted_expected_output += curr_expected_char_line
                     formatted_actual_output += curr_actual_char_line
                     continue
