@@ -32,6 +32,18 @@ class CoreValidateTestMixin:
         cls._quote_select_identifier_format = None
         cls._quote_str_literal_format = None
 
+    # def sql_injection(self):
+    #     with self.subTest('SQL Injection - Drop database'):
+    #         with self.assertRaises():
+    #             self.connector.
+    #             self.connector.validate.validate_select_clause('DROP DATABASE {0}'.format(self.test_db_name_start))
+    #
+    #     with self.subTest('SQL Injection - Drop table'):
+    #         with self.assertRaises():
+    #             self.connector.validate.validate_select_clause('DROP DATABASE {0}'.format(self.test_db_name_start))
+
+
+
     def test__column_quote_format(self):
         raise NotImplementedError('Check for column quote formatting not implemented.')
 
@@ -44,7 +56,7 @@ class CoreValidateTestMixin:
     def test__str_literal_quote_format(self):
         raise NotImplementedError('Check for str literal quote formatting not implemented.')
 
-    # region Name Validation
+    # region Validation Functions
 
     def test__identifier__success(self):
         """
@@ -561,46 +573,6 @@ class CoreValidateTestMixin:
             with self.assertRaises(ValueError):
                 self.connector.validate.table_columns({'id': 'INT;'})
 
-    def test__table_column__success(self):
-        """
-        Test "table column" validation, when it should succeed.
-        """
-        with self.subTest('"Permitted characters in unquoted Identifiers"'):
-            # Ensure capital letters validate.
-            self.assertTrue(self.connector.validate.table_column('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))
-
-            # Ensure lowercase characters validate.
-            self.assertTrue(self.connector.validate.table_column('abcdefghijklmnopqrstuvwxyz'))
-
-            # Ensure integer characters validate.
-            self.assertTrue(self.connector.validate.table_column('0123456789'))
-
-            # Ensure dollar and underscore validate.
-            self.assertTrue(self.connector.validate.table_column('_$'))
-
-        with self.subTest('At max length - unquoted'):
-            test_str = 'Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-            self.assertText(len(test_str), 64)
-            self.assertTrue(self.connector.validate.table_column(test_str))
-
-        with self.subTest('At max length - quoted'):
-            test_str = '`Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`'
-            self.assertText(len(test_str), 66)
-            self.assertTrue(self.connector.validate.table_column(test_str))
-
-        with self.subTest(
-            '"Permitted characters in quoted identifiers include the full Unicode Basic Multilingual Plane (BMP), '
-            'except U+0000"'
-        ):
-            for index in range(127):
-                # Skip "unacceptable" values.
-                if (index + 1) in self.unallowed_unicode_index_list:
-                    continue
-
-                # Test value.
-                test_str = u'`' + chr(index + 1) + u'`'
-                self.assertTrue(self.connector.validate.table_column(test_str))
-
     def test__table_column__failure(self):
         """
         Test "table column" validation, when it should fail.
@@ -703,9 +675,241 @@ class CoreValidateTestMixin:
                 self.assertIn('Invalid table column of ', str(err.exception))
                 self.assertIn('. Column does not match acceptable characters.', str(err.exception))
 
-    # endregion Name Validation
+    def test__validate_select_clause__success(self):
+        """"""
 
-    # region Clause Validation
+    def test__validate_select_clause__failure(self):
+        """"""
+
+    def test__validate_columns_clause__success(self):
+        """
+        Test "table column" individual value validation, when it should succeed.
+        """
+        with self.subTest('"Permitted characters in unquoted Identifiers"'):
+            # Ensure capital letters validate.
+            self.assertTrue(self.connector.validate.validate_columns_clause('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))
+
+            # Ensure lowercase characters validate.
+            self.assertTrue(self.connector.validate.validate_columns_clause('abcdefghijklmnopqrstuvwxyz'))
+
+            # Ensure integer characters validate.
+            self.assertTrue(self.connector.validate.validate_columns_clause('0123456789'))
+
+            # Ensure dollar and underscore validate.
+            self.assertTrue(self.connector.validate.validate_columns_clause('_$'))
+
+        with self.subTest('At max length - unquoted'):
+            test_str = 'Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+            self.assertText(len(test_str), 64)
+            self.assertTrue(self.connector.validate.validate_columns_clause(test_str))
+
+        with self.subTest('At max length - quoted'):
+            test_str = '`Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`'
+            self.assertText(len(test_str), 66)
+            self.assertTrue(self.connector.validate.validate_columns_clause(test_str))
+
+        with self.subTest(
+            '"Permitted characters in quoted identifiers include the full Unicode Basic Multilingual Plane (BMP), '
+            'except U+0000"'
+        ):
+            for index in range(127):
+                # Skip "unacceptable" values.
+                if (index + 1) in self.unallowed_unicode_index_list:
+                    continue
+
+                # Test value.
+                test_str = u'`' + chr(index + 1) + u'`'
+                self.assertTrue(self.connector.validate.validate_columns_clause(test_str))
+
+        with self.subTest('Basic common column values - As-is'):
+            self.assertTrue(self.connector.validate.validate_columns_clause('name'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('description'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('id'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('code'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('size'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('type'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('quantity'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('qty'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('status'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('order'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('order_id'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('invoice'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('invoice_id'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('load'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('load_id'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('location'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('location_id'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('product'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('product_id'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('item'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('item_id'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('date_created'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('date_modified'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('last_edited'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('last_active'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('last_activity'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('active'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('is_active'))
+
+        with self.subTest('Basic common column values - With Single Quotes'):
+            # Standard Values.
+            self.assertTrue(self.connector.validate.validate_columns_clause("'name'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'description'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'id'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'code'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'size'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'type'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'quantity'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'qty'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'status'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'order'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'order_id'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'invoice'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'invoice_id'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'load'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'load_id'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'location'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'location_id'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'product'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'product_id'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'item'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'item_id'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'date_created'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'date_modified'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'last_edited'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'last_active'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'last_activity'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'active'"))
+            self.assertTrue(self.connector.validate.validate_columns_clause("'is_active'"))
+
+            # Keyword values that fail without quotes, but succeed here.
+            self.assertTrue(self.connector.validate.validate_columns_clause("'desc'"))
+
+        with self.subTest('Basic common column values - With Double Quotes'):
+            # Standard values.
+            self.assertTrue(self.connector.validate.validate_columns_clause('"name"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"description"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"id"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"code"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"size"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"type"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"quantity"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"qty"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"status"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"order"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"order_id"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"invoice"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"invoice_id"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"load"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"load_id"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"location"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"location_id"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"product"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"product_id"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"item"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"item_id"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"date_created"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"date_modified"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"last_edited"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"last_active"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"last_activity"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"active"'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('"is_active"'))
+
+            # Keyword values that fail without quotes, but succeed here.
+            self.assertTrue(self.connector.validate.validate_columns_clause('"desc"'))
+
+        with self.subTest('Basic common column values - With Backtick Quotes'):
+            # Standard values.
+            self.assertTrue(self.connector.validate.validate_columns_clause('`name`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`description`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`id`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`code`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`size`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`type`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`quantity`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`qty`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`status`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`order`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`order_id`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`invoice`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`invoice_id`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`load`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`load_id`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`location`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`location_id`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`product`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`product_id`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`item`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`item_id`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`date_created`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`date_modified`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`last_edited`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`last_active`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`last_activity`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`active`'))
+            self.assertTrue(self.connector.validate.validate_columns_clause('`is_active`'))
+
+            # Keyword values that fail without quotes, but succeed here.
+            self.assertTrue(self.connector.validate.validate_columns_clause('`desc`'))
+
+        with self.subTest('Special cases'):
+            # Contains space.
+            self.assertTrue(self.connector.validate.validate_columns_clause('"test value"'))
+
+            # Contains inner apostraphe.
+            self.assertTrue(self.connector.validate.validate_columns_clause('"Customer\'s Price"'))
+
+            # Contains inner quotes.
+            self.assertTrue(self.connector.validate.validate_columns_clause('"John "Spaceman" Johnny"'))
+
+    def test__validate_columns_clause__failure(self):
+        """"""
+        # # Test none.
+        # self.assertFalse(self.connector.validate.validate_columns_clause(None))
+        #
+        # # Test empty str.
+        # self.assertFalse(self.connector.validate.validate_columns_clause(''))
+
+        with self.subTest('Common column keyword values that will fail without quotes'):
+            with self.assertRaises(ValueError) as err:
+                self.assertFalse(self.connector.validate.validate_columns_clause('desc'))
+            self.assertText(
+                (
+                    'Invalid table column of "desc". Column matches a known keyword. '
+                    'Must be quoted to use this value. Identifier is: desc'
+                ),
+                str(err.exception)
+            )
+
+    def test__validate_where_clause__success(self):
+        """"""
+
+    def test__validate_where_clause__failure(self):
+        """"""
+
+    def test__validate_values_clause__success(self):
+        """"""
+
+    def test__validate_values_clause__failure(self):
+        """"""
+
+    def test__validate_order_by_clause__success(self):
+        """"""
+
+    def test__validate_order_by_clause__failure(self):
+        """"""
+
+    def test__validate_limit_by_clause__success(self):
+        """"""
+
+    def test__validate_limit_by_clause__failure(self):
+        """"""
+
+    # endregion Validation Functions
+
+
+    # region Sanitization Functions
 
     def test__sanitize_select_identifier_clause__success(self):
         """
@@ -1184,7 +1388,7 @@ class CoreValidateTestMixin:
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_select_identifier_clause(identifier)
         self.assertText(
-            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: "id\'',
+            'Found mismatching quotes for identifier "id\'',
             str(err.exception),
         )
 
@@ -1193,7 +1397,7 @@ class CoreValidateTestMixin:
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_select_identifier_clause(identifier)
         self.assertText(
-            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: \'id"',
+            'Found mismatching quotes for identifier \'id"',
             str(err.exception),
         )
 
@@ -1202,7 +1406,7 @@ class CoreValidateTestMixin:
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_select_identifier_clause(identifier)
         self.assertText(
-            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: `id\'',
+            'Found mismatching quotes for identifier `id\'',
             str(err.exception),
         )
 
@@ -1211,7 +1415,7 @@ class CoreValidateTestMixin:
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_select_identifier_clause(identifier)
         self.assertText(
-            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: \'id`',
+            'Found mismatching quotes for identifier \'id`',
             str(err.exception),
         )
 
@@ -1220,7 +1424,7 @@ class CoreValidateTestMixin:
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_select_identifier_clause(identifier)
         self.assertText(
-            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: "id`',
+            'Found mismatching quotes for identifier "id`',
             str(err.exception),
         )
 
@@ -1229,7 +1433,7 @@ class CoreValidateTestMixin:
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_select_identifier_clause(identifier)
         self.assertText(
-            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: `id"',
+            'Found mismatching quotes for identifier `id"',
             str(err.exception),
         )
 
@@ -1266,6 +1470,13 @@ class CoreValidateTestMixin:
             self.assertText(result, self._quote_columns_format.format('id'))
             # With extra whitespace.
             result = self.connector.validate.sanitize_columns_clause(' id ')
+            self.assertText(result, self._quote_columns_format.format('id'))
+
+            # Single val provided and COLUMNS.
+            result = self.connector.validate.sanitize_columns_clause('COLUMNS (id)')
+            self.assertText(result, self._quote_columns_format.format('id'))
+            # With extra whitespace.
+            result = self.connector.validate.sanitize_columns_clause(' COLUMNS ( id ) ')
             self.assertText(result, self._quote_columns_format.format('id'))
 
             # Two vals provided.
@@ -1716,7 +1927,7 @@ class CoreValidateTestMixin:
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_columns_clause(identifier)
         self.assertText(
-            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: "id\'',
+            'Found mismatching quotes for identifier "id\'',
             str(err.exception),
         )
 
@@ -1725,7 +1936,7 @@ class CoreValidateTestMixin:
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_columns_clause(identifier)
         self.assertText(
-            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: \'id"',
+            'Found mismatching quotes for identifier \'id"',
             str(err.exception),
         )
 
@@ -1734,7 +1945,7 @@ class CoreValidateTestMixin:
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_columns_clause(identifier)
         self.assertText(
-            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: `id\'',
+            'Found mismatching quotes for identifier `id\'',
             str(err.exception),
         )
 
@@ -1743,7 +1954,7 @@ class CoreValidateTestMixin:
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_columns_clause(identifier)
         self.assertText(
-            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: \'id`',
+            'Found mismatching quotes for identifier \'id`',
             str(err.exception),
         )
 
@@ -1752,7 +1963,7 @@ class CoreValidateTestMixin:
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_columns_clause(identifier)
         self.assertText(
-            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: "id`',
+            'Found mismatching quotes for identifier "id`',
             str(err.exception),
         )
 
@@ -1761,7 +1972,7 @@ class CoreValidateTestMixin:
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_columns_clause(identifier)
         self.assertText(
-            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: `id"',
+            'Found mismatching quotes for identifier `id"',
             str(err.exception),
         )
 
@@ -3008,7 +3219,7 @@ class CoreValidateTestMixin:
     #     # identifier = """\"id'"""
     #     # result = self.connector.validate.sanitize_values_clause(identifier)
     #     # self.assertText(
-    #     #     'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: "id\'',
+    #     #     'Found mismatching quotes for identifier "id\'',
     #     #     result,
     #     # )
     #     #
@@ -3016,7 +3227,7 @@ class CoreValidateTestMixin:
     #     # identifier = """'id\""""
     #     # result = self.connector.validate.sanitize_values_clause(identifier)
     #     # self.assertText(
-    #     #     'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: \'id"',
+    #     #     'Found mismatching quotes for identifier \'id"',
     #     #     result,
     #     # )
     #     #
@@ -3024,7 +3235,7 @@ class CoreValidateTestMixin:
     #     # identifier = "`id'"
     #     # result = self.connector.validate.sanitize_values_clause(identifier)
     #     # self.assertText(
-    #     #     'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: `id\'',
+    #     #     'Found mismatching quotes for identifier `id\'',
     #     #     result,
     #     # )
     #     #
@@ -3032,7 +3243,7 @@ class CoreValidateTestMixin:
     #     # identifier = "'id`"
     #     # result = self.connector.validate.sanitize_values_clause(identifier)
     #     # self.assertText(
-    #     #     'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: \'id`',
+    #     #     'Found mismatching quotes for identifier \'id`',
     #     #     result,
     #     # )
     #     #
@@ -3040,7 +3251,7 @@ class CoreValidateTestMixin:
     #     # identifier = '"id`'
     #     # result = self.connector.validate.sanitize_values_clause(identifier)
     #     # self.assertText(
-    #     #     'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: "id`',
+    #     #     'Found mismatching quotes for identifier "id`',
     #     #     result,
     #     # )
     #     #
@@ -3048,7 +3259,7 @@ class CoreValidateTestMixin:
     #     # identifier = '`id"'
     #     # result = self.connector.validate.sanitize_values_clause(identifier)
     #     # self.assertText(
-    #     #     'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: `id"',
+    #     #     'Found mismatching quotes for identifier `id"',
     #     #     result,
     #     # )
 
@@ -3615,7 +3826,7 @@ class CoreValidateTestMixin:
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_order_by_clause(identifier)
         self.assertText(
-            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: "id\'',
+            'Found mismatching quotes for identifier "id\'',
             str(err.exception),
         )
 
@@ -3624,7 +3835,7 @@ class CoreValidateTestMixin:
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_order_by_clause(identifier)
         self.assertText(
-            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: \'id"',
+            'Found mismatching quotes for identifier \'id"',
             str(err.exception),
         )
 
@@ -3633,7 +3844,7 @@ class CoreValidateTestMixin:
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_order_by_clause(identifier)
         self.assertText(
-            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: `id\'',
+            'Found mismatching quotes for identifier `id\'',
             str(err.exception),
         )
 
@@ -3642,7 +3853,7 @@ class CoreValidateTestMixin:
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_order_by_clause(identifier)
         self.assertText(
-            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: \'id`',
+            'Found mismatching quotes for identifier \'id`',
             str(err.exception),
         )
 
@@ -3651,7 +3862,7 @@ class CoreValidateTestMixin:
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_order_by_clause(identifier)
         self.assertText(
-            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: "id`',
+            'Found mismatching quotes for identifier "id`',
             str(err.exception),
         )
 
@@ -3660,7 +3871,7 @@ class CoreValidateTestMixin:
         with self.assertRaises(ValueError) as err:
             self.connector.validate.sanitize_order_by_clause(identifier)
         self.assertText(
-            'Invalid identifier. Identifier does not match acceptable characters.\n Identifier is: `id"',
+            'Found mismatching quotes for identifier `id"',
             str(err.exception),
         )
 
@@ -3754,7 +3965,8 @@ class CoreValidateTestMixin:
             self.connector.validate.sanitize_limit_clause('abc')
         self.assertText('The LIMIT clause expects a positive integer.', str(err.exception))
 
-    # endregion Clause Validation
+    # endregion Sanitization Functions
+
 
     # region Helper Functions
 
@@ -3772,7 +3984,7 @@ class CoreValidateTestMixin:
         self.assertTrue(self.connector.validate._is_quoted("'True False'"))
         self.assertTrue(self.connector.validate._is_quoted('`True False`'))
 
-        # And commas.
+        # With commas.
         self.assertTrue(self.connector.validate._is_quoted('"True, False"'))
         self.assertTrue(self.connector.validate._is_quoted("'True, False'"))
         self.assertTrue(self.connector.validate._is_quoted('`True, False`'))
@@ -3787,13 +3999,109 @@ class CoreValidateTestMixin:
         # Integer type.
         self.assertFalse(self.connector.validate._is_quoted(1))
 
-        # Basic strings.
-        self.assertFalse(self.connector.validate._is_quoted('True'))
+        with self.subTest('Str defined by single quotes'):
+            # Basic strings.
+            self.assertFalse(self.connector.validate._is_quoted('True'))
 
-        # With spaces.
-        self.assertFalse(self.connector.validate._is_quoted('True False'))
+            # With spaces.
+            self.assertFalse(self.connector.validate._is_quoted('True False'))
 
-        # And commas.
-        self.assertFalse(self.connector.validate._is_quoted('True, False'))
+            # With commas.
+            self.assertFalse(self.connector.validate._is_quoted('True, False'))
+
+            # With mismatching quote types.
+            self.assertFalse(self.connector.validate._is_quoted('\'True"'))
+            self.assertFalse(self.connector.validate._is_quoted('"True\''))
+            self.assertFalse(self.connector.validate._is_quoted('`True"'))
+            self.assertFalse(self.connector.validate._is_quoted('"True`'))
+            self.assertFalse(self.connector.validate._is_quoted('`True\''))
+            self.assertFalse(self.connector.validate._is_quoted('\'True`'))
+
+            # With value mid-string.
+            self.assertFalse(self.connector.validate._is_quoted('we\'re'))
+            self.assertFalse(self.connector.validate._is_quoted('\'twas'))
+            self.assertFalse(self.connector.validate._is_quoted('Marcus\''))
+            self.assertFalse(self.connector.validate._is_quoted('Marcus\' Market'))
+            self.assertFalse(self.connector.validate._is_quoted('Marcus \'Fresh\' Market'))
+            self.assertFalse(self.connector.validate._is_quoted('we"re'))
+            self.assertFalse(self.connector.validate._is_quoted('"twas'))
+            self.assertFalse(self.connector.validate._is_quoted('Marcus"'))
+            self.assertFalse(self.connector.validate._is_quoted('Marcus" Market'))
+            self.assertFalse(self.connector.validate._is_quoted('Marcus "Fresh" Market'))
+            self.assertFalse(self.connector.validate._is_quoted('we`re'))
+            self.assertFalse(self.connector.validate._is_quoted('`twas'))
+            self.assertFalse(self.connector.validate._is_quoted('Marcus`'))
+            self.assertFalse(self.connector.validate._is_quoted('Marcus` Market'))
+            self.assertFalse(self.connector.validate._is_quoted('Marcus `Fresh` Market'))
+
+        with self.subTest('Str defined by double quotes'):
+            # Basic strings.
+            self.assertFalse(self.connector.validate._is_quoted("True"))
+
+            # With spaces.
+            self.assertFalse(self.connector.validate._is_quoted("True False"))
+
+            # With commas.
+            self.assertFalse(self.connector.validate._is_quoted("True, False"))
+
+            # With mismatching quote types.
+            self.assertFalse(self.connector.validate._is_quoted("'True\""))
+            self.assertFalse(self.connector.validate._is_quoted("\"True'"))
+            self.assertFalse(self.connector.validate._is_quoted("`True\""))
+            self.assertFalse(self.connector.validate._is_quoted("\"True`"))
+            self.assertFalse(self.connector.validate._is_quoted("`True\'"))
+            self.assertFalse(self.connector.validate._is_quoted("'True`"))
+
+            # With value mid-string.
+            self.assertFalse(self.connector.validate._is_quoted("we're"))
+            self.assertFalse(self.connector.validate._is_quoted("'twas"))
+            self.assertFalse(self.connector.validate._is_quoted("Marcus'"))
+            self.assertFalse(self.connector.validate._is_quoted("Marcus' Market"))
+            self.assertFalse(self.connector.validate._is_quoted("Marcus 'Fresh' Market"))
+            self.assertFalse(self.connector.validate._is_quoted("we\"re"))
+            self.assertFalse(self.connector.validate._is_quoted("\"twas"))
+            self.assertFalse(self.connector.validate._is_quoted("Marcus\""))
+            self.assertFalse(self.connector.validate._is_quoted("Marcus\" Market"))
+            self.assertFalse(self.connector.validate._is_quoted("Marcus \"Fresh\" Market"))
+            self.assertFalse(self.connector.validate._is_quoted("we`re"))
+            self.assertFalse(self.connector.validate._is_quoted("`twas"))
+            self.assertFalse(self.connector.validate._is_quoted("Marcus`"))
+            self.assertFalse(self.connector.validate._is_quoted("Marcus` Market"))
+            self.assertFalse(self.connector.validate._is_quoted("Marcus `Fresh` Market"))
+
+        with self.subTest('Str defined by triple quotes'):
+            # Basic strings.
+            self.assertFalse(self.connector.validate._is_quoted("""True"""))
+
+            # With spaces.
+            self.assertFalse(self.connector.validate._is_quoted("""True False"""))
+
+            # With commas.
+            self.assertFalse(self.connector.validate._is_quoted("""True, False"""))
+
+            # With mismatching quote types.
+            self.assertFalse(self.connector.validate._is_quoted("""'True\""""))
+            self.assertFalse(self.connector.validate._is_quoted("""\"True'"""))
+            self.assertFalse(self.connector.validate._is_quoted("""`True\""""))
+            self.assertFalse(self.connector.validate._is_quoted("""\"True`"""))
+            self.assertFalse(self.connector.validate._is_quoted("""`True\'"""))
+            self.assertFalse(self.connector.validate._is_quoted("""'True`"""))
+
+            # With value mid-string.
+            self.assertFalse(self.connector.validate._is_quoted("""we're"""))
+            self.assertFalse(self.connector.validate._is_quoted("""'twas"""))
+            self.assertFalse(self.connector.validate._is_quoted("""Marcus'"""))
+            self.assertFalse(self.connector.validate._is_quoted("""Marcus' Market"""))
+            self.assertFalse(self.connector.validate._is_quoted("""Marcus 'Fresh' Market"""))
+            self.assertFalse(self.connector.validate._is_quoted("""we"re"""))
+            self.assertFalse(self.connector.validate._is_quoted(""""twas"""))
+            self.assertFalse(self.connector.validate._is_quoted("""Marcus\""""))
+            self.assertFalse(self.connector.validate._is_quoted("""Marcus" Market"""))
+            self.assertFalse(self.connector.validate._is_quoted("""Marcus "Fresh" Market"""))
+            self.assertFalse(self.connector.validate._is_quoted("""we`re"""))
+            self.assertFalse(self.connector.validate._is_quoted("""`twas"""))
+            self.assertFalse(self.connector.validate._is_quoted("""Marcus`"""))
+            self.assertFalse(self.connector.validate._is_quoted("""Marcus` Market"""))
+            self.assertFalse(self.connector.validate._is_quoted("""Marcus `Fresh` Market"""))
 
     # endregion Helper Functions

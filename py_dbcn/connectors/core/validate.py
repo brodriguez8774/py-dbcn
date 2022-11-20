@@ -49,8 +49,9 @@ class BaseValidate:
         self._quote_order_by_format = None
         self._quote_str_literal_format = None
         self._reserved_function_names = None
+        self._reserved_keywords = None
 
-    # region Name Validation
+    # region Validation Functions
 
     def _identifier(self, identifier):
         """Generalized validation for "identifier naming conventions".
@@ -90,6 +91,15 @@ class BaseValidate:
             pattern = re.compile('^([0-9a-zA-Z$_])+$')
             if not re.match(pattern, identifier):
                 return (False, """does not match acceptable characters.\n Identifier is: {0}""".format(identifier))
+
+            # Check against known keyword values. Cannot use keywords without quotes.
+            if identifier.upper() in self._reserved_keywords:
+                return (
+                    False,
+                    """matches a known keyword. Must be quoted to use this value. Identifier is: {0}""".format(
+                        identifier,
+                    ),
+                )
         else:
             # Check against "quoted patterns".
             pattern = re.compile(u'^([\u0001-\u007F])+$', flags=re.UNICODE)
@@ -247,21 +257,107 @@ class BaseValidate:
         # Passed checks.
         return True
 
-    # endregion Name Validation
+    def validate_select_clause(self, identifier):
+        """"""
 
-    # region Clause Validation
+    def validate_columns_clause(self, identifier):
+        """"""
+        # Ensure we have our reserved lists defined for this database type.
+        if not self._reserved_function_names:
+            raise ValueError('Reserved function list is not defined.')
+        if not self._reserved_keywords:
+            raise ValueError('Reserved keyword list is not defined.')
 
-    def sanitize_select_identifier_clause(self, clause):
+        # Ensure provided identifier is not null.
+        if identifier is None:
+            raise TypeError('Invalid table column. Is None.')
+        identifier = str(identifier).strip()
+
+        # Check if value is quoted.
+        is_quoted = self._is_quoted(identifier)
+
+        # Validate using "general identifier" logic.
+        results = self._identifier(identifier)
+
+        if results[0] is False:
+            if is_quoted:
+                raise ValueError(u'Invalid table column of {0}. Column {1}'.format(str(identifier), results[1]))
+            else:
+                raise ValueError(u'Invalid table column of "{0}". Column {1}'.format(str(identifier), results[1]))
+
+        # Passed checks.
+        return True
+
+    def validate_where_clause(self, identifier):
+        """"""
+
+    def validate_values_clause(self, identifier):
+        """"""
+
+    def validate_order_by_clause(self, identifier):
+        """"""
+        # Ensure we have our reserved lists defined for this database type.
+        if not self._reserved_function_names:
+            raise ValueError('Reserved function list is not defined.')
+        if not self._reserved_keywords:
+            raise ValueError('Reserved keyword list is not defined.')
+
+        # Ensure provided identifier is not null.
+        if identifier is None:
+            raise TypeError('Invalid table column. Is None.')
+        identifier = str(identifier).strip()
+
+        if identifier.upper().endswith(' ASC'):
+            identifier = identifier[:-3].strip()
+        elif identifier.upper().endswith(' DESC'):
+            identifier = identifier[:-4].strip()
+
+        # Check if value is quoted.
+        is_quoted = self._is_quoted(identifier)
+
+        # Validate using "general identifier" logic.
+        results = self._identifier(identifier)
+
+        if results[0] is False:
+            if is_quoted:
+                raise ValueError(u'Invalid table column of {0}. Column {1}'.format(str(identifier), results[1]))
+            else:
+                raise ValueError(u'Invalid table column of "{0}". Column {1}'.format(str(identifier), results[1]))
+
+        # Passed checks.
+        return True
+
+    def validate_limit_by_clause(self, identifier):
+        """"""
+
+    # endregion Validation Functions
+
+    # region Sanitization Functions
+
+    def sanitize_select_identifier_clause(self, clause, as_str=True):
         """
         Validates that provided clause follows acceptable format.
         :param clause: SELECT clause to validate.
+        :param as_str: Bool indicating if return value should be formatted as a str. Otherwise is list.
         :return: Properly formatted clause if possible, otherwise error.
         """
         if not self._reserved_function_names:
             raise ValueError('Reserved keyword list is not defined.')
 
-        # Validate.
-        return self._inner_sanitize_columns(clause, allow_wildcard=True)
+        # Sanitize overall clause.
+        clause = self._inner_sanitize_columns(clause, allow_wildcard=True)
+
+        # Check that each inner clause item is valid.
+        for item in clause:
+            self.validate_select_clause(item)
+
+        # All items in clause were valid. Return validated and sanitized SELECT clause.
+        if as_str:
+            # Re-concatenate into single expected str format.
+            return ', '.join(clause)
+        else:
+            # Return as list.
+            return clause
 
     def sanitize_where_clause(self, clause):
         """
@@ -291,17 +387,30 @@ class BaseValidate:
 
         return clause
 
-    def sanitize_columns_clause(self, clause):
+    def sanitize_columns_clause(self, clause, as_str=True):
         """
         Validates that provided clause follows acceptable format.
         :param clause: COLUMNS clause to validate.
+        :param as_str: Bool indicating if return value should be formatted as a str. Otherwise is list.
         :return: Properly formatted clause if possible, otherwise error.
         """
         if not self._reserved_function_names:
             raise ValueError('Reserved keyword list is not defined.')
 
-        # Validate.
-        return self._inner_sanitize_columns(clause, allow_wildcard=False)
+        # Sanitize overall clause.
+        clause = self._inner_sanitize_columns(clause, allow_wildcard=False)
+
+        # Check that each inner clause item is valid.
+        for item in clause:
+            self.validate_columns_clause(item)
+
+        # All items in clause were valid. Return validated and sanitized SELECT clause.
+        if as_str:
+            # Re-concatenate into single expected str format.
+            return ', '.join(clause)
+        else:
+            # Return as list.
+            return clause
 
     def sanitize_values_clause(self, clause):
         """
@@ -408,10 +517,11 @@ class BaseValidate:
         # # Return formatted clause.
         # return ' VALUES ({0})'.format(', '.join(clause))
 
-    def sanitize_order_by_clause(self, clause):
+    def sanitize_order_by_clause(self, clause, as_str=True):
         """
         Validates that provided clause follows acceptable format.
         :param clause: ORDER_BY clause to validate.
+        :param as_str: Bool indicating if return value should be formatted as a str. Otherwise is list.
         :return: Properly formatted clause if possible, otherwise error.
         """
         if not self._reserved_function_names:
@@ -436,8 +546,18 @@ class BaseValidate:
         if clause == '':
             return ''
 
-        # Return formatted clause.
-        return '\nORDER BY {0}'.format(clause)
+        # Check that each inner clause item is valid.
+        for item in clause:
+            self.validate_order_by_clause(item)
+
+        # All items in clause were valid. Return validated and sanitized SELECT clause.
+        if as_str:
+            # Re-concatenate into single expected str format.
+            clause = ', '.join(clause)
+            return '\nORDER BY {0}'.format(clause)
+        else:
+            # Return as list.
+            return clause
 
     def sanitize_limit_clause(self, clause):
         """
@@ -476,15 +596,20 @@ class BaseValidate:
         # Return formatted clause.
         return clause
 
-    # endregion Clause Validation
+    # endregion Sanitization Functions
 
     # region Helper Functions
 
     def _is_quoted(self, value):
         """Checks if provided value is quoted.
 
-        Aka, these are three "quoted" values:   "id", `first_name`, 'last_name'
-        These are three not "quoted" values:    id, first_name, last_name
+        Aka, these are three "quoted" values: "id", `first_name`, 'last_name'
+        These are not "quoted" values:
+            id, first_name, last_name
+            "id'
+            'id"
+            `id'
+            etc...
         """
         is_quoted = False
         if isinstance(value, str):
@@ -497,8 +622,15 @@ class BaseValidate:
 
         return is_quoted
 
-    def _inner_sanitize_columns(self, clause, allow_wildcard=False, order_by=False):
-        """"""
+    def _inner_sanitize_columns(self, clause, allow_wildcard=False, order_by=False, as_str=False):
+        """Common logic used by multiple functions to sanitize columns-like values.
+
+        :param clause: Clause to sanitize.
+        :param allow_wildcard: Bool indicating if wildcard is allowed for this instance.
+        :param order_by: Bool indicating if this is an order_by instance.
+        :param as_str: Bool indicating if return value should be formatted as a str. Otherwise is list.
+        :return: Str or List of sanitized values.
+        """
         if allow_wildcard:
             quote_format = self._quote_identifier_format
         elif order_by:
@@ -523,6 +655,18 @@ class BaseValidate:
             else:
                 # Handle for all other types.
                 clause = str(clause).strip()
+
+            # Check for descriptor values.
+            if clause.upper().startswith('COLUMNS ') or clause.upper().startswith('COLUMNS('):
+                clause = clause[7:].strip()
+            if clause.upper().startswith('WHERE ') or clause.upper().startswith('WHERE('):
+                clause = clause[5:].strip()
+            if clause.upper().startswith('VALUES ') or clause.upper().startswith('VALUES('):
+                clause = clause[6:].strip()
+            if clause.upper().startswith('ORDER BY ') or clause.upper().startswith('ORDER BY('):
+                clause = clause[8:].strip()
+            if clause.upper().startswith('LIMIT ') or clause.upper().startswith('LIMIT('):
+                clause = clause[5:].strip()
 
             # Check for outer parens.
             if (
@@ -603,28 +747,20 @@ class BaseValidate:
                     raise ValueError('SELECT clause provided * with other params. * is only valid alone.')
 
             # Validate individual identifier.
-            item_identifier = item
             order_by_descriptor = ''
             if item != '*':
                 if order_by:
                     # To check identifier, trim possible ASC/DESC values.
-                    if item_identifier.lower().endswith(' asc'):
+                    if item.lower().endswith(' asc'):
                         # Handle for ASC syntax.
-                        item_identifier = item_identifier[:-4].rstrip()
-                        item = item_identifier
+                        item = item[:-4].rstrip()
                         order_by_descriptor = ' ASC'
-                    if item_identifier.lower().endswith(' desc'):
+                    if item.lower().endswith(' desc'):
                         # Handle for DESC syntax.
-                        item_identifier = item_identifier[:-5].rstrip()
-                        item = item_identifier
+                        item = item[:-5].rstrip()
                         order_by_descriptor = ' DESC'
 
-                # Check for valid identifier.
-                results = self._identifier(item_identifier)
-                if results[0] is False:
-                    raise ValueError('Invalid identifier. Identifier {0}'.format(results[1]))
-
-            # If we made it this far, item is valid. Escape with backticks and readd.
+            # If we made it this far, item is valid. Escape with proper quote format and readd.
             is_quoted = self._is_quoted(item)
             if is_quoted:
                 # Was already quoted, but may not be with expected format. Reformat to guaranteed use expected format.
@@ -632,7 +768,12 @@ class BaseValidate:
             elif item == '*':
                 pass
             else:
-                # Was not quoted. Add quotes.
+                # Was not quoted.
+                # First double check that we don't have mismatched quotes.
+                if len(item) > 1 and item[0] in ['\'', '"', '`'] and item[-1] in ['\'', '"', '`']:
+                    raise ValueError('Found mismatching quotes for identifier {0}'.format(item))
+
+                # Add quotes.
                 item = '{1}{0}{1}{2}{3}'.format(item, quote_format, cast_identifier, order_by_descriptor)
 
             # Re-add function values.
@@ -641,10 +782,12 @@ class BaseValidate:
             # Append updated value to clause.
             new_clause.append(item)
 
-        # All items in clause were valid. Re-concatenate into single expected str format.
-        clause = ', '.join(new_clause)
-
-        # Return validated and sanitized SELECT clause.
-        return clause
+        # All items in clause were valid. Return validated and sanitized SELECT clause.
+        if as_str:
+            # Re-concatenate into single expected str format.
+            return ', '.join(new_clause)
+        else:
+            # Return as list.
+            return new_clause
 
     # endregion Helper Functions

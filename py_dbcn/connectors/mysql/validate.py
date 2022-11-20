@@ -136,6 +136,26 @@ class MysqlValidate(BaseValidate):
             'YEAR',
         ]
 
+        # Keywords that cannot be used as identifiers, such as column names, unless quoted.
+        # We don't define the comprehensive list here, but get many common ones.
+        # See https://dev.mysql.com/doc/refman/8.0/en/keywords.html
+        self._reserved_keywords = list(self._reserved_function_names)
+        self._reserved_keywords += [
+            'ADD',
+            'ALL',
+            'ALWAYS',
+            'ANALYZE',
+            'AND',
+            'ANY',
+            'AS',
+            'ASC',
+            'ASCI',
+            'AUTO_INCREMENT',
+            'AVG',
+
+            'DESC',
+        ]
+
         # Initialize database string-quote types.
         # Aka, what the database says is "okay" to surround string values with.
         self._quote_column_format = QUOTE_COLUMN_FORMAT

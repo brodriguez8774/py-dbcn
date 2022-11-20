@@ -99,6 +99,15 @@ class PostgresqlValidate(BaseValidate):
             'VARIANCE',
             'YEAR',
         ]
+        # Keywords that cannot be used as identifiers, such as column names, unless quoted.
+        # We don't define the comprehensive list here, but get many common ones.
+        # See https://www.postgresql.org/docs/current/sql-keywords-appendix.html
+        self._reserved_keywords = list(self._reserved_function_names)
+        self._reserved_keywords += [
+            'ASC',
+            'AS',
+            'DESC',
+        ]
 
         # Initialize database string-quote types.
         # Aka, what the database says is "okay" to surround string values with.
