@@ -94,6 +94,8 @@ class BaseRecords:
 
         # Check that provided COLUMNS clause is valid format.
         columns_clause = self._base.validate.sanitize_columns_clause(columns_clause)
+        if len(columns_clause) > 0:
+            columns_clause = ' ({0})'.format(columns_clause)
 
         # Check that provided VALUES clause is valid format.
         values_clause = self._base.validate.sanitize_values_clause(values_clause)

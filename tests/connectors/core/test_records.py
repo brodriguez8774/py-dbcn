@@ -872,6 +872,10 @@ class CoreRecordsTestMixin:
 
         # Works for 0, 1, and 2. Assume works for all further n+1 values.
 
+        # Test with columns defined.
+        row = (3, 'test_name_3', 'test_desc_3')
+        self.connector.records.insert(table_name, row, columns_clause='id, name, description')
+
     def test__insert__datetime__success(self):
         """
         Test `INSERT` query with datetime values.
