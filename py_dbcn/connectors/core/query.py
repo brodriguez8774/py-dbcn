@@ -31,7 +31,7 @@ class BaseQuery:
         # Define provided direct parent object.
         self._parent = parent
 
-    def execute(self, query, display_query=True):
+    def execute(self, query, data=None, display_query=True):
         """Core function to execute database queries.
 
         :param query: Query to execute.
@@ -40,12 +40,18 @@ class BaseQuery:
         if display_query:
             self._base.display.query(query)
 
+        if isinstance(data, str):
+            data = [data]
+
         # Create connection and execute query.
         cursor = self._base._connection.cursor()
         # Improve query speed if PostgreSQL (supposedly. Needs more research).
         if self._base._config.db_type == 'PostgreSQL':
             query = cursor.mogrify(query)
-        cursor.execute(query)
+        if data is not None:
+            cursor.execute(query, data)
+        else:
+            cursor.execute(query)
 
         # Get results.
         results = self._fetch_results(cursor)
