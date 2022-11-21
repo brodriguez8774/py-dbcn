@@ -2,6 +2,10 @@ Version History
 ***************
 
 
+0.3.1 - Bugfix Release
+----------------------
+
+
 0.3.0 - Stable PostgreSQL Querying
 ==================================
 
