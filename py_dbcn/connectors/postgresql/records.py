@@ -125,14 +125,14 @@ class PostgresqlRecords(BaseRecords):
             for index in range(len(columns_clause)):
                 if set_clause != '':
                     set_clause += ',\n'
-                set_clause += '    {0} = pydbcn_temp.{0}::{1}'.format(
+                set_clause += '    "{0}" = pydbcn_temp."{0}"::{1}'.format(
                     columns_clause[index].strip(self._base.validate._quote_column_format),
                     column_types_clause[index],
                 )
         else:
             # No type hinting. Provide columns as-is.
             set_clause = ',\n'.join([
-                '    {0} = pydbcn_temp.{0}'.format(x.strip(self._base.validate._quote_column_format))
+                '    "{0}" = pydbcn_temp."{0}"'.format(x.strip(self._base.validate._quote_column_format))
                 for x in columns_clause
             ])
         values_clause = ',\n'.join([
@@ -140,11 +140,11 @@ class PostgresqlRecords(BaseRecords):
             for x in values_clause
         ])
         columns_clause = ', '.join([
-            x.strip(self._base.validate._quote_column_format)
+            '"{0}"'.format(x.strip(self._base.validate._quote_column_format))
             for x in columns_clause
         ])
         where_columns_clause = ' AND\n'.join([
-            '    pydbcn_update_table.{0} = pydbcn_temp.{0}'.format(x.strip(self._base.validate._quote_column_format))
+            '    pydbcn_update_table."{0}" = pydbcn_temp."{0}"'.format(x.strip(self._base.validate._quote_column_format))
             for x in where_columns_clause
         ])
 
