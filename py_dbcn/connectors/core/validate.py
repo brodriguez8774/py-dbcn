@@ -359,8 +359,10 @@ class BaseValidate:
         :param clause: VALUES clause to validate.
         :return: Properly formatted clause if possible, otherwise error.
         """
-        # For now, always return as valid.
-        return clause
+        return clauses.ValuesClauseBuilder(self, clause)
+
+    def sanitize_set_clause(self, clause):
+        return clauses.SetClauseBuilder(self, clause)
 
         # # TODO: Attempted to have full, dynamic validation of entire clause and all inner values.
         # #   However, had too many cases where it would break, due to being able to essentially put in anything.

@@ -184,6 +184,15 @@ class CoreClauseTestMixin:
             self.assertEqual([""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""], clause_object.array)
             self.assertText("""WHERE ("id" = 'test') AND ("code" = 1234) AND ("name" = 'Test User')""", str(clause_object))
 
+        with self.subTest('WHERE containing various quote types'):
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(validation_class, ("""name = '2" nail'""", """description = '2 inch nail'"""""))
+            self.assertEqual([""""name" = '2" nail'""", """"description" = '2 inch nail'"""], clause_object.array)
+            self.assertText("""WHERE ("name" = '2" nail') AND ("description" = '2 inch nail')""", str(clause_object))
+
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(validation_class, ("""name = '1\' ruler'""", """description = '1 foot ruler'"""""))
+            self.assertEqual([""""name" = '1\' ruler'""", """"description" = '1 foot ruler'"""], clause_object.array)
+            self.assertText("""WHERE ("name" = '1\' ruler') AND ("description" = '1 foot ruler')""", str(clause_object))
+
     def test__clause__columns(self):
         """Test logic for parsing a COLUMNS clause."""
         validation_class = self.connector.validate
@@ -283,6 +292,86 @@ class CoreClauseTestMixin:
     def test__clause__values(self):
         """Test logic for paring a VALUES clause."""
         validation_class = self.connector.validate
+
+        with self.subTest('VALUES clause as Empty'):
+            # With passing none.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, None)
+            self.assertEqual([], clause_object.array)
+            self.assertText('', str(clause_object))
+
+            # With empty single-quote string.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, '')
+            self.assertEqual([], clause_object.array)
+            self.assertText('', str(clause_object))
+
+            # With empty double-quote string.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, "")
+            self.assertEqual([], clause_object.array)
+            self.assertText('', str(clause_object))
+
+            # With emtpy triple double-quote string.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, """""")
+            self.assertEqual([], clause_object.array)
+            self.assertText('', str(clause_object))
+
+        with self.subTest('Basic VALUES clause - As str'):
+            # With no quotes.
+            # NOTE: To account for things like ints, we do not do space formatting unless they're already provided.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, """test""")
+            self.assertEqual(["""test"""], clause_object.array)
+            self.assertText("""VALUES (test)""", str(clause_object))
+
+            # With single quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, """'test'""")
+            self.assertEqual(["""'test'"""], clause_object.array)
+            self.assertText("""VALUES ('test')""", str(clause_object))
+
+            # With double quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, """"test\"""")
+            self.assertEqual(["""'test'"""], clause_object.array)
+            self.assertText("""VALUES ('test')""", str(clause_object))
+
+            # With backtick quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, """`test`""")
+            self.assertEqual(["""'test'"""], clause_object.array)
+            self.assertText("""VALUES ('test')""", str(clause_object))
+
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, """'test', 1234, 'Test User'""")
+            self.assertEqual(["""'test'""", """1234""", """'Test User'"""], clause_object.array)
+            self.assertText("""VALUES ('test', 1234, 'Test User')""", str(clause_object))
+
+        with self.subTest('Basic VALUES clause - As list'):
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, ["""'test'"""])
+            self.assertEqual(["""'test'"""], clause_object.array)
+            self.assertText("""VALUES ('test')""", str(clause_object))
+
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(
+                validation_class,
+                ["""'test'""", """1234""", """'Test User'"""],
+            )
+            self.assertEqual(["""'test'""", """1234""", """'Test User'"""], clause_object.array)
+            self.assertText("""VALUES ('test', 1234, 'Test User')""", str(clause_object))
+
+        with self.subTest('Basic VALUES clause - As tuple'):
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, ("""'test'""",))
+            self.assertEqual(["""'test'"""], clause_object.array)
+            self.assertText("""VALUES ('test')""", str(clause_object))
+
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(
+                validation_class,
+                ("""'test'""", """1234""", """'Test User'"""),
+            )
+            self.assertEqual(["""'test'""", """1234""", """'Test User'"""], clause_object.array)
+            self.assertText("""VALUES ('test', 1234, 'Test User')""", str(clause_object))
+
+        with self.subTest('VALUES containing various quote types'):
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, ("""'2" nail'""", """'2 inch nail'"""""))
+            self.assertEqual(["""'2" nail'""", """'2 inch nail'"""], clause_object.array)
+            self.assertText("""VALUES ('2" nail', '2 inch nail')""", str(clause_object))
+
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, ("""'1\' ruler'""", """'1 foot ruler'"""""))
+            self.assertEqual(["""'1\' ruler'""", """'1 foot ruler'"""], clause_object.array)
+            self.assertText("""VALUES ('1\' ruler', '1 foot ruler')""", str(clause_object))
 
     def test__clause__order_by(self):
         """Test logic for parsing an ORDER BY clause."""

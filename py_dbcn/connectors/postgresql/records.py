@@ -92,29 +92,6 @@ class PostgresqlRecords(BaseRecords):
                     )
                 )
 
-        # Check for values that might need formatting.
-        # For example, if we find date/datetime objects, we automatically convert to a str value that won't error.
-        updated_values_clause = ()
-        for value_set in values_clause:
-            updated_values_set = ()
-            for item in value_set:
-
-                if isinstance(item, datetime.datetime):
-                    # Is a datetime object. Convert to string.
-                    item = item.strftime('%Y-%m-%d %H:%M:%S')
-                elif isinstance(item, datetime.date):
-                    # Is a date object. Convert to string.
-                    item = item.strftime('%Y-%m-%d')
-
-                # Add item to updated inner set.
-                updated_values_set += (item,)
-
-            # Add item to updated clause.
-            updated_values_clause += (updated_values_set,)
-
-        # Replace original clause.
-        values_clause = updated_values_clause
-
         # Now format our clauses for query.
         if column_types_clause is not None:
             # Provide type hinting for columns.
@@ -134,7 +111,7 @@ class PostgresqlRecords(BaseRecords):
             ])
         values_clause = ',\n'.join([
             '    {0}'.format(x)
-            for x in values_clause
+            for x in values_clause.array
         ])
         columns_clause = ', '.join([
             '"{0}"'.format(x.strip(self._base.validate._quote_column_format))

@@ -99,36 +99,14 @@ class BaseRecords:
         # Check that provided VALUES clause is valid format.
         values_clause = self._base.validate.sanitize_values_clause(values_clause)
 
-        # Check for values that might need formatting.
-        # For example, if we find date/datetime objects, we automatically convert to a str value that won't error.
-        if isinstance(values_clause, list) or isinstance(values_clause, tuple):
-            updated_values_clause = ()
-            for item in values_clause:
-
-                if isinstance(item, datetime.datetime):
-                    # Is a datetime object. Convert to string.
-                    item = item.strftime('%Y-%m-%d %H:%M:%S')
-                elif isinstance(item, datetime.date):
-                    # Is a date object. Convert to string.
-                    item = item.strftime('%Y-%m-%d')
-
-                # # Handle if quote in item.
-                # if isinstance(item, str) and "'" in item:
-                #     item = """E'{0}'""".format(item)
-
-                # Add item to updated clause.
-                updated_values_clause += (item,)
-
-            # Replace original clause.
-            values_clause = updated_values_clause
-
         # Insert record.
         query = textwrap.dedent(
             """
             INSERT INTO {0}{1}
-            VALUES {2};
+            {2};
             """.format(table_name, columns_clause, values_clause)
         )
+
         results = self._base.query.execute(query, display_query=display_query)
         if display_results:
             self._base.display.results('{0}'.format(results))
@@ -151,31 +129,7 @@ class BaseRecords:
         if len(values_clause) < 1:
             raise ValueError('VALUES clause cannot be empty for INSERT_MANY queries.')
         values_clause = self._base.validate.sanitize_values_clause(values_clause)
-
-        # Check for values that might need formatting.
-        # For example, if we find date/datetime objects, we automatically convert to a str value that won't error.
-        if isinstance(values_clause, list) or isinstance(values_clause, tuple):
-            updated_values_clause = ()
-
-            # Check each sub-item.
-            for item in values_clause:
-
-                if isinstance(item, datetime.datetime):
-                    # Is a datetime object. Convert to string.
-                    item = item.strftime('%Y-%m-%d %H:%M:%S')
-                elif isinstance(item, datetime.date):
-                    # Is a date object. Convert to string.
-                    item = item.strftime('%Y-%m-%d')
-
-                # Add item to updated clause.
-                updated_values_clause += (item,)
-
-            # Replace original clause.
-            values_clause = updated_values_clause
-        else:
-            raise ValueError('In an execute_many, values clause must be a list or tuple.')
-
-        values_context = ', '.join('%s' for i in range(len(values_clause[0])))
+        values_context = ', '.join('%s' for i in range(len(values_clause.array[0])))
 
         # Insert record.
         query = textwrap.dedent(
@@ -184,7 +138,8 @@ class BaseRecords:
             VALUES ({2});
             """.format(table_name, columns_clause, values_context)
         )
-        results = self._base.query.execute_many(query, values_clause, display_query=display_query)
+
+        results = self._base.query.execute_many(query, values_clause.array, display_query=display_query)
         if display_results:
             self._base.display.results('{0}'.format(results))
 
@@ -204,35 +159,16 @@ class BaseRecords:
             raise ValueError('Invalid table name of "{0}".'.format(table_name))
 
         # Check that provided VALUES clause is valid format.
-        values_clause = self._base.validate.sanitize_values_clause(values_clause)
+        values_clause = self._base.validate.sanitize_set_clause(values_clause)
 
         # Check that provided WHERE clause is valid format.
         where_clause = self._base.validate.sanitize_where_clause(where_clause)
-
-        # Check for values that might need formatting.
-        # For example, if we find date/datetime objects, we automatically convert to a str value that won't error.
-        if isinstance(values_clause, list) or isinstance(values_clause, tuple):
-            updated_values_clause = ()
-            for item in values_clause:
-
-                if isinstance(item, datetime.datetime):
-                    # Is a datetime object. Convert to string.
-                    item = item.strftime('%Y-%m-%d %H:%M:%S')
-                elif isinstance(item, datetime.date):
-                    # Is a date object. Convert to string.
-                    item = item.strftime('%Y-%m-%d')
-
-                # Add item to updated clause.
-                updated_values_clause += (item,)
-
-            # Replace original clause.
-            values_clause = updated_values_clause
 
         # Update record.
         query = textwrap.dedent(
             """
             UPDATE {0}
-            SET {1}{2};
+            {1}{2};
             """.format(table_name, values_clause, where_clause)
         )
         self._base.query.execute(query, display_query=display_query)

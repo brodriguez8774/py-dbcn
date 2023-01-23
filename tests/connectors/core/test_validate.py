@@ -1356,13 +1356,7 @@ class CoreValidateTestMixin:
 
         with self.subTest('Values as non-standard types'):
             result = self.connector.validate.sanitize_select_identifier_clause((1, True))
-            self.assertText(
-                '({0}, {1})'.format(
-                    self._quote_select_identifier_format.format(1),
-                    self._quote_select_identifier_format.format(True),
-                ),
-                result,
-            )
+            self.assertText('({0}, {1})'.format(1, True), result)
 
         with self.subTest('Values with function calls'):
             # Uppercase.
@@ -1902,13 +1896,7 @@ class CoreValidateTestMixin:
             # TODO: Should these fail? These probably should fail.
             #  I think only literal column names should work.
             result = self.connector.validate.sanitize_columns_clause((1, True))
-            self.assertText(
-                '({0}, {1})'.format(
-                    self._quote_columns_format.format(1),
-                    self._quote_columns_format.format(True),
-                ),
-                result,
-            )
+            self.assertText('({0}, {1})'.format(1, True), result)
 
     def test__sanitize_columns_clause__failure(self):
         """
@@ -3796,13 +3784,7 @@ class CoreValidateTestMixin:
             # TODO: Should these fail? These probably should fail.
             #  I think only literal column names should work.
             result = self.connector.validate.sanitize_order_by_clause((1, True))
-            self.assertText(
-                '\nORDER BY {0}, {1}'.format(
-                    self._quote_order_by_format.format(1),
-                    self._quote_order_by_format.format(True),
-                ),
-                result,
-            )
+            self.assertText('\nORDER BY {0}, {1}'.format(1, True), result)
 
     def test__sanitize_order_by_clause__failure(self):
         """

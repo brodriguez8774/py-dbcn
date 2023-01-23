@@ -3,7 +3,7 @@ Helper classes to build and store clause logic for queries.
 """
 
 # System Imports.
-import re
+import datetime, re
 from io import StringIO
 from tokenize import (
     generate_tokens,
@@ -18,7 +18,7 @@ from tokenize import (
 
 class BaseClauseBuilder(object):
     """"""
-    def __init__(self, validation_class, clause, clause_type, *args, **kwargs):
+    def __init__(self, validation_class, clause_type, *args, **kwargs):
         # Call parent logic.
         super().__init__(*args, **kwargs)
 
@@ -42,7 +42,8 @@ class BaseClauseBuilder(object):
         self._clause_array = []
         self._sanitized_clause = None
         self._print_parens = True
-        self.array = clause
+        self._always_quote = True
+        self._allow_spaces = False
 
     def __str__(self):
         if len(self.array) > 0:
@@ -80,13 +81,15 @@ class BaseClauseBuilder(object):
 
     def _to_array(self, value):
         """Converts clause to array format for initial parsing."""
-
         if self._clause_prefix is None:
             raise NotImplementedError('Query type {0} missing clause_prefix value.'.format(self.__class__))
         if self._print_prefix is None:
             raise NotImplementedError('Query type {0} missing print_prefix value.'.format(self.__class__))
         if self._quote_format is None:
             raise NotImplementedError('Query type {0} missing quote_format value.'.format(self.__class__))
+
+        print('')
+        print('original val: {0}'.format(value))
 
         if isinstance(value, list):
             # Already list format.
@@ -122,6 +125,13 @@ class BaseClauseBuilder(object):
                     elif clause.upper().startswith('{0} '.format(self._clause_prefix)):
                         clause = clause[(len(self._clause_prefix) + 1):]
 
+                    # Check if starts with brackets only and no prefix.
+                    elif (
+                        clause.startswith('(') and clause.endswith(')')
+                        or clause.startswith('[') and clause.endswith(']')
+                    ):
+                        clause = clause[1:-1]
+
                 # Convert to list.
                 clause = clause.split(',')
                 for index in range(len(clause)):
@@ -140,6 +150,22 @@ class BaseClauseBuilder(object):
             # Handle any other clause that is non-empty.
             new_clause = []
             for item in clause:
+
+                # Handle various specific types.
+                if isinstance(item, datetime.datetime):
+                    # Is a datetime object. Convert to string.
+                    item = "'{0}'".format(item.strftime('%Y-%m-%d %H:%M:%S'))
+
+                elif isinstance(item, datetime.date):
+                    # Is a date object. Convert to string.
+                    item = "'{0}'".format(item.strftime('%Y-%m-%d'))
+
+                # Skip handling for other non-str items.
+                elif not isinstance(item, str):
+                    new_clause.append(item)
+                    continue
+
+                # If we made it this far, then item is a str (or converted to such).
                 item = str(item).strip()
 
                 # Strip out function values.
@@ -192,21 +218,38 @@ class BaseClauseBuilder(object):
                         item = item[:-5].rstrip()
                         order_by_descriptor = ' DESC'
 
+                print('')
+                print('item: {0}'.format(item))
+
                 # If we made it this far, item is valid. Escape with proper quote format and readd.
+                is_quoted = False
                 if self.is_quoted(item):
                     item = item[1:-1].strip()
+                    is_quoted = True
+
+                # Check if apostrophe in value.
+                if "'" in item:
+                    item.replace("'", '\0027')
 
                 # Skip items that are empty. Otherwise append.
                 if len(item) > 0:
+                    print('')
+                    print('item: {0}'.format(item))
+                    print('is_quoted: {0}'.format(is_quoted))
                     if item != '*':
                         # Readd quotes in proper format.
                         # Account for statements that may have multiple parts (denoted by spaces).
-                        item_split = item.split(' ')
-                        item = '{1}{0}{1}'.format(item_split.pop(0), self._quote_format)
-                        while len(item_split) > 0:
-                            item_split_part = item_split.pop(0).strip()
-                            if len(item_split_part) > 0:
-                                item = '{0} {1}'.format(item, item_split_part)
+                        if not self._allow_spaces:
+                            item_split = item.split(' ')
+                            if self._always_quote or is_quoted:
+                                item = '{1}{0}{1}'.format(item_split.pop(0), self._quote_format)
+                            while len(item_split) > 0:
+                                item_split_part = item_split.pop(0).strip()
+                                if len(item_split_part) > 0:
+                                    item = '{0} {1}'.format(item, item_split_part)
+                        else:
+                            if self._always_quote or is_quoted:
+                                item = '{1}{0}{1}'.format(item, self._quote_format)
 
                     # Readd identifiers in proper format.
                     item = '{0}{1}{2}'.format(item, cast_identifier, order_by_descriptor)
@@ -249,14 +292,17 @@ class BaseClauseBuilder(object):
 
 class SelectClauseBuilder(BaseClauseBuilder):
     """"""
-    def __init__(self, *args, clause_type='SELECT', **kwargs):
+    def __init__(self, validation_class, clause, *args, clause_type='SELECT', **kwargs):
         # Pre-parent-call initialize values.
         self._clause_prefix = ''
         self._print_prefix = ''
         self._quote_format = '"'
 
         # Call parent logic.
-        super().__init__(*args, clause_type=clause_type, **kwargs)
+        super().__init__(validation_class, *args, clause_type=clause_type, **kwargs)
+
+        # Process and save provided clause.
+        self.array = clause
 
     def __str__(self):
         # Handle for all-star return.
@@ -285,14 +331,17 @@ class SelectClauseBuilder(BaseClauseBuilder):
 
 class WhereClauseBuilder(BaseClauseBuilder):
     """"""
-    def __init__(self, *args, clause_type='WHERE', **kwargs):
+    def __init__(self, validation_class, clause, *args, clause_type='WHERE', **kwargs):
         # Pre-parent-call initialize values.
         self._clause_prefix = 'WHERE'
         self._print_prefix = 'WHERE '
         self._quote_format = '"'
 
         # Call parent logic.
-        super().__init__(*args, clause_type=clause_type, **kwargs)
+        super().__init__(validation_class, *args, clause_type=clause_type, **kwargs)
+
+        # Process and save provided clause.
+        self.array = clause
 
     def __str__(self):
         if len(self.array) > 0:
@@ -391,14 +440,17 @@ class WhereClauseBuilder(BaseClauseBuilder):
 
 class ColumnsClauseBuilder(BaseClauseBuilder):
     """"""
-    def __init__(self, *args, clause_type='COLUMNS', **kwargs):
+    def __init__(self, validation_class, clause, *args, clause_type='COLUMNS', **kwargs):
         # Pre-parent-call initialize values.
         self._clause_prefix = 'COLUMNS'
         self._print_prefix = ''
         self._quote_format = '"'
 
         # Call parent logic.
-        super().__init__(*args, clause_type=clause_type, **kwargs)
+        super().__init__(validation_class, *args, clause_type=clause_type, **kwargs)
+
+        # Process and save provided clause.
+        self.array = clause
 
     def _to_array(self, value):
         # Call parent logic.
@@ -411,28 +463,59 @@ class ColumnsClauseBuilder(BaseClauseBuilder):
 
 class ValuesClauseBuilder(BaseClauseBuilder):
     """"""
-    def __init__(self, *args, clause_type='VALUES', **kwargs):
+    def __init__(self, validation_class, clause, *args, clause_type='VALUES', **kwargs):
         # Pre-parent-call initialize values.
         self._clause_prefix = 'VALUES'
         self._print_prefix = 'VALUES '
+        self._quote_format = "'"
 
         # Call parent logic.
-        super().__init__(*args, clause_type=clause_type, **kwargs)
+        super().__init__(validation_class, *args, clause_type=clause_type, **kwargs)
+
+        # Post-parent-call initialize values.
+        self._always_quote = False
+        self._allow_spaces = True
+
+        # Process and save provided clause.
+        self.array = clause
+
+
+class SetClauseBuilder(BaseClauseBuilder):
+    """"""
+    def __init__(self, validation_class, clause, *args, clause_type='VALUES', **kwargs):
+        # Pre-parent-call initialize values.
+        self._clause_prefix = 'SET'
+        self._print_prefix = 'SET '
+        self._quote_format = '"'
+
+        # Call parent logic.
+        super().__init__(validation_class, *args, clause_type=clause_type, **kwargs)
+
+        # Post-parent-call initialize values.
+        self._print_parens = False
+        self._always_quote = True
+        self._allow_spaces = False
+
+        # Process and save provided clause.
+        self.array = clause
 
 
 class OrderByClauseBuilder(BaseClauseBuilder):
     """"""
-    def __init__(self, *args, clause_type='ORDER_BY', **kwargs):
+    def __init__(self, validation_class, clause, *args, clause_type='ORDER_BY', **kwargs):
         # Pre-parent-call initialize values.
         self._clause_prefix = 'ORDER BY'
         self._print_prefix = 'ORDER BY '
         self._quote_format = '"'
 
         # Call parent logic.
-        super().__init__(*args, clause_type=clause_type, **kwargs)
+        super().__init__(validation_class, *args, clause_type=clause_type, **kwargs)
 
         # Post-parent-call initialize values.
         self._print_parens = False
+
+        # Process and save provided clause.
+        self.array = clause
 
     def __str__(self):
         if len(self.array) > 0:

@@ -203,8 +203,8 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'QUERY') as qlog:
                 self.connector.tables.show()
-            self.assertText(self.get_logging_output(qlog, 0), show_tables_query)
-            self.assertText(self.get_logging_output(qlog, 1), '{0}Empty Set{1}'.format(OUTPUT_RESULTS, OUTPUT_RESET))
+            self.assertText(show_tables_query, self.get_logging_output(qlog, 0))
+            self.assertText('{0}Empty Set{1}'.format(OUTPUT_RESULTS, OUTPUT_RESET), self.get_logging_output(qlog, 1))
 
         with self.subTest('Db name longer - Pt 1'):
             # Create table.
@@ -213,10 +213,10 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertText(self.get_logging_output(ilog, 0), show_tables_query)
+            self.assertText(show_tables_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.tables.SHOW__DB_LONGER__PT_1, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('Db name longer - Pt 2'):
@@ -226,10 +226,10 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertText(self.get_logging_output(ilog, 0), show_tables_query)
+            self.assertText(show_tables_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.tables.SHOW__DB_LONGER__PT_2, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('Db name longer - Pt 3'):
@@ -239,10 +239,10 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertText(self.get_logging_output(ilog, 0), show_tables_query)
+            self.assertText(show_tables_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.tables.SHOW__DB_LONGER__PT_3, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('Db name and table name equal length'):
@@ -256,10 +256,10 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertText(self.get_logging_output(ilog, 0), show_tables_query)
+            self.assertText(show_tables_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.tables.SHOW__EQUAL_LENGTH, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('Table name longer - Pt 1'):
@@ -273,10 +273,10 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertText(self.get_logging_output(ilog, 0), show_tables_query)
+            self.assertText(show_tables_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.tables.SHOW__TABLE_LONGER__PT_1, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('Table name longer - Pt 2'):
@@ -286,10 +286,10 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertText(self.get_logging_output(ilog, 0), show_tables_query)
+            self.assertText(show_tables_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.tables.SHOW__TABLE_LONGER__PT_2, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('Table name longer - Pt 3'):
@@ -303,10 +303,10 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.show()
-            self.assertText(self.get_logging_output(ilog, 0), show_tables_query)
+            self.assertText(show_tables_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.tables.SHOW__TABLE_LONGER__PT_3, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
     def test__display__describe_tables(self):
@@ -325,10 +325,10 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.describe('category')
-            self.assertText(self.get_logging_output(ilog, 0), describe_table_query)
+            self.assertText(describe_table_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.tables.DESCRIBE__COLS_ID, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('With id, name'):
@@ -338,10 +338,10 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.describe('category')
-            self.assertText(self.get_logging_output(ilog, 0), describe_table_query)
+            self.assertText(describe_table_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.tables.DESCRIBE__COLS_ID_NAME, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('With id, name, desc'):
@@ -351,10 +351,10 @@ class CoreDisplayTablesTestMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.tables.describe('category')
-            self.assertText(self.get_logging_output(ilog, 0), describe_table_query)
+            self.assertText(describe_table_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.tables.DESCRIBE__COLS_ID_NAME_DESC, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
 
@@ -383,14 +383,17 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(select_from_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}Empty Set{1}'.format(OUTPUT_RESULTS, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('With 1 record present'):
             # Create record.
+            print('quote_str_literal_format: {0}'.format(self.connector.validate._quote_str_literal_format))
+            print('')
+            print('insert str: {0}'.format('(1, {0}tn{0}, {0}td{0})'.format(self.connector.validate._quote_str_literal_format)))
             self.connector.records.insert(
                 'category',
                 '(1, {0}tn{0}, {0}td{0})'.format(self.connector.validate._quote_str_literal_format),
@@ -400,10 +403,10 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(select_from_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_1, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('With 2 records present'):
@@ -417,10 +420,10 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(select_from_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_2, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('With 3 records present'):
@@ -434,10 +437,10 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(select_from_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_3, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('With 4 records present'):
@@ -451,10 +454,10 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(select_from_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_4, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('With 5 records present'):
@@ -468,10 +471,10 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(select_from_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_5, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('With 6 records present'):
@@ -485,10 +488,10 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(select_from_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_6, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('With 7 records present'):
@@ -502,10 +505,10 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(select_from_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_7, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('With 8 records present'):
@@ -519,10 +522,10 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(select_from_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_8, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('With 9 records present'):
@@ -536,10 +539,10 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(select_from_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_9, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('With 10 records present'):
@@ -553,10 +556,10 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(select_from_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_10, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('With 11 records present'):
@@ -570,10 +573,10 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(select_from_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_11, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('With 12 records present'):
@@ -589,10 +592,10 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(select_from_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_12, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('With 13 records present'):
@@ -608,10 +611,10 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(select_from_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_13, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('With 14 records present'):
@@ -627,10 +630,10 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(select_from_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_14, OUTPUT_RESET),
+                self.get_logging_output(ilog, 1),
             )
 
         with self.subTest('With 15 records present'):
@@ -646,298 +649,298 @@ class CoreDisplayRecordsMixin:
             # Capture logging output.
             with self.assertLogs(None, 'INFO') as ilog:
                 self.connector.records.select('category')
-            self.assertText(self.get_logging_output(ilog, 0), select_from_query)
+            self.assertText(select_from_query, self.get_logging_output(ilog, 0))
             self.assertText(
-                self.get_logging_output(ilog, 1),
                 '{0}{1}{2}'.format(OUTPUT_RESULTS, self.expected_output.records.SELECT__PT_15, OUTPUT_RESET),
-            )
-
-    def test__display__select_records__limited(self):
-        """"""
-        select_from_query = '{0}SELECT {1} FROM category2;{2}'.format(OUTPUT_QUERY, '{0}', OUTPUT_RESET)
-        quoted_id = '{0}id{0}'.format(self.connector.validate._quote_identifier_format)
-        quoted_name = '{0}name{0}'.format(self.connector.validate._quote_identifier_format)
-        quoted_desc = '{0}description{0}'.format(self.connector.validate._quote_identifier_format)
-
-        # Create table.
-        self.connector.tables.create('category2', self._columns_clause__basic, display_query=False)
-
-        # Create record.
-        self.connector.records.insert(
-            'category2',
-            '(1, {0}longer name value{0}, {0}short desc{0})'.format(
-                self.connector.validate._quote_str_literal_format,
-            ),
-            display_query=False,
-        )
-
-        with self.subTest('With basic column types - Pull all'):
-            # Capture logging output.
-            with self.assertLogs(None, 'INFO') as ilog:
-                self.connector.records.select('category2')
-            self.assertText(select_from_query.format('*'), self.get_logging_output(ilog, 0))
-            self.assertText(
-                self.get_logging_output(ilog, 1),
-                '{0}{1}{2}'.format(
-                    OUTPUT_RESULTS,
-                    self.expected_output.records.LIMITED_SELECT__BASIC__ALL,
-                    OUTPUT_RESET,
-                ),
-            )
-
-        with self.subTest('With basic column types - Exclude id'):
-            # Capture logging output.
-            with self.assertLogs(None, 'INFO') as ilog:
-                self.connector.records.select('category2', 'name, description')
-            curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_name, quoted_desc))
-            self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
-            self.assertText(
-                '{0}{1}{2}'.format(
-                    OUTPUT_RESULTS,
-                    self.expected_output.records.LIMITED_SELECT__BASIC__OMIT_ID,
-                    OUTPUT_RESET
-                ),
                 self.get_logging_output(ilog, 1),
             )
 
-        with self.subTest('With basic column types - Exclude name'):
-            # Capture logging output.
-            with self.assertLogs(None, 'INFO') as ilog:
-                self.connector.records.select('category2', 'id, description')
-            curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_id, quoted_desc))
-            self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
-            self.assertText(
-                '{0}{1}{2}'.format(
-                    OUTPUT_RESULTS,
-                    self.expected_output.records.LIMITED_SELECT__BASIC__OMIT_NAME,
-                    OUTPUT_RESET,
-                ),
-                self.get_logging_output(ilog, 1),
-            )
-
-        with self.subTest('With basic column types - Exclude description'):
-            # Capture logging output.
-            with self.assertLogs(None, 'INFO') as ilog:
-                self.connector.records.select('category2', 'id, name')
-            curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_id, quoted_name))
-            self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
-            self.assertText(
-                '{0}{1}{2}'.format(
-                    OUTPUT_RESULTS,
-                    self.expected_output.records.LIMITED_SELECT__BASIC__OMIT_DESC,
-                    OUTPUT_RESET,
-                ),
-                self.get_logging_output(ilog, 1),
-            )
-
-        with self.subTest('With basic column types - Pull all reversed'):
-            # Capture logging output.
-            with self.assertLogs(None, 'INFO') as ilog:
-                self.connector.records.select('category2', 'description, name, id')
-            curr_select_clause = select_from_query.format('({0}, {1}, {2})'.format(quoted_desc, quoted_name, quoted_id))
-            self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
-            self.assertText(
-                '{0}{1}{2}'.format(
-                    OUTPUT_RESULTS,
-                    self.expected_output.records.LIMITED_SELECT__BASIC__REVERSED_ALL,
-                    OUTPUT_RESET,
-                ),
-                self.get_logging_output(ilog, 1),
-            )
-
-        with self.subTest('With basic column types - Exclude id reversed'):
-            # Capture logging output.
-            with self.assertLogs(None, 'INFO') as ilog:
-                self.connector.records.select('category2', 'description, name')
-            curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_desc, quoted_name))
-            self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
-            self.assertText(
-                '{0}{1}{2}'.format(
-                    OUTPUT_RESULTS,
-                    self.expected_output.records.LIMITED_SELECT__BASIC__REVERSED_OMIT_ID,
-                    OUTPUT_RESET
-                ),
-                self.get_logging_output(ilog, 1),
-            )
-
-        with self.subTest('With basic column types - Exclude name reversed'):
-            # Capture logging output.
-            with self.assertLogs(None, 'INFO') as ilog:
-                self.connector.records.select('category2', 'description, id')
-            curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_desc, quoted_id))
-            self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
-            self.assertText(
-                '{0}{1}{2}'.format(
-                    OUTPUT_RESULTS,
-                    self.expected_output.records.LIMITED_SELECT__BASIC__REVERSED_OMIT_NAME,
-                    OUTPUT_RESET,
-                ),
-                self.get_logging_output(ilog, 1),
-            )
-
-        with self.subTest('With basic column types - Exclude description reversed'):
-            # Capture logging output.
-            with self.assertLogs(None, 'INFO') as ilog:
-                self.connector.records.select('category2', 'name, id')
-            curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_name, quoted_id))
-            self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
-            self.assertText(
-                '{0}{1}{2}'.format(
-                    OUTPUT_RESULTS,
-                    self.expected_output.records.LIMITED_SELECT__BASIC__REVERSED_OMIT_DESC,
-                    OUTPUT_RESET,
-                ),
-                self.get_logging_output(ilog, 1),
-            )
-
-        datetime_now = datetime.now()
-        select_from_query = '{0}SELECT {1} FROM category3;{2}'.format(OUTPUT_QUERY, '{0}', OUTPUT_RESET)
-        quoted_datetime = '{0}test_datetime{0}'.format(self.connector.validate._quote_identifier_format)
-        quoted_date = '{0}test_date{0}'.format(self.connector.validate._quote_identifier_format)
-
-        # Create table.
-        self.connector.tables.create('category3', self._columns_clause__datetime, display_query=False)
-
-        # Create record.
-        self.connector.records.insert('category3', [1, datetime_now, datetime_now], display_query=False)
-
-        with self.subTest('With datetime column types - Pull all'):
-            # Capture logging output.
-            with self.assertLogs(None, 'INFO') as ilog:
-                self.connector.records.select('category3')
-            self.assertText(select_from_query.format('*'), self.get_logging_output(ilog, 0))
-            self.assertText(
-                '{0}{1}{2}'.format(
-                    OUTPUT_RESULTS,
-                    self.expected_output.records.LIMITED_SELECT__DATETIME__ALL.format(
-                        datetime_now.strftime('%Y-%m-%d %H:%M:%S'),
-                        datetime_now.date(),
-                    ),
-                    OUTPUT_RESET,
-                ),
-                self.get_logging_output(ilog, 1),
-            )
-
-        with self.subTest('With datetime column types - Exclude id'):
-            # Capture logging output.
-            with self.assertLogs(None, 'INFO') as ilog:
-                self.connector.records.select('category3', 'test_datetime, test_date')
-            curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_datetime, quoted_date))
-            self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
-            self.assertText(
-                '{0}{1}{2}'.format(
-                    OUTPUT_RESULTS,
-                    self.expected_output.records.LIMITED_SELECT__DATETIME__OMIT_ID.format(
-                        datetime_now.strftime('%Y-%m-%d %H:%M:%S'),
-                        datetime_now.date(),
-                    ),
-                    OUTPUT_RESET
-                ),
-                self.get_logging_output(ilog, 1),
-            )
-
-        with self.subTest('With datetime column types - Exclude datetime'):
-            # Capture logging output.
-            with self.assertLogs(None, 'INFO') as ilog:
-                self.connector.records.select('category3', 'id, test_date')
-            curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_id, quoted_date))
-            self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
-            self.assertText(
-                '{0}{1}{2}'.format(
-                    OUTPUT_RESULTS,
-                    self.expected_output.records.LIMITED_SELECT__DATETIME__OMIT_DATETIME.format(
-                        datetime_now.date(),
-                    ),
-                    OUTPUT_RESET,
-                ),
-                self.get_logging_output(ilog, 1),
-            )
-
-        with self.subTest('With datetime column types - Exclude date'):
-            # Capture logging output.
-            with self.assertLogs(None, 'INFO') as ilog:
-                self.connector.records.select('category3', 'id, test_datetime')
-            curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_id, quoted_datetime))
-            self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
-            self.assertText(
-                '{0}{1}{2}'.format(
-                    OUTPUT_RESULTS,
-                    self.expected_output.records.LIMITED_SELECT__DATETIME__OMIT_DATE.format(
-                        datetime_now.strftime('%Y-%m-%d %H:%M:%S'),
-                    ),
-                    OUTPUT_RESET,
-                ),
-                self.get_logging_output(ilog, 1),
-            )
-
-        with self.subTest('With datetime column types - Pull all reversed'):
-            # Capture logging output.
-            with self.assertLogs(None, 'INFO') as ilog:
-                self.connector.records.select('category3', 'test_date, test_datetime, id')
-            curr_select_clause = select_from_query.format(
-                '({0}, {1}, {2})'.format(quoted_date, quoted_datetime, quoted_id),
-            )
-            self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
-            self.assertText(
-                '{0}{1}{2}'.format(
-                    OUTPUT_RESULTS,
-                    self.expected_output.records.LIMITED_SELECT__DATETIME__REVERSED_ALL.format(
-                        datetime_now.date(),
-                        datetime_now.strftime('%Y-%m-%d %H:%M:%S'),
-                    ),
-                    OUTPUT_RESET,
-                ),
-                self.get_logging_output(ilog, 1),
-            )
-
-        with self.subTest('With datetime column types - Exclude id reversed'):
-            # Capture logging output.
-            with self.assertLogs(None, 'INFO') as ilog:
-                self.connector.records.select('category3', 'test_date, test_datetime')
-            curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_date, quoted_datetime))
-            self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
-            self.assertText(
-                '{0}{1}{2}'.format(
-                    OUTPUT_RESULTS,
-                    self.expected_output.records.LIMITED_SELECT__DATETIME__REVERSED_OMIT_ID.format(
-                        datetime_now.date(),
-                        datetime_now.strftime('%Y-%m-%d %H:%M:%S'),
-                    ),
-                    OUTPUT_RESET
-                ),
-                self.get_logging_output(ilog, 1),
-            )
-
-        with self.subTest('With datetime column types - Exclude datetime reversed'):
-            # Capture logging output.
-            with self.assertLogs(None, 'INFO') as ilog:
-                self.connector.records.select('category3', 'test_date, id')
-            curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_date, quoted_id))
-            self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
-            self.assertText(
-                '{0}{1}{2}'.format(
-                    OUTPUT_RESULTS,
-                    self.expected_output.records.LIMITED_SELECT__DATETIME__REVERSED_OMIT_DATETIME.format(
-                        datetime_now.date(),
-                    ),
-                    OUTPUT_RESET,
-                ),
-                self.get_logging_output(ilog, 1),
-            )
-
-        with self.subTest('With datetime column types - Exclude date reversed'):
-            # Capture logging output.
-            with self.assertLogs(None, 'INFO') as ilog:
-                self.connector.records.select('category3', 'test_datetime, id')
-            curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_datetime, quoted_id))
-            self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
-            self.assertText(
-                '{0}{1}{2}'.format(
-                    OUTPUT_RESULTS,
-                    self.expected_output.records.LIMITED_SELECT__DATETIME__REVERSED_OMIT_DATE.format(
-                        datetime_now.strftime('%Y-%m-%d %H:%M:%S'),
-                    ),
-                    OUTPUT_RESET,
-                ),
-                self.get_logging_output(ilog, 1),
-            )
+    # def test__display__select_records__limited(self):
+    #     """"""
+    #     select_from_query = '{0}SELECT {1} FROM category2;{2}'.format(OUTPUT_QUERY, '{0}', OUTPUT_RESET)
+    #     quoted_id = '{0}id{0}'.format(self.connector.validate._quote_identifier_format)
+    #     quoted_name = '{0}name{0}'.format(self.connector.validate._quote_identifier_format)
+    #     quoted_desc = '{0}description{0}'.format(self.connector.validate._quote_identifier_format)
+    #
+    #     # Create table.
+    #     self.connector.tables.create('category2', self._columns_clause__basic, display_query=False)
+    #
+    #     # Create record.
+    #     self.connector.records.insert(
+    #         'category2',
+    #         '(1, {0}longer name value{0}, {0}short desc{0})'.format(
+    #             self.connector.validate._quote_str_literal_format,
+    #         ),
+    #         display_query=False,
+    #     )
+    #
+    #     with self.subTest('With basic column types - Pull all'):
+    #         # Capture logging output.
+    #         with self.assertLogs(None, 'INFO') as ilog:
+    #             self.connector.records.select('category2')
+    #         self.assertText(select_from_query.format('*'), self.get_logging_output(ilog, 0))
+    #         self.assertText(
+    #             self.get_logging_output(ilog, 1),
+    #             '{0}{1}{2}'.format(
+    #                 OUTPUT_RESULTS,
+    #                 self.expected_output.records.LIMITED_SELECT__BASIC__ALL,
+    #                 OUTPUT_RESET,
+    #             ),
+    #         )
+    #
+    #     with self.subTest('With basic column types - Exclude id'):
+    #         # Capture logging output.
+    #         with self.assertLogs(None, 'INFO') as ilog:
+    #             self.connector.records.select('category2', 'name, description')
+    #         curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_name, quoted_desc))
+    #         self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
+    #         self.assertText(
+    #             '{0}{1}{2}'.format(
+    #                 OUTPUT_RESULTS,
+    #                 self.expected_output.records.LIMITED_SELECT__BASIC__OMIT_ID,
+    #                 OUTPUT_RESET
+    #             ),
+    #             self.get_logging_output(ilog, 1),
+    #         )
+    #
+    #     with self.subTest('With basic column types - Exclude name'):
+    #         # Capture logging output.
+    #         with self.assertLogs(None, 'INFO') as ilog:
+    #             self.connector.records.select('category2', 'id, description')
+    #         curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_id, quoted_desc))
+    #         self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
+    #         self.assertText(
+    #             '{0}{1}{2}'.format(
+    #                 OUTPUT_RESULTS,
+    #                 self.expected_output.records.LIMITED_SELECT__BASIC__OMIT_NAME,
+    #                 OUTPUT_RESET,
+    #             ),
+    #             self.get_logging_output(ilog, 1),
+    #         )
+    #
+    #     with self.subTest('With basic column types - Exclude description'):
+    #         # Capture logging output.
+    #         with self.assertLogs(None, 'INFO') as ilog:
+    #             self.connector.records.select('category2', 'id, name')
+    #         curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_id, quoted_name))
+    #         self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
+    #         self.assertText(
+    #             '{0}{1}{2}'.format(
+    #                 OUTPUT_RESULTS,
+    #                 self.expected_output.records.LIMITED_SELECT__BASIC__OMIT_DESC,
+    #                 OUTPUT_RESET,
+    #             ),
+    #             self.get_logging_output(ilog, 1),
+    #         )
+    #
+    #     with self.subTest('With basic column types - Pull all reversed'):
+    #         # Capture logging output.
+    #         with self.assertLogs(None, 'INFO') as ilog:
+    #             self.connector.records.select('category2', 'description, name, id')
+    #         curr_select_clause = select_from_query.format('({0}, {1}, {2})'.format(quoted_desc, quoted_name, quoted_id))
+    #         self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
+    #         self.assertText(
+    #             '{0}{1}{2}'.format(
+    #                 OUTPUT_RESULTS,
+    #                 self.expected_output.records.LIMITED_SELECT__BASIC__REVERSED_ALL,
+    #                 OUTPUT_RESET,
+    #             ),
+    #             self.get_logging_output(ilog, 1),
+    #         )
+    #
+    #     with self.subTest('With basic column types - Exclude id reversed'):
+    #         # Capture logging output.
+    #         with self.assertLogs(None, 'INFO') as ilog:
+    #             self.connector.records.select('category2', 'description, name')
+    #         curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_desc, quoted_name))
+    #         self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
+    #         self.assertText(
+    #             '{0}{1}{2}'.format(
+    #                 OUTPUT_RESULTS,
+    #                 self.expected_output.records.LIMITED_SELECT__BASIC__REVERSED_OMIT_ID,
+    #                 OUTPUT_RESET
+    #             ),
+    #             self.get_logging_output(ilog, 1),
+    #         )
+    #
+    #     with self.subTest('With basic column types - Exclude name reversed'):
+    #         # Capture logging output.
+    #         with self.assertLogs(None, 'INFO') as ilog:
+    #             self.connector.records.select('category2', 'description, id')
+    #         curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_desc, quoted_id))
+    #         self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
+    #         self.assertText(
+    #             '{0}{1}{2}'.format(
+    #                 OUTPUT_RESULTS,
+    #                 self.expected_output.records.LIMITED_SELECT__BASIC__REVERSED_OMIT_NAME,
+    #                 OUTPUT_RESET,
+    #             ),
+    #             self.get_logging_output(ilog, 1),
+    #         )
+    #
+    #     with self.subTest('With basic column types - Exclude description reversed'):
+    #         # Capture logging output.
+    #         with self.assertLogs(None, 'INFO') as ilog:
+    #             self.connector.records.select('category2', 'name, id')
+    #         curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_name, quoted_id))
+    #         self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
+    #         self.assertText(
+    #             '{0}{1}{2}'.format(
+    #                 OUTPUT_RESULTS,
+    #                 self.expected_output.records.LIMITED_SELECT__BASIC__REVERSED_OMIT_DESC,
+    #                 OUTPUT_RESET,
+    #             ),
+    #             self.get_logging_output(ilog, 1),
+    #         )
+    #
+    #     datetime_now = datetime.now()
+    #     select_from_query = '{0}SELECT {1} FROM category3;{2}'.format(OUTPUT_QUERY, '{0}', OUTPUT_RESET)
+    #     quoted_datetime = '{0}test_datetime{0}'.format(self.connector.validate._quote_identifier_format)
+    #     quoted_date = '{0}test_date{0}'.format(self.connector.validate._quote_identifier_format)
+    #
+    #     # Create table.
+    #     self.connector.tables.create('category3', self._columns_clause__datetime, display_query=False)
+    #
+    #     # Create record.
+    #     self.connector.records.insert('category3', [1, datetime_now, datetime_now], display_query=False)
+    #
+    #     with self.subTest('With datetime column types - Pull all'):
+    #         # Capture logging output.
+    #         with self.assertLogs(None, 'INFO') as ilog:
+    #             self.connector.records.select('category3')
+    #         self.assertText(select_from_query.format('*'), self.get_logging_output(ilog, 0))
+    #         self.assertText(
+    #             '{0}{1}{2}'.format(
+    #                 OUTPUT_RESULTS,
+    #                 self.expected_output.records.LIMITED_SELECT__DATETIME__ALL.format(
+    #                     datetime_now.strftime('%Y-%m-%d %H:%M:%S'),
+    #                     datetime_now.date(),
+    #                 ),
+    #                 OUTPUT_RESET,
+    #             ),
+    #             self.get_logging_output(ilog, 1),
+    #         )
+    #
+    #     with self.subTest('With datetime column types - Exclude id'):
+    #         # Capture logging output.
+    #         with self.assertLogs(None, 'INFO') as ilog:
+    #             self.connector.records.select('category3', 'test_datetime, test_date')
+    #         curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_datetime, quoted_date))
+    #         self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
+    #         self.assertText(
+    #             '{0}{1}{2}'.format(
+    #                 OUTPUT_RESULTS,
+    #                 self.expected_output.records.LIMITED_SELECT__DATETIME__OMIT_ID.format(
+    #                     datetime_now.strftime('%Y-%m-%d %H:%M:%S'),
+    #                     datetime_now.date(),
+    #                 ),
+    #                 OUTPUT_RESET
+    #             ),
+    #             self.get_logging_output(ilog, 1),
+    #         )
+    #
+    #     with self.subTest('With datetime column types - Exclude datetime'):
+    #         # Capture logging output.
+    #         with self.assertLogs(None, 'INFO') as ilog:
+    #             self.connector.records.select('category3', 'id, test_date')
+    #         curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_id, quoted_date))
+    #         self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
+    #         self.assertText(
+    #             '{0}{1}{2}'.format(
+    #                 OUTPUT_RESULTS,
+    #                 self.expected_output.records.LIMITED_SELECT__DATETIME__OMIT_DATETIME.format(
+    #                     datetime_now.date(),
+    #                 ),
+    #                 OUTPUT_RESET,
+    #             ),
+    #             self.get_logging_output(ilog, 1),
+    #         )
+    #
+    #     with self.subTest('With datetime column types - Exclude date'):
+    #         # Capture logging output.
+    #         with self.assertLogs(None, 'INFO') as ilog:
+    #             self.connector.records.select('category3', 'id, test_datetime')
+    #         curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_id, quoted_datetime))
+    #         self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
+    #         self.assertText(
+    #             '{0}{1}{2}'.format(
+    #                 OUTPUT_RESULTS,
+    #                 self.expected_output.records.LIMITED_SELECT__DATETIME__OMIT_DATE.format(
+    #                     datetime_now.strftime('%Y-%m-%d %H:%M:%S'),
+    #                 ),
+    #                 OUTPUT_RESET,
+    #             ),
+    #             self.get_logging_output(ilog, 1),
+    #         )
+    #
+    #     with self.subTest('With datetime column types - Pull all reversed'):
+    #         # Capture logging output.
+    #         with self.assertLogs(None, 'INFO') as ilog:
+    #             self.connector.records.select('category3', 'test_date, test_datetime, id')
+    #         curr_select_clause = select_from_query.format(
+    #             '({0}, {1}, {2})'.format(quoted_date, quoted_datetime, quoted_id),
+    #         )
+    #         self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
+    #         self.assertText(
+    #             '{0}{1}{2}'.format(
+    #                 OUTPUT_RESULTS,
+    #                 self.expected_output.records.LIMITED_SELECT__DATETIME__REVERSED_ALL.format(
+    #                     datetime_now.date(),
+    #                     datetime_now.strftime('%Y-%m-%d %H:%M:%S'),
+    #                 ),
+    #                 OUTPUT_RESET,
+    #             ),
+    #             self.get_logging_output(ilog, 1),
+    #         )
+    #
+    #     with self.subTest('With datetime column types - Exclude id reversed'):
+    #         # Capture logging output.
+    #         with self.assertLogs(None, 'INFO') as ilog:
+    #             self.connector.records.select('category3', 'test_date, test_datetime')
+    #         curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_date, quoted_datetime))
+    #         self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
+    #         self.assertText(
+    #             '{0}{1}{2}'.format(
+    #                 OUTPUT_RESULTS,
+    #                 self.expected_output.records.LIMITED_SELECT__DATETIME__REVERSED_OMIT_ID.format(
+    #                     datetime_now.date(),
+    #                     datetime_now.strftime('%Y-%m-%d %H:%M:%S'),
+    #                 ),
+    #                 OUTPUT_RESET
+    #             ),
+    #             self.get_logging_output(ilog, 1),
+    #         )
+    #
+    #     with self.subTest('With datetime column types - Exclude datetime reversed'):
+    #         # Capture logging output.
+    #         with self.assertLogs(None, 'INFO') as ilog:
+    #             self.connector.records.select('category3', 'test_date, id')
+    #         curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_date, quoted_id))
+    #         self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
+    #         self.assertText(
+    #             '{0}{1}{2}'.format(
+    #                 OUTPUT_RESULTS,
+    #                 self.expected_output.records.LIMITED_SELECT__DATETIME__REVERSED_OMIT_DATETIME.format(
+    #                     datetime_now.date(),
+    #                 ),
+    #                 OUTPUT_RESET,
+    #             ),
+    #             self.get_logging_output(ilog, 1),
+    #         )
+    #
+    #     with self.subTest('With datetime column types - Exclude date reversed'):
+    #         # Capture logging output.
+    #         with self.assertLogs(None, 'INFO') as ilog:
+    #             self.connector.records.select('category3', 'test_datetime, id')
+    #         curr_select_clause = select_from_query.format('({0}, {1})'.format(quoted_datetime, quoted_id))
+    #         self.assertText(curr_select_clause, self.get_logging_output(ilog, 0))
+    #         self.assertText(
+    #             '{0}{1}{2}'.format(
+    #                 OUTPUT_RESULTS,
+    #                 self.expected_output.records.LIMITED_SELECT__DATETIME__REVERSED_OMIT_DATE.format(
+    #                     datetime_now.strftime('%Y-%m-%d %H:%M:%S'),
+    #                 ),
+    #                 OUTPUT_RESET,
+    #             ),
+    #             self.get_logging_output(ilog, 1),
+    #         )

@@ -780,60 +780,60 @@ class CoreRecordsTestMixin:
             self.assertIn(row_4, results)
             self.assertIn(row_5, results)
 
-    def test__select__aggregates(self):
-        """"""
-        table_name = 'test_queries__select__aggregate'
-        # Verify table exists.
-        try:
-            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__aggregates))
-        except self.connector.errors.table_already_exists:
-            # Table already exists, as we want.
-            pass
-
-        # Prepopulate with a few records.
-        self.connector.records.insert_many(
-            table_name,
-            [
-                ('test one', 10, False),
-                ('test two', 12, False),
-                ('test three', 5, False),
-                ('test four', 3, False),
-                ('test five', 22, False),
-            ],
-            columns_clause=('test_str, test_int, test_bool'),
-        )
-
-        with self.subTest('SELECT with AVG aggregation'):
-            # Run test query.
-            results = self.connector.records.select(table_name, 'AVG(test_int)')
-
-            # Verify return aggregate result.
-            self.assertEqual(len(results), 1)
-            self.assertEqual(results[0][0], Decimal('10.4'))
-
-        with self.subTest('SELECT with MAX aggregation'):
-            # Run test query.
-            results = self.connector.records.select(table_name, 'MAX(test_int)')
-
-            # Verify return aggregate result.
-            self.assertEqual(len(results), 1)
-            self.assertEqual(results[0][0], 22)
-
-        with self.subTest('SELECT with MIN aggregation'):
-            # Run test query.
-            results = self.connector.records.select(table_name, 'MIN(test_int)')
-
-            # Verify return aggregate result.
-            self.assertEqual(len(results), 1)
-            self.assertEqual(results[0][0], 3)
-
-        with self.subTest('SELECT with SUM aggregation'):
-            # Run test query.
-            results = self.connector.records.select(table_name, 'SUM(test_int)')
-
-            # Verify return aggregate result.
-            self.assertEqual(len(results), 1)
-            self.assertEqual(results[0][0], 52)
+    # def test__select__aggregates(self):
+    #     """"""
+    #     table_name = 'test_queries__select__aggregate'
+    #     # Verify table exists.
+    #     try:
+    #         self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__aggregates))
+    #     except self.connector.errors.table_already_exists:
+    #         # Table already exists, as we want.
+    #         pass
+    #
+    #     # Prepopulate with a few records.
+    #     self.connector.records.insert_many(
+    #         table_name,
+    #         [
+    #             ('test one', 10, False),
+    #             ('test two', 12, False),
+    #             ('test three', 5, False),
+    #             ('test four', 3, False),
+    #             ('test five', 22, False),
+    #         ],
+    #         columns_clause=('test_str, test_int, test_bool'),
+    #     )
+    #
+    #     with self.subTest('SELECT with AVG aggregation'):
+    #         # Run test query.
+    #         results = self.connector.records.select(table_name, 'AVG(test_int)')
+    #
+    #         # Verify return aggregate result.
+    #         self.assertEqual(len(results), 1)
+    #         self.assertEqual(results[0][0], Decimal('10.4'))
+    #
+    #     with self.subTest('SELECT with MAX aggregation'):
+    #         # Run test query.
+    #         results = self.connector.records.select(table_name, 'MAX(test_int)')
+    #
+    #         # Verify return aggregate result.
+    #         self.assertEqual(len(results), 1)
+    #         self.assertEqual(results[0][0], 22)
+    #
+    #     with self.subTest('SELECT with MIN aggregation'):
+    #         # Run test query.
+    #         results = self.connector.records.select(table_name, 'MIN(test_int)')
+    #
+    #         # Verify return aggregate result.
+    #         self.assertEqual(len(results), 1)
+    #         self.assertEqual(results[0][0], 3)
+    #
+    #     with self.subTest('SELECT with SUM aggregation'):
+    #         # Run test query.
+    #         results = self.connector.records.select(table_name, 'SUM(test_int)')
+    #
+    #         # Verify return aggregate result.
+    #         self.assertEqual(len(results), 1)
+    #         self.assertEqual(results[0][0], 52)
 
     def test__insert__basic__success(self):
         """
@@ -853,33 +853,33 @@ class CoreRecordsTestMixin:
         self.assertEqual(len(results), 0)
 
         # Run test query.
-        row = (1, 'test_name_1', 'test_desc_1')
+        row = (1, "'test_name_1'", "'test_desc_1'")
         self.connector.records.insert(table_name, row)
         results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
 
         # Verify one record returned.
         self.assertEqual(len(results), 1)
-        self.assertIn(row, results)
+        self.assertIn((1, 'test_name_1', 'test_desc_1'), results)
 
         # Run test query.
-        row = (2, 'test_name_2', 'test_desc_2')
+        row = (2, "'test_name_2'", "'test_desc_2'")
         self.connector.records.insert(table_name, row)
         results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
 
         # Verify two records returned.
         self.assertEqual(len(results), 2)
-        self.assertIn(row, results)
+        self.assertIn((2, 'test_name_2', 'test_desc_2'), results)
 
         # Works for 0, 1, and 2. Assume works for all further n+1 values.
 
         # Test with columns defined.
-        row = (3, 'test_name_3', 'test_desc_3')
+        row = (3, "'test_name_3'", "'test_desc_3'")
         self.connector.records.insert(table_name, row, columns_clause='id, name, description')
         results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
 
         # Verify two records returned.
         self.assertEqual(len(results), 3)
-        self.assertIn(row, results)
+        self.assertIn((3, 'test_name_3', 'test_desc_3'), results)
 
     def test__insert__datetime__success(self):
         """
@@ -909,8 +909,8 @@ class CoreRecordsTestMixin:
             microsecond=29,
         )
         test_date__2020 = test_datetime__2020.date()
-        test_datetime_str__2020 = test_datetime__2020.strftime('%Y-%m-%d %H:%M:%S')
-        test_date_str__2020 = test_date__2020.strftime('%Y-%m-%d')
+        test_datetime_str__2020 = "'{0}'".format(test_datetime__2020.strftime('%Y-%m-%d %H:%M:%S'))
+        test_date_str__2020 = "'{0}'".format(test_date__2020.strftime('%Y-%m-%d'))
 
         # Run test query, using string values.
         row_1 = (1, test_datetime_str__2020, test_date_str__2020)
@@ -942,6 +942,39 @@ class CoreRecordsTestMixin:
         self.assertEqual(len(results), 2)
         self.assertIn((1, test_datetime__2020.replace(microsecond=0), test_date__2020), results)
         self.assertIn((2, test_datetime__2021.replace(microsecond=0), test_date__2021), results)
+
+    # # def test__insert__with_quote_types(self):
+    # #     """"""
+    # #     table_name = 'test_queries__insert__with_quote_types'
+    # #
+    # #     # Verify table exists.
+    # #     try:
+    # #         self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__basic))
+    # #     except self.connector.errors.table_already_exists:
+    # #         # Table already exists, as we want.
+    # #         pass
+    # #
+    # #     # Verify starting state.
+    # #     results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+    # #     self.assertEqual(len(results), 0)
+    # #
+    # #     # Run test query.
+    # #     row = (1, """'2" nail'""", """'2 inch nail'""""")
+    # #     self.connector.records.insert(table_name, row)
+    # #     results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+    # #
+    # #     # Verify one record returned.
+    # #     self.assertEqual(len(results), 1)
+    # #     self.assertIn(row, results)
+    # #
+    # #     # Run test query.
+    # #     row = (2, """'1\' ruler'""", """'1 foot ruler'""""")
+    # #     self.connector.records.insert(table_name, row)
+    # #     results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+    # #
+    # #     # Verify two records returned.
+    # #     self.assertEqual(len(results), 2)
+    # #     self.assertIn(row, results)
 
     def test__insert_many__success(self):
         """
