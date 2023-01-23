@@ -80,12 +80,10 @@ class PostgresqlRecords(BaseRecords):
         # Check that provided WHERE clause is valid format.
         columns_clause = self._base.validate.sanitize_columns_clause(columns_clause)
         where_columns_clause = self._base.validate.sanitize_columns_clause(where_columns_clause)
-        columns_clause = columns_clause.split(', ')
-        where_columns_clause = where_columns_clause.split(', ')
 
         # Verify each "where column" is present in the base columns clause.
-        for column in where_columns_clause:
-            if column not in columns_clause:
+        for column in where_columns_clause.array:
+            if column not in columns_clause.array:
                 raise ValueError(
                     'All columns specified in WHERE_COLUMNS must also be present in COLUMNS.'
                     'Failed to find "{0}" in {1}'.format(
@@ -96,44 +94,43 @@ class PostgresqlRecords(BaseRecords):
 
         # Check for values that might need formatting.
         # For example, if we find date/datetime objects, we automatically convert to a str value that won't error.
-        if isinstance(values_clause, list) or isinstance(values_clause, tuple):
-            updated_values_clause = ()
-            for value_set in values_clause:
-                updated_values_set = ()
-                for item in value_set:
+        updated_values_clause = ()
+        for value_set in values_clause:
+            updated_values_set = ()
+            for item in value_set:
 
-                    if isinstance(item, datetime.datetime):
-                        # Is a datetime object. Convert to string.
-                        item = item.strftime('%Y-%m-%d %H:%M:%S')
-                    elif isinstance(item, datetime.date):
-                        # Is a date object. Convert to string.
-                        item = item.strftime('%Y-%m-%d')
+                if isinstance(item, datetime.datetime):
+                    # Is a datetime object. Convert to string.
+                    item = item.strftime('%Y-%m-%d %H:%M:%S')
+                elif isinstance(item, datetime.date):
+                    # Is a date object. Convert to string.
+                    item = item.strftime('%Y-%m-%d')
 
-                    # Add item to updated inner set.
-                    updated_values_set += (item,)
+                # Add item to updated inner set.
+                updated_values_set += (item,)
 
-                # Add item to updated clause.
-                updated_values_clause += (updated_values_set,)
+            # Add item to updated clause.
+            updated_values_clause += (updated_values_set,)
 
-            # Replace original clause.
-            values_clause = updated_values_clause
+        # Replace original clause.
+        values_clause = updated_values_clause
 
         # Now format our clauses for query.
         if column_types_clause is not None:
             # Provide type hinting for columns.
             set_clause = ''
-            for index in range(len(columns_clause)):
+            for index in range(len(columns_clause.array)):
                 if set_clause != '':
                     set_clause += ',\n'
                 set_clause += '    "{0}" = pydbcn_temp."{0}"::{1}'.format(
-                    columns_clause[index].strip(self._base.validate._quote_column_format),
+                    columns_clause.array[index].strip(self._base.validate._quote_column_format),
                     column_types_clause[index],
                 )
         else:
             # No type hinting. Provide columns as-is.
             set_clause = ',\n'.join([
                 '    "{0}" = pydbcn_temp."{0}"'.format(x.strip(self._base.validate._quote_column_format))
-                for x in columns_clause
+                for x in columns_clause.array
             ])
         values_clause = ',\n'.join([
             '    {0}'.format(x)
@@ -141,11 +138,11 @@ class PostgresqlRecords(BaseRecords):
         ])
         columns_clause = ', '.join([
             '"{0}"'.format(x.strip(self._base.validate._quote_column_format))
-            for x in columns_clause
+            for x in columns_clause.array
         ])
         where_columns_clause = ' AND\n'.join([
             '    pydbcn_update_table."{0}" = pydbcn_temp."{0}"'.format(x.strip(self._base.validate._quote_column_format))
-            for x in where_columns_clause
+            for x in where_columns_clause.array
         ])
 
         # Update records.

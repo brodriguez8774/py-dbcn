@@ -73,6 +73,7 @@ class BaseRecords:
             order_by_clause,
             limit_clause,
         )
+
         results = self._base.query.execute(query, display_query=display_query)
         if display_results:
             self._base.display.records.select(results, logger, table_name, select_clause)
@@ -94,8 +95,6 @@ class BaseRecords:
 
         # Check that provided COLUMNS clause is valid format.
         columns_clause = self._base.validate.sanitize_columns_clause(columns_clause)
-        if len(columns_clause) > 0:
-            columns_clause = ' ({0})'.format(columns_clause)
 
         # Check that provided VALUES clause is valid format.
         values_clause = self._base.validate.sanitize_values_clause(values_clause)
@@ -112,6 +111,10 @@ class BaseRecords:
                 elif isinstance(item, datetime.date):
                     # Is a date object. Convert to string.
                     item = item.strftime('%Y-%m-%d')
+
+                # # Handle if quote in item.
+                # if isinstance(item, str) and "'" in item:
+                #     item = """E'{0}'""".format(item)
 
                 # Add item to updated clause.
                 updated_values_clause += (item,)
@@ -140,8 +143,6 @@ class BaseRecords:
 
         # Check that provided COLUMNS clause is valid format.
         columns_clause = self._base.validate.sanitize_columns_clause(columns_clause)
-        if columns_clause != '':
-            columns_clause = ' ({0})'.format(columns_clause)
 
         # Check that provided VALUES clause is valid format.
         # Must be array format.

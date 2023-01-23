@@ -294,13 +294,6 @@ class RecordDisplay:
             raise ValueError('Column quote format is not defined.')
 
         if results:
-            # Check select clause, which directly affects desired output columns.
-            # First we initialize to a default str.
-            if select_clause is None:
-                select_clause = '*'
-            else:
-                select_clause = str(select_clause).strip()
-
             if self._base._config.db_type == 'MySQL':
                 col_name_index = 0
             elif self._base._config.db_type == 'PostgreSQL':
@@ -310,26 +303,27 @@ class RecordDisplay:
 
             # Handle based on star or specific cols.
             # TODO: Probably need to tokenize this, to properly compare.
-            if select_clause == '*' or '(*)' in select_clause:
+            if len(select_clause.array) ==  1 and select_clause.array[0] == '*':
                 # Calculate column header values, using all columns.
                 table_cols = [
                     x[col_name_index]
                     for x in self._base.tables.describe(table_name, display_query=False, display_results=False)
                 ]
             else:
-                select_clause = select_clause.split(',')
+                # Calculate column header values, using only provided columns.
                 table_cols = []
                 table_describe = self._base.tables.describe(table_name, display_query=False, display_results=False)
-                for index in range(len(select_clause)):
+                select_clause_arr = select_clause.array
+                for index in range(len(select_clause_arr)):
                     # Sanitize select clause values.
-                    clause = select_clause[index].strip()
-                    if len(clause) > 1 and clause[0] == clause[-1] and clause[0] in ['`', '"', "'"]:
-                        clause = clause[1:-1]
-                    select_clause[index] = clause
+                    if select_clause.is_quoted(select_clause_arr[index]):
+                        clause = select_clause_arr[index][1:-1]
+                    else:
+                        clause = select_clause_arr[index]
+                    # if clause in table_describe:
+                    table_cols.append(clause)
 
-                # Calculate column header values, filtered by select clause.
-                table_cols = copy.deepcopy(select_clause)
-
+            # Calculate column header values with determined columns.
             col_len_array = []
             total_col_len = 0
             for table_col in table_cols:

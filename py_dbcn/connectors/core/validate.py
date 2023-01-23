@@ -7,18 +7,9 @@ Should be inherited by language-specific connectors.
 
 # System Imports.
 import copy, re
-from io import StringIO
-from tokenize import (
-    generate_tokens,
-    ENDMARKER,
-    NAME,
-    NEWLINE,
-    NUMBER,
-    OP,
-    STRING,
-)
 
 # Internal Imports.
+from . import clauses
 from py_dbcn.logging import init_logging
 
 
@@ -41,6 +32,7 @@ class BaseValidate:
 
         # Define provided direct parent object.
         self._parent = parent
+        self.clauses = clauses
 
         # Define inheritance variables.
         self._reserved_function_names = None
@@ -334,30 +326,14 @@ class BaseValidate:
 
     # region Sanitization Functions
 
-    def sanitize_select_identifier_clause(self, clause, as_str=True):
+    def sanitize_select_identifier_clause(self, clause):
         """
         Validates that provided clause follows acceptable format.
         :param clause: SELECT clause to validate.
         :param as_str: Bool indicating if return value should be formatted as a str. Otherwise is list.
         :return: Properly formatted clause if possible, otherwise error.
         """
-        if not self._reserved_function_names:
-            raise ValueError('Reserved keyword list is not defined.')
-
-        # Sanitize overall clause.
-        clause = self._inner_sanitize_columns(clause, allow_wildcard=True)
-
-        # Check that each inner clause item is valid.
-        for item in clause:
-            self.validate_select_clause(item)
-
-        # All items in clause were valid. Return validated and sanitized SELECT clause.
-        if as_str:
-            # Re-concatenate into single expected str format.
-            return ', '.join(clause)
-        else:
-            # Return as list.
-            return clause
+        return clauses.SelectClauseBuilder(self, clause)
 
     def sanitize_where_clause(self, clause):
         """
@@ -365,52 +341,16 @@ class BaseValidate:
         :param clause: WHERE clause to validate.
         :return: Properly formatted clause if possible, otherwise error.
         """
-        # TODO: Implement proper sanitization.
+        return clauses.WhereClauseBuilder(self, clause)
 
-        # Handle if none.
-        if clause is None:
-            clause = ''
-
-        # Convert to str.
-        clause = str(clause).strip()
-
-        # Remove prefix, if present.
-        if clause.lower().startswith('where'):
-            clause = clause[5:]
-
-        # Strip now that prefix is gone.
-        clause = clause.strip()
-
-        # Put into expected format.
-        if len(clause) > 1:
-            clause = '\nWHERE {0}'.format(clause)
-
-        return clause
-
-    def sanitize_columns_clause(self, clause, as_str=True):
+    def sanitize_columns_clause(self, clause):
         """
         Validates that provided clause follows acceptable format.
         :param clause: COLUMNS clause to validate.
         :param as_str: Bool indicating if return value should be formatted as a str. Otherwise is list.
         :return: Properly formatted clause if possible, otherwise error.
         """
-        if not self._reserved_function_names:
-            raise ValueError('Reserved keyword list is not defined.')
-
-        # Sanitize overall clause.
-        clause = self._inner_sanitize_columns(clause, allow_wildcard=False)
-
-        # Check that each inner clause item is valid.
-        for item in clause:
-            self.validate_columns_clause(item)
-
-        # All items in clause were valid. Return validated and sanitized SELECT clause.
-        if as_str:
-            # Re-concatenate into single expected str format.
-            return ', '.join(clause)
-        else:
-            # Return as list.
-            return clause
+        return clauses.ColumnsClauseBuilder(self, clause)
 
     def sanitize_values_clause(self, clause):
         """
@@ -517,47 +457,14 @@ class BaseValidate:
         # # Return formatted clause.
         # return ' VALUES ({0})'.format(', '.join(clause))
 
-    def sanitize_order_by_clause(self, clause, as_str=True):
+    def sanitize_order_by_clause(self, clause):
         """
         Validates that provided clause follows acceptable format.
         :param clause: ORDER_BY clause to validate.
         :param as_str: Bool indicating if return value should be formatted as a str. Otherwise is list.
         :return: Properly formatted clause if possible, otherwise error.
         """
-        if not self._reserved_function_names:
-            raise ValueError('Reserved keyword list is not defined.')
-
-        # Quickly sanitize if string format.
-        if isinstance(clause, str):
-            clause = clause.strip()
-
-            # Remove clause starting value.
-            if clause.lower().startswith('order by'):
-                clause = clause[8:].strip()
-
-                # Ensure not empty when prefix was provided.
-                if len(clause) < 1:
-                    raise ValueError('Invalid ORDER BY clause.')
-
-        # Validate.
-        clause = self._inner_sanitize_columns(clause, allow_wildcard=False, order_by=True)
-
-        # Handle empty clause.
-        if clause == '':
-            return ''
-
-        # Check that each inner clause item is valid.
-        for item in clause:
-            self.validate_order_by_clause(item)
-
-        # All items in clause were valid. Return validated and sanitized SELECT clause.
-        if as_str:
-            # Re-concatenate into single expected str format.
-            clause = ', '.join(clause)
-            return '\nORDER BY {0}'.format(clause)
-        else:
-            # Return as list.
-            return clause
+        return clauses.OrderByClauseBuilder(self, clause)
 
     def sanitize_limit_clause(self, clause):
         """

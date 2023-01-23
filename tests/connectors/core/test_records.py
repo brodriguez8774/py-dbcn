@@ -875,6 +875,11 @@ class CoreRecordsTestMixin:
         # Test with columns defined.
         row = (3, 'test_name_3', 'test_desc_3')
         self.connector.records.insert(table_name, row, columns_clause='id, name, description')
+        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+
+        # Verify two records returned.
+        self.assertEqual(len(results), 3)
+        self.assertIn(row, results)
 
     def test__insert__datetime__success(self):
         """
