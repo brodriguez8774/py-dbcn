@@ -75,7 +75,7 @@ class PostgresqlRecords(BaseRecords):
             raise ValueError('VALUES clause for INSERT_MANY queries must be in list/tuple format.')
         if len(values_clause) < 1:
             raise ValueError('VALUES clause cannot be empty for UPDATE_MANY queries.')
-        values_clause = self._base.validate.sanitize_values_clause(values_clause)
+        values_clause = self._base.validate.sanitize_values_many_clause(values_clause)
 
         # Check that provided WHERE clause is valid format.
         columns_clause = self._base.validate.sanitize_columns_clause(columns_clause)
@@ -109,10 +109,16 @@ class PostgresqlRecords(BaseRecords):
                 '    "{0}" = pydbcn_temp."{0}"'.format(x.strip(self._base.validate._quote_column_format))
                 for x in columns_clause.array
             ])
-        values_clause = ',\n'.join([
-            '    {0}'.format(x)
-            for x in values_clause.array
-        ])
+
+        print('')
+        print('set_clause:')
+        print('{0}'.format(set_clause))
+
+        print('')
+        print('values_clause:')
+        print('{0}'.format(values_clause))
+
+        # values_clause = formatted_values_clause
         columns_clause = ', '.join([
             '"{0}"'.format(x.strip(self._base.validate._quote_column_format))
             for x in columns_clause.array
@@ -122,15 +128,30 @@ class PostgresqlRecords(BaseRecords):
             for x in where_columns_clause.array
         ])
 
+        print('')
+        print('values_clause:')
+        print('{0}'.format(values_clause))
+
+        print('')
+        print('columns_clause:')
+        print('{0}'.format(columns_clause))
+
+        print('')
+        print('where_columns_clause:')
+        print('{0}'.format(where_columns_clause))
+
+        print('')
+
         # Update records.
         query = f'UPDATE {table_name} AS pydbcn_update_table SET\n'
         query += f'{set_clause}\n'
         query += f'FROM (VALUES\n'
-        query += f'{values_clause}\n'
+        query += f'{values_clause.context}'
         query += f') AS pydbcn_temp ({columns_clause})\n'
         query += f'WHERE (\n'
         query += f'{where_columns_clause}\n'
         query += f');'
+        query = query.format(*values)
         results = self._base.query.execute(query, display_query=display_query)
 
         # # Do a select to get the updated values as results.

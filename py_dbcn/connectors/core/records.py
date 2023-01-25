@@ -107,6 +107,16 @@ class BaseRecords:
             """.format(table_name, columns_clause, values_clause)
         )
 
+        print('\n\n\n\n')
+
+        print('')
+        print('values_clause:')
+        print('{0}'.format(values_clause))
+
+        print('')
+        print('query:')
+        print('{0}'.format(query))
+
         results = self._base.query.execute(query, display_query=display_query)
         if display_results:
             self._base.display.results('{0}'.format(results))
@@ -128,7 +138,7 @@ class BaseRecords:
             raise ValueError('VALUES clause for INSERT_MANY queries must be in list/tuple format.')
         if len(values_clause) < 1:
             raise ValueError('VALUES clause cannot be empty for INSERT_MANY queries.')
-        values_clause = self._base.validate.sanitize_values_clause(values_clause)
+        values_clause = self._base.validate.sanitize_values_many_clause(values_clause)
         values_context = ', '.join('%s' for i in range(len(values_clause.array[0])))
 
         # Insert record.
@@ -171,6 +181,17 @@ class BaseRecords:
             {1}{2};
             """.format(table_name, values_clause, where_clause)
         )
+
+        print('\n\n\n\n')
+
+        print('')
+        print('values_clause:')
+        print('{0}'.format(values_clause))
+
+        print('')
+        print('query:')
+        print('{0}'.format(query))
+
         self._base.query.execute(query, display_query=display_query)
 
         # Do a select to get the updated values as results.
