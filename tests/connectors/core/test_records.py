@@ -853,33 +853,33 @@ class CoreRecordsTestMixin:
         self.assertEqual(len(results), 0)
 
         # Run test query.
-        row = (1, "'test_name_1'", "'test_desc_1'")
+        row = (1, 'test_name_1', 'test_desc_1')
         self.connector.records.insert(table_name, row)
         results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
 
         # Verify one record returned.
         self.assertEqual(len(results), 1)
-        self.assertIn((1, 'test_name_1', 'test_desc_1'), results)
+        self.assertIn(row, results)
 
         # Run test query.
-        row = (2, "'test_name_2'", "'test_desc_2'")
+        row = (2, 'test_name_2', 'test_desc_2')
         self.connector.records.insert(table_name, row)
         results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
 
         # Verify two records returned.
         self.assertEqual(len(results), 2)
-        self.assertIn((2, 'test_name_2', 'test_desc_2'), results)
+        self.assertIn(row, results)
 
         # Works for 0, 1, and 2. Assume works for all further n+1 values.
 
         # Test with columns defined.
-        row = (3, "'test_name_3'", "'test_desc_3'")
+        row = (3, 'test_name_3', 'test_desc_3')
         self.connector.records.insert(table_name, row, columns_clause='id, name, description')
         results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
 
         # Verify two records returned.
         self.assertEqual(len(results), 3)
-        self.assertIn((3, 'test_name_3', 'test_desc_3'), results)
+        self.assertIn(row, results)
 
     def test__insert__datetime__success(self):
         """
@@ -975,6 +975,39 @@ class CoreRecordsTestMixin:
     # #     # Verify two records returned.
     # #     self.assertEqual(len(results), 2)
     # #     self.assertIn(row, results)
+
+    # def test__insert__with_quote_types(self):
+    #     """"""
+    #     table_name = 'test_queries__insert__with_quote_types'
+    #
+    #     # Verify table exists.
+    #     try:
+    #         self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__basic))
+    #     except self.connector.errors.table_already_exists:
+    #         # Table already exists, as we want.
+    #         pass
+    #
+    #     # Verify starting state.
+    #     results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+    #     self.assertEqual(len(results), 0)
+    #
+    #     # Run test query.
+    #     row = (1, """2" nail""", """2 inch nail""")
+    #     self.connector.records.insert(table_name, row)
+    #     results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+    #
+    #     # Verify one record returned.
+    #     self.assertEqual(len(results), 1)
+    #     self.assertIn(row, results)
+    #
+    #     # Run test query.
+    #     row = (2, """'1\' ruler'""", """'1 foot ruler'""")
+    #     self.connector.records.insert(table_name, row)
+    #     results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+    #
+    #     # Verify two records returned.
+    #     self.assertEqual(len(results), 2)
+    #     self.assertIn(row, results)
 
     def test__insert_many__basic__success(self):
         """
@@ -1382,11 +1415,11 @@ class CoreRecordsTestMixin:
             self.connector.records.update(
                 table_name,
                 (
-                    'test_datetime = {1}{0}{1}, '.format(
+                    """test_datetime = {1}{0}{1}, """.format(
                         updated_test_datetime_str__2021,
                         self.connector.validate._quote_str_literal_format,
                     )
-                    + 'test_date = {1}{0}{1}'.format(
+                    + """test_date = {1}{0}{1}""".format(
                         updated_test_date_str__2021,
                         self.connector.validate._quote_str_literal_format,
                     )
@@ -1425,11 +1458,11 @@ class CoreRecordsTestMixin:
             self.connector.records.update(
                 table_name,
                 (
-                    'test_datetime = {1}{0}{1}, '.format(
+                    """test_datetime = {1}{0}{1}, """.format(
                         updated_test_datetime__2022,
                         self.connector.validate._quote_str_literal_format,
                     )
-                    + 'test_date = {1}{0}{1}'.format(
+                    + """test_date = {1}{0}{1}""".format(
                         updated_test_date__2022,
                         self.connector.validate._quote_str_literal_format,
                     )

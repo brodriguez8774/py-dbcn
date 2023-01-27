@@ -81,7 +81,19 @@ class BaseClauseBuilder(object):
 
     @property
     def context(self):
-        return ', '.join('{}' for i in range(len(self.array)))
+        if len(self.array) > 0:
+            context = ', '.join('%s' for i in range(len(self.array)))
+            return context
+        else:
+            return ''
+
+    @property
+    def data(self):
+        single_depth_array = []
+        for index in range(len(self.array)):
+            single_depth_array.append(self.array[index])
+
+        return single_depth_array
 
     def _to_array(self, value):
         """Converts clause to array format for initial parsing."""
@@ -252,15 +264,18 @@ class BaseClauseBuilder(object):
             # ):
             #     item = """'{0}'""".format(item)
 
+            # # Check if apostrophe in value.
+            # if "'" in item:
+            #     print('\n\n\n\n')
+            #     print('replacing quote in {0}'.format(item))
+            #     item.replace("'", '\0027')
+            #     print('replaced quote in {0}'.format(item))
+
             # If we made it this far, item is valid. Escape with proper quote format and readd.
             is_quoted = False
             if self.is_quoted(item):
                 item = item[1:-1].strip()
                 is_quoted = True
-
-            # Check if apostrophe in value.
-            if "'" in item:
-                item.replace("'", '\0027')
 
             # Skip items that are empty. Otherwise append.
             if len(item) > 0:
@@ -290,6 +305,8 @@ class BaseClauseBuilder(object):
 
                 # Save item to clause.
                 new_clause.append(item)
+
+        print('final result: {0}'.format(item))
 
         return new_clause
 
@@ -571,6 +588,10 @@ class ValuesManyClauseBuilder(ValuesClauseBuilder):
             return context
         else:
             return ''
+
+    @property
+    def orig_context(self):
+        return super().context
 
     @property
     def data(self):

@@ -127,239 +127,239 @@ EXPECTED__RECORD__SELECT__PT_1 = """
 +----+------+-------------+
 | id | name | description |
 +----+------+-------------+
-| 1  | tn   | td          |
+| 1  | 'tn' | 'td'        |
 +----+------+-------------+
 """.strip()
 
 
 EXPECTED__RECORD__SELECT__PT_2 = """
-+----+------+-------------+
-| id | name | description |
-+----+------+-------------+
-| 1  | tn   | td          |
-| 2  | t n  | t d         |
-+----+------+-------------+
++----+-------+-------------+
+| id | name  | description |
++----+-------+-------------+
+| 1  | 'tn'  | 'td'        |
+| 2  | 't n' | 't d'       |
++----+-------+-------------+
 """.strip()
 
 
 EXPECTED__RECORD__SELECT__PT_3 = """
-+----+------+-------------+
-| id | name | description |
-+----+------+-------------+
-| 1  | tn   | td          |
-| 2  | t n  | t d         |
-| 3  | te n | te d        |
-+----+------+-------------+
++----+--------+-------------+
+| id | name   | description |
++----+--------+-------------+
+| 1  | 'tn'   | 'td'        |
+| 2  | 't n'  | 't d'       |
+| 3  | 'te n' | 'te d'      |
++----+--------+-------------+
 """.strip()
 
 
 EXPECTED__RECORD__SELECT__PT_4 = """
-+----+-------+-------------+
-| id | name  | description |
-+----+-------+-------------+
-| 1  | tn    | td          |
-| 2  | t n   | t d         |
-| 3  | te n  | te d        |
-| 4  | tes n | tes d       |
-+----+-------+-------------+
++----+---------+-------------+
+| id | name    | description |
++----+---------+-------------+
+| 1  | 'tn'    | 'td'        |
+| 2  | 't n'   | 't d'       |
+| 3  | 'te n'  | 'te d'      |
+| 4  | 'tes n' | 'tes d'     |
++----+---------+-------------+
 """.strip()
 
 
 EXPECTED__RECORD__SELECT__PT_5 = """
-+----+--------+-------------+
-| id | name   | description |
-+----+--------+-------------+
-| 1  | tn     | td          |
-| 2  | t n    | t d         |
-| 3  | te n   | te d        |
-| 4  | tes n  | tes d       |
-| 5  | test n | test d      |
-+----+--------+-------------+
++----+----------+-------------+
+| id | name     | description |
++----+----------+-------------+
+| 1  | 'tn'     | 'td'        |
+| 2  | 't n'    | 't d'       |
+| 3  | 'te n'   | 'te d'      |
+| 4  | 'tes n'  | 'tes d'     |
+| 5  | 'test n' | 'test d'    |
++----+----------+-------------+
 """.strip()
 
 
 EXPECTED__RECORD__SELECT__PT_6 = """
-+----+---------+-------------+
-| id | name    | description |
-+----+---------+-------------+
-| 1  | tn      | td          |
-| 2  | t n     | t d         |
-| 3  | te n    | te d        |
-| 4  | tes n   | tes d       |
-| 5  | test n  | test d      |
-| 6  | test na | test de     |
-+----+---------+-------------+
++----+-----------+-------------+
+| id | name      | description |
++----+-----------+-------------+
+| 1  | 'tn'      | 'td'        |
+| 2  | 't n'     | 't d'       |
+| 3  | 'te n'    | 'te d'      |
+| 4  | 'tes n'   | 'tes d'     |
+| 5  | 'test n'  | 'test d'    |
+| 6  | 'test na' | 'test de'   |
++----+-----------+-------------+
 """.strip()
 
 
 EXPECTED__RECORD__SELECT__PT_7 = """
-+----+----------+-------------+
-| id | name     | description |
-+----+----------+-------------+
-| 1  | tn       | td          |
-| 2  | t n      | t d         |
-| 3  | te n     | te d        |
-| 4  | tes n    | tes d       |
-| 5  | test n   | test d      |
-| 6  | test na  | test de     |
-| 7  | test nam | test des    |
-+----+----------+-------------+
++----+------------+-------------+
+| id | name       | description |
++----+------------+-------------+
+| 1  | 'tn'       | 'td'        |
+| 2  | 't n'      | 't d'       |
+| 3  | 'te n'     | 'te d'      |
+| 4  | 'tes n'    | 'tes d'     |
+| 5  | 'test n'   | 'test d'    |
+| 6  | 'test na'  | 'test de'   |
+| 7  | 'test nam' | 'test des'  |
++----+------------+-------------+
 """.strip()
 
 
 EXPECTED__RECORD__SELECT__PT_8 = """
-+----+-----------+-------------+
-| id | name      | description |
-+----+-----------+-------------+
-| 1  | tn        | td          |
-| 2  | t n       | t d         |
-| 3  | te n      | te d        |
-| 4  | tes n     | tes d       |
-| 5  | test n    | test d      |
-| 6  | test na   | test de     |
-| 7  | test nam  | test des    |
-| 8  | test name | test desc   |
-+----+-----------+-------------+
++----+-------------+-------------+
+| id | name        | description |
++----+-------------+-------------+
+| 1  | 'tn'        | 'td'        |
+| 2  | 't n'       | 't d'       |
+| 3  | 'te n'      | 'te d'      |
+| 4  | 'tes n'     | 'tes d'     |
+| 5  | 'test n'    | 'test d'    |
+| 6  | 'test na'   | 'test de'   |
+| 7  | 'test nam'  | 'test des'  |
+| 8  | 'test name' | 'test desc' |
++----+-------------+-------------+
 """.strip()
 
 
 EXPECTED__RECORD__SELECT__PT_9 = """
-+----+-----------+-------------+
-| id | name      | description |
-+----+-----------+-------------+
-| 1  | tn        | td          |
-| 2  | t n       | t d         |
-| 3  | te n      | te d        |
-| 4  | tes n     | tes d       |
-| 5  | test n    | test d      |
-| 6  | test na   | test de     |
-| 7  | test nam  | test des    |
-| 8  | test name | test desc   |
-| 9  | test name | test descr  |
-+----+-----------+-------------+
++----+-------------+--------------+
+| id | name        | description  |
++----+-------------+--------------+
+| 1  | 'tn'        | 'td'         |
+| 2  | 't n'       | 't d'        |
+| 3  | 'te n'      | 'te d'       |
+| 4  | 'tes n'     | 'tes d'      |
+| 5  | 'test n'    | 'test d'     |
+| 6  | 'test na'   | 'test de'    |
+| 7  | 'test nam'  | 'test des'   |
+| 8  | 'test name' | 'test desc'  |
+| 9  | 'test name' | 'test descr' |
++----+-------------+--------------+
 """.strip()
 
 
 EXPECTED__RECORD__SELECT__PT_10 = """
-+----+-----------+-------------+
-| id | name      | description |
-+----+-----------+-------------+
-| 1  | tn        | td          |
-| 2  | t n       | t d         |
-| 3  | te n      | te d        |
-| 4  | tes n     | tes d       |
-| 5  | test n    | test d      |
-| 6  | test na   | test de     |
-| 7  | test nam  | test des    |
-| 8  | test name | test desc   |
-| 9  | test name | test descr  |
-| 10 | test name | test descri |
-+----+-----------+-------------+
++----+-------------+---------------+
+| id | name        | description   |
++----+-------------+---------------+
+| 1  | 'tn'        | 'td'          |
+| 2  | 't n'       | 't d'         |
+| 3  | 'te n'      | 'te d'        |
+| 4  | 'tes n'     | 'tes d'       |
+| 5  | 'test n'    | 'test d'      |
+| 6  | 'test na'   | 'test de'     |
+| 7  | 'test nam'  | 'test des'    |
+| 8  | 'test name' | 'test desc'   |
+| 9  | 'test name' | 'test descr'  |
+| 10 | 'test name' | 'test descri' |
++----+-------------+---------------+
 """.strip()
 
 
 EXPECTED__RECORD__SELECT__PT_11 = """
-+-----+-----------+--------------+
-| id  | name      | description  |
-+-----+-----------+--------------+
-| 1   | tn        | td           |
-| 2   | t n       | t d          |
-| 3   | te n      | te d         |
-| 4   | tes n     | tes d        |
-| 5   | test n    | test d       |
-| 6   | test na   | test de      |
-| 7   | test nam  | test des     |
-| 8   | test name | test desc    |
-| 9   | test name | test descr   |
-| 10  | test name | test descri  |
-| 101 | test name | test descrip |
-+-----+-----------+--------------+
++-----+-------------+----------------+
+| id  | name        | description    |
++-----+-------------+----------------+
+| 1   | 'tn'        | 'td'           |
+| 2   | 't n'       | 't d'          |
+| 3   | 'te n'      | 'te d'         |
+| 4   | 'tes n'     | 'tes d'        |
+| 5   | 'test n'    | 'test d'       |
+| 6   | 'test na'   | 'test de'      |
+| 7   | 'test nam'  | 'test des'     |
+| 8   | 'test name' | 'test desc'    |
+| 9   | 'test name' | 'test descr'   |
+| 10  | 'test name' | 'test descri'  |
+| 101 | 'test name' | 'test descrip' |
++-----+-------------+----------------+
 """.strip()
 
 
 EXPECTED__RECORD__SELECT__PT_12 = """
-+------+-----------+---------------+
-| id   | name      | description   |
-+------+-----------+---------------+
-| 1    | tn        | td            |
-| 2    | t n       | t d           |
-| 3    | te n      | te d          |
-| 4    | tes n     | tes d         |
-| 5    | test n    | test d        |
-| 6    | test na   | test de       |
-| 7    | test nam  | test des      |
-| 8    | test name | test desc     |
-| 9    | test name | test descr    |
-| 10   | test name | test descri   |
-| 101  | test name | test descrip  |
-| 1010 | test name | test descript |
-+------+-----------+---------------+
++------+-------------+-----------------+
+| id   | name        | description     |
++------+-------------+-----------------+
+| 1    | 'tn'        | 'td'            |
+| 2    | 't n'       | 't d'           |
+| 3    | 'te n'      | 'te d'          |
+| 4    | 'tes n'     | 'tes d'         |
+| 5    | 'test n'    | 'test d'        |
+| 6    | 'test na'   | 'test de'       |
+| 7    | 'test nam'  | 'test des'      |
+| 8    | 'test name' | 'test desc'     |
+| 9    | 'test name' | 'test descr'    |
+| 10   | 'test name' | 'test descri'   |
+| 101  | 'test name' | 'test descrip'  |
+| 1010 | 'test name' | 'test descript' |
++------+-------------+-----------------+
 """.strip()
 
 
 EXPECTED__RECORD__SELECT__PT_13 = """
-+-------+-----------+----------------+
-| id    | name      | description    |
-+-------+-----------+----------------+
-| 1     | tn        | td             |
-| 2     | t n       | t d            |
-| 3     | te n      | te d           |
-| 4     | tes n     | tes d          |
-| 5     | test n    | test d         |
-| 6     | test na   | test de        |
-| 7     | test nam  | test des       |
-| 8     | test name | test desc      |
-| 9     | test name | test descr     |
-| 10    | test name | test descri    |
-| 101   | test name | test descrip   |
-| 1010  | test name | test descript  |
-| 10101 | test name | test descripti |
-+-------+-----------+----------------+
++-------+-------------+------------------+
+| id    | name        | description      |
++-------+-------------+------------------+
+| 1     | 'tn'        | 'td'             |
+| 2     | 't n'       | 't d'            |
+| 3     | 'te n'      | 'te d'           |
+| 4     | 'tes n'     | 'tes d'          |
+| 5     | 'test n'    | 'test d'         |
+| 6     | 'test na'   | 'test de'        |
+| 7     | 'test nam'  | 'test des'       |
+| 8     | 'test name' | 'test desc'      |
+| 9     | 'test name' | 'test descr'     |
+| 10    | 'test name' | 'test descri'    |
+| 101   | 'test name' | 'test descrip'   |
+| 1010  | 'test name' | 'test descript'  |
+| 10101 | 'test name' | 'test descripti' |
++-------+-------------+------------------+
 """.strip()
 
 
 EXPECTED__RECORD__SELECT__PT_14 = """
-+--------+-----------+-----------------+
-| id     | name      | description     |
-+--------+-----------+-----------------+
-| 1      | tn        | td              |
-| 2      | t n       | t d             |
-| 3      | te n      | te d            |
-| 4      | tes n     | tes d           |
-| 5      | test n    | test d          |
-| 6      | test na   | test de         |
-| 7      | test nam  | test des        |
-| 8      | test name | test desc       |
-| 9      | test name | test descr      |
-| 10     | test name | test descri     |
-| 101    | test name | test descrip    |
-| 1010   | test name | test descript   |
-| 10101  | test name | test descripti  |
-| 101010 | test name | test descriptio |
-+--------+-----------+-----------------+
++--------+-------------+-------------------+
+| id     | name        | description       |
++--------+-------------+-------------------+
+| 1      | 'tn'        | 'td'              |
+| 2      | 't n'       | 't d'             |
+| 3      | 'te n'      | 'te d'            |
+| 4      | 'tes n'     | 'tes d'           |
+| 5      | 'test n'    | 'test d'          |
+| 6      | 'test na'   | 'test de'         |
+| 7      | 'test nam'  | 'test des'        |
+| 8      | 'test name' | 'test desc'       |
+| 9      | 'test name' | 'test descr'      |
+| 10     | 'test name' | 'test descri'     |
+| 101    | 'test name' | 'test descrip'    |
+| 1010   | 'test name' | 'test descript'   |
+| 10101  | 'test name' | 'test descripti'  |
+| 101010 | 'test name' | 'test descriptio' |
++--------+-------------+-------------------+
 """.strip()
 
 
 EXPECTED__RECORD__SELECT__PT_15 = """
-+---------+-----------+------------------+
-| id      | name      | description      |
-+---------+-----------+------------------+
-| 1       | tn        | td               |
-| 2       | t n       | t d              |
-| 3       | te n      | te d             |
-| 4       | tes n     | tes d            |
-| 5       | test n    | test d           |
-| 6       | test na   | test de          |
-| 7       | test nam  | test des         |
-| 8       | test name | test desc        |
-| 9       | test name | test descr       |
-| 10      | test name | test descri      |
-| 101     | test name | test descrip     |
-| 1010    | test name | test descript    |
-| 10101   | test name | test descripti   |
-| 101010  | test name | test descriptio  |
-| 1010101 | test name | test description |
-+---------+-----------+------------------+
++---------+-------------+--------------------+
+| id      | name        | description        |
++---------+-------------+--------------------+
+| 1       | 'tn'        | 'td'               |
+| 2       | 't n'       | 't d'              |
+| 3       | 'te n'      | 'te d'             |
+| 4       | 'tes n'     | 'tes d'            |
+| 5       | 'test n'    | 'test d'           |
+| 6       | 'test na'   | 'test de'          |
+| 7       | 'test nam'  | 'test des'         |
+| 8       | 'test name' | 'test desc'        |
+| 9       | 'test name' | 'test descr'       |
+| 10      | 'test name' | 'test descri'      |
+| 101     | 'test name' | 'test descrip'     |
+| 1010    | 'test name' | 'test descript'    |
+| 10101   | 'test name' | 'test descripti'   |
+| 101010  | 'test name' | 'test descriptio'  |
+| 1010101 | 'test name' | 'test description' |
++---------+-------------+--------------------+
 """.strip()
 
 

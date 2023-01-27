@@ -103,11 +103,11 @@ class BaseRecords:
         query = textwrap.dedent(
             """
             INSERT INTO {0}{1}
-            {2};
-            """.format(table_name, columns_clause, values_clause)
+            VALUES ({2});
+            """.format(table_name, columns_clause, values_clause.context)
         )
 
-        results = self._base.query.execute(query, display_query=display_query)
+        results = self._base.query.execute(query, data=values_clause.data, display_query=display_query)
         if display_results:
             self._base.display.results('{0}'.format(results))
 
@@ -128,18 +128,18 @@ class BaseRecords:
             raise ValueError('VALUES clause for INSERT_MANY queries must be in list/tuple format.')
         if len(values_clause) < 1:
             raise ValueError('VALUES clause cannot be empty for INSERT_MANY queries.')
-        values_clause = self._base.validate.sanitize_values_clause(values_clause)
-        values_context = ', '.join('%s' for i in range(len(values_clause.array[0])))
+        values_clause = self._base.validate.sanitize_values_many_clause(values_clause)
 
         # Insert record.
         query = textwrap.dedent(
             """
             INSERT INTO {0}{1}
-            VALUES ({2});
-            """.format(table_name, columns_clause, values_context)
+            VALUES
+            {2};
+            """.format(table_name, columns_clause, values_clause.context)
         )
 
-        results = self._base.query.execute_many(query, values_clause.array, display_query=display_query)
+        results = self._base.query.execute(query, data=values_clause.data, display_query=display_query)
         if display_results:
             self._base.display.results('{0}'.format(results))
 
