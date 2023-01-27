@@ -148,123 +148,129 @@ class BaseClauseBuilder(object):
 
         elif len(clause) > 0:
             # Handle any other clause that is non-empty.
-            new_clause = []
-            for item in clause:
-
-                # Handle various specific types.
-                if isinstance(item, datetime.datetime):
-                    # Is a datetime object. Convert to string.
-                    item = "'{0}'".format(item.strftime('%Y-%m-%d %H:%M:%S'))
-
-                elif isinstance(item, datetime.date):
-                    # Is a date object. Convert to string.
-                    item = "'{0}'".format(item.strftime('%Y-%m-%d'))
-
-                # Skip handling for other non-str items.
-                elif not isinstance(item, str):
-                    new_clause.append(item)
-                    continue
-
-                # If we made it this far, then item is a str (or converted to such).
-                item = str(item).strip()
-
-                # Strip out function values.
-                # First check against regex matches.
-                func_call_regex = (r'\(*|'.join(self._parent._reserved_function_names))
-                matches = re.match(func_call_regex, item, flags=re.IGNORECASE)
-
-                # Proceed if at least one match is found.
-                stripped_left = ''
-                stripped_right = ''
-                if matches:
-                    index = 0
-                    while index < len(self._parent._reserved_function_names):
-                        func_call = self._parent._reserved_function_names[index]
-                        if (
-                            re.match(r'^{0}\('.format(func_call), item, flags=re.IGNORECASE)
-                            and item[-1] == ')'
-                        ):
-                            # Found a match. Update identifier and check for further matches.
-                            length = len(func_call) + 1
-                            stripped_left += item[:length]
-                            stripped_right += ')'
-                            item = item[length:-1].strip()
-                        index += 1
-
-                # Ignore potential type casting syntax.
-                cast_identifier = ''
-                if self._base._config.db_type == 'PostgreSQL':
-                    # Handle for PostgreSQL casting.
-                    cast_split = item.split('::')
-                    if len(cast_split) > 2:
-                        raise ValueError('Invalid casting identifier "{0}"'.format(item))
-                    elif len(cast_split) > 1:
-                        cast_identifier = cast_split[1]
-                        if not re.match(r'[A-Za-z0-9]+', cast_identifier):
-                            raise ValueError('Invalid casting identifier "{0}"'.format(cast_identifier))
-                        cast_identifier = '::{0}'.format(cast_identifier)
-                    item = cast_split[0]
-
-                # Validate individual identifier.
-                order_by_descriptor = ''
-                if item != '*':
-                    # To check identifier, trim possible ASC/DESC values.
-                    if item.lower().endswith(' asc'):
-                        # Handle for ASC syntax.
-                        item = item[:-4].rstrip()
-                        order_by_descriptor = ' ASC'
-                    if item.lower().endswith(' desc'):
-                        # Handle for DESC syntax.
-                        item = item[:-5].rstrip()
-                        order_by_descriptor = ' DESC'
-
-                print('')
-                print('item: {0}'.format(item))
-
-                # If we made it this far, item is valid. Escape with proper quote format and readd.
-                is_quoted = False
-                if self.is_quoted(item):
-                    item = item[1:-1].strip()
-                    is_quoted = True
-
-                # Check if apostrophe in value.
-                if "'" in item:
-                    item.replace("'", '\0027')
-
-                # Skip items that are empty. Otherwise append.
-                if len(item) > 0:
-                    print('')
-                    print('item: {0}'.format(item))
-                    print('is_quoted: {0}'.format(is_quoted))
-                    if item != '*':
-                        # Readd quotes in proper format.
-                        # Account for statements that may have multiple parts (denoted by spaces).
-                        if not self._allow_spaces:
-                            item_split = item.split(' ')
-                            if self._always_quote or is_quoted:
-                                item = '{1}{0}{1}'.format(item_split.pop(0), self._quote_format)
-                            while len(item_split) > 0:
-                                item_split_part = item_split.pop(0).strip()
-                                if len(item_split_part) > 0:
-                                    item = '{0} {1}'.format(item, item_split_part)
-                        else:
-                            if self._always_quote or is_quoted:
-                                item = '{1}{0}{1}'.format(item, self._quote_format)
-
-                    # Readd identifiers in proper format.
-                    item = '{0}{1}{2}'.format(item, cast_identifier, order_by_descriptor)
-
-                    # Readd function calls if present.
-                    item = '{1}{0}{2}'.format(item, stripped_left.upper(), stripped_right)
-
-                    # Save item to clause.
-                    new_clause.append(item)
+            clause = self._validate_clause(clause)
 
             # Save validated clause.
-            self._clause_array = new_clause
+            self._clause_array = clause
         else:
             # Save empty clause.
             self._clause_array = []
+
+    def _validate_clause(self, original_clause):
+        """Used to validate/sanitize an array of clause values."""
+        new_clause = []
+        for item in original_clause:
+
+            # Handle various specific types.
+            if isinstance(item, datetime.datetime):
+                # Is a datetime object. Convert to string.
+                item = "'{0}'".format(item.strftime('%Y-%m-%d %H:%M:%S'))
+
+            elif isinstance(item, datetime.date):
+                # Is a date object. Convert to string.
+                item = "'{0}'".format(item.strftime('%Y-%m-%d'))
+
+            # Skip handling for other non-str items.
+            elif not isinstance(item, str):
+                new_clause.append(item)
+                continue
+
+            # If we made it this far, then item is a str (or converted to such).
+            item = str(item).strip()
+
+            # Strip out function values.
+            # First check against regex matches.
+            func_call_regex = (r'\(*|'.join(self._parent._reserved_function_names))
+            matches = re.match(func_call_regex, item, flags=re.IGNORECASE)
+
+            # Proceed if at least one match is found.
+            stripped_left = ''
+            stripped_right = ''
+            if matches:
+                index = 0
+                while index < len(self._parent._reserved_function_names):
+                    func_call = self._parent._reserved_function_names[index]
+                    if (
+                        re.match(r'^{0}\('.format(func_call), item, flags=re.IGNORECASE)
+                        and item[-1] == ')'
+                    ):
+                        # Found a match. Update identifier and check for further matches.
+                        length = len(func_call) + 1
+                        stripped_left += item[:length]
+                        stripped_right += ')'
+                        item = item[length:-1].strip()
+                    index += 1
+
+            # Ignore potential type casting syntax.
+            cast_identifier = ''
+            if self._base._config.db_type == 'PostgreSQL':
+                # Handle for PostgreSQL casting.
+                cast_split = item.split('::')
+                if len(cast_split) > 2:
+                    raise ValueError('Invalid casting identifier "{0}"'.format(item))
+                elif len(cast_split) > 1:
+                    cast_identifier = cast_split[1]
+                    if not re.match(r'[A-Za-z0-9]+', cast_identifier):
+                        raise ValueError('Invalid casting identifier "{0}"'.format(cast_identifier))
+                    cast_identifier = '::{0}'.format(cast_identifier)
+                item = cast_split[0]
+
+            # Validate individual identifier.
+            order_by_descriptor = ''
+            if item != '*':
+                # To check identifier, trim possible ASC/DESC values.
+                if item.lower().endswith(' asc'):
+                    # Handle for ASC syntax.
+                    item = item[:-4].rstrip()
+                    order_by_descriptor = ' ASC'
+                if item.lower().endswith(' desc'):
+                    # Handle for DESC syntax.
+                    item = item[:-5].rstrip()
+                    order_by_descriptor = ' DESC'
+
+            print('')
+            print('item: {0}'.format(item))
+
+            # If we made it this far, item is valid. Escape with proper quote format and readd.
+            is_quoted = False
+            if self.is_quoted(item):
+                item = item[1:-1].strip()
+                is_quoted = True
+
+            # Check if apostrophe in value.
+            if "'" in item:
+                item.replace("'", '\0027')
+
+            # Skip items that are empty. Otherwise append.
+            if len(item) > 0:
+                print('')
+                print('item: {0}'.format(item))
+                print('is_quoted: {0}'.format(is_quoted))
+                if item != '*':
+                    # Readd quotes in proper format.
+                    # Account for statements that may have multiple parts (denoted by spaces).
+                    if not self._allow_spaces:
+                        item_split = item.split(' ')
+                        if self._always_quote or is_quoted:
+                            item = '{1}{0}{1}'.format(item_split.pop(0), self._quote_format)
+                        while len(item_split) > 0:
+                            item_split_part = item_split.pop(0).strip()
+                            if len(item_split_part) > 0:
+                                item = '{0} {1}'.format(item, item_split_part)
+                    else:
+                        if self._always_quote or is_quoted:
+                            item = '{1}{0}{1}'.format(item, self._quote_format)
+
+                # Readd identifiers in proper format.
+                item = '{0}{1}{2}'.format(item, cast_identifier, order_by_descriptor)
+
+                # Readd function calls if present.
+                item = '{1}{0}{2}'.format(item, stripped_left.upper(), stripped_right)
+
+                # Save item to clause.
+                new_clause.append(item)
+
+        return new_clause
 
     @staticmethod
     def is_quoted(value):
