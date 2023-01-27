@@ -109,10 +109,6 @@ class PostgresqlRecords(BaseRecords):
                 '    "{0}" = pydbcn_temp."{0}"'.format(x.strip(self._base.validate._quote_column_format))
                 for x in columns_clause.array
             ])
-        values_clause = ',\n'.join([
-            '    {0}'.format(tuple(x))
-            for x in values_clause.array
-        ])
         columns_clause = ', '.join([
             '"{0}"'.format(x.strip(self._base.validate._quote_column_format))
             for x in columns_clause.array
@@ -126,12 +122,12 @@ class PostgresqlRecords(BaseRecords):
         query = f'UPDATE {table_name} AS pydbcn_update_table SET\n'
         query += f'{set_clause}\n'
         query += f'FROM (VALUES\n'
-        query += f'{values_clause}\n'
+        query += f'{values_clause.context}\n'
         query += f') AS pydbcn_temp ({columns_clause})\n'
         query += f'WHERE (\n'
         query += f'{where_columns_clause}\n'
         query += f');'
-        results = self._base.query.execute(query, display_query=display_query)
+        results = self._base.query.execute(query, data=values_clause.data, display_query=display_query)
 
         # # Do a select to get the updated values as results.
         # # TODO: Currently doesn't get any results. Not sure how to dynamically get them at this time.

@@ -564,13 +564,22 @@ class ValuesManyClauseBuilder(ValuesClauseBuilder):
     @property
     def context(self):
         if len(self.array) > 0:
-            context_line = ', '.join('{}' for i in range(len(self.array[0])))
+            context_line = ', '.join('%s' for i in range(len(self.array[0])))
             context_line = '    ({0})'.format(context_line)
             context = ',\n'.join(context_line for i in range(len(self.array)))
             context += '\n'
             return context
         else:
             return ''
+
+    @property
+    def data(self):
+        single_depth_array = []
+        for inner_array in self.array:
+            for index in range(len(inner_array)):
+                single_depth_array.append(inner_array[index])
+
+        return single_depth_array
 
 
 class SetClauseBuilder(BaseClauseBuilder):
