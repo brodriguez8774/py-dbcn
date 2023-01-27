@@ -943,71 +943,38 @@ class CoreRecordsTestMixin:
         self.assertIn((1, test_datetime__2020.replace(microsecond=0), test_date__2020), results)
         self.assertIn((2, test_datetime__2021.replace(microsecond=0), test_date__2021), results)
 
-    # # def test__insert__with_quote_types(self):
-    # #     """"""
-    # #     table_name = 'test_queries__insert__with_quote_types'
-    # #
-    # #     # Verify table exists.
-    # #     try:
-    # #         self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__basic))
-    # #     except self.connector.errors.table_already_exists:
-    # #         # Table already exists, as we want.
-    # #         pass
-    # #
-    # #     # Verify starting state.
-    # #     results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
-    # #     self.assertEqual(len(results), 0)
-    # #
-    # #     # Run test query.
-    # #     row = (1, """'2" nail'""", """'2 inch nail'""""")
-    # #     self.connector.records.insert(table_name, row)
-    # #     results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
-    # #
-    # #     # Verify one record returned.
-    # #     self.assertEqual(len(results), 1)
-    # #     self.assertIn(row, results)
-    # #
-    # #     # Run test query.
-    # #     row = (2, """'1\' ruler'""", """'1 foot ruler'""""")
-    # #     self.connector.records.insert(table_name, row)
-    # #     results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
-    # #
-    # #     # Verify two records returned.
-    # #     self.assertEqual(len(results), 2)
-    # #     self.assertIn(row, results)
+    def test__insert__with_quote_types(self):
+        """"""
+        table_name = 'test_queries__insert__with_quote_types'
 
-    # def test__insert__with_quote_types(self):
-    #     """"""
-    #     table_name = 'test_queries__insert__with_quote_types'
-    #
-    #     # Verify table exists.
-    #     try:
-    #         self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__basic))
-    #     except self.connector.errors.table_already_exists:
-    #         # Table already exists, as we want.
-    #         pass
-    #
-    #     # Verify starting state.
-    #     results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
-    #     self.assertEqual(len(results), 0)
-    #
-    #     # Run test query.
-    #     row = (1, """2" nail""", """2 inch nail""")
-    #     self.connector.records.insert(table_name, row)
-    #     results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
-    #
-    #     # Verify one record returned.
-    #     self.assertEqual(len(results), 1)
-    #     self.assertIn(row, results)
-    #
-    #     # Run test query.
-    #     row = (2, """'1\' ruler'""", """'1 foot ruler'""")
-    #     self.connector.records.insert(table_name, row)
-    #     results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
-    #
-    #     # Verify two records returned.
-    #     self.assertEqual(len(results), 2)
-    #     self.assertIn(row, results)
+        # Verify table exists.
+        try:
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__basic))
+        except self.connector.errors.table_already_exists:
+            # Table already exists, as we want.
+            pass
+
+        # Verify starting state.
+        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+        self.assertEqual(len(results), 0)
+
+        # Run test query.
+        row = (1, """2" nail""", """2 inch nail""")
+        self.connector.records.insert(table_name, row)
+        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+
+        # Verify one record returned.
+        self.assertEqual(len(results), 1)
+        self.assertIn(row, results)
+
+        # Run test query.
+        row = (2, """1' ruler""", """1 foot ruler""")
+        self.connector.records.insert(table_name, row)
+        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+
+        # Verify two records returned.
+        self.assertEqual(len(results), 2)
+        self.assertIn(row, results)
 
     def test__insert_many__basic__success(self):
         """
@@ -1240,6 +1207,60 @@ class CoreRecordsTestMixin:
         # Reset table.
         self.connector.tables.drop(table_name)
         self.connector.tables.create(table_name, self._columns_clause__datetime)
+
+    def test__insert_many__with_quote_types(self):
+        """"""
+        table_name = 'test_queries__insert_many__with_quote_types'
+
+        # Verify table exists.
+        try:
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__basic))
+        except self.connector.errors.table_already_exists:
+            # Table already exists, as we want.
+            pass
+
+        # Verify starting state.
+        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+        self.assertEqual(len(results), 0)
+
+        # Run test query.
+        row_1 = (1, """1" nail""", """1 inch nail""")
+        row_2 = (2, """2" nail""", """2 inch nail""")
+        row_3 = (3, """3" nail""", """3 inch nail""")
+        rows = [
+            row_1,
+            row_2,
+            row_3,
+        ]
+        self.connector.records.insert_many(table_name, rows)
+        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+
+        # Verify three records returned.
+        self.assertEqual(len(results), 3)
+        self.assertIn(row_1, results)
+        self.assertIn(row_2, results)
+        self.assertIn(row_3, results)
+
+        # Run test query.
+        row_4 = (4, """4' ruler""", """4 foot ruler""")
+        row_5 = (5, """5' ruler""", """5 foot ruler""")
+        row_6 = (6, """6' ruler""", """6 foot ruler""")
+        rows = [
+            row_4,
+            row_5,
+            row_6,
+        ]
+        self.connector.records.insert_many(table_name, rows)
+        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+
+        # Verify six records returned.
+        self.assertEqual(len(results), 6)
+        self.assertIn(row_1, results)
+        self.assertIn(row_2, results)
+        self.assertIn(row_3, results)
+        self.assertIn(row_4, results)
+        self.assertIn(row_5, results)
+        self.assertIn(row_6, results)
 
     def test__update__basic__success(self):
         """
@@ -1560,7 +1581,7 @@ class CoreRecordsTestMixin:
             where_columns_clause = ['id']
             self.connector.records.update_many(table_name, columns_clause, values_clause, where_columns_clause)
 
-            # Verify one record returned.
+            # Verify one record updated.
             results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
             self.assertEqual(len(results), 10)
             self.assertIn(updated_row_1, results)
@@ -1590,7 +1611,7 @@ class CoreRecordsTestMixin:
             where_columns_clause = ['id']
             self.connector.records.update_many(table_name, columns_clause, values_clause, where_columns_clause)
 
-            # Verify one record returned.
+            # Verify two records updated.
             results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
             self.assertEqual(len(results), 10)
             self.assertIn(row_1, results)
@@ -1628,7 +1649,7 @@ class CoreRecordsTestMixin:
             where_columns_clause = ['name']
             self.connector.records.update_many(table_name, columns_clause, values_clause, where_columns_clause)
 
-            # Verify five records returned.
+            # Verify five records updated.
             results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
             self.assertEqual(len(results), 10)
             self.assertIn(row_1, results)
@@ -1682,7 +1703,7 @@ class CoreRecordsTestMixin:
             where_columns_clause = 'id'
             self.connector.records.update_many(table_name, columns_clause, values_clause, where_columns_clause)
 
-            # Verify ten records returned.
+            # Verify ten records updated.
             results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
             self.assertEqual(len(results), 10)
             self.assertIn(updated_row_1, results)
@@ -1728,7 +1749,7 @@ class CoreRecordsTestMixin:
             where_columns_clause = ['id']
             self.connector.records.update_many(table_name, columns_clause, values_clause, where_columns_clause)
 
-            # Verify one record returned.
+            # Verify one record updated.
             results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
             self.assertEqual(len(results), 10)
             self.assertIn(row_1, results)
@@ -1760,7 +1781,7 @@ class CoreRecordsTestMixin:
             where_columns_clause = ['id']
             self.connector.records.update_many(table_name, columns_clause, values_clause, where_columns_clause)
 
-            # Verify one record returned.
+            # Verify three records updated.
             results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
             self.assertEqual(len(results), 10)
             self.assertIn(row_1, results)
@@ -1792,7 +1813,7 @@ class CoreRecordsTestMixin:
             where_columns_clause = ['id', 'name']
             self.connector.records.update_many(table_name, columns_clause, values_clause, where_columns_clause)
 
-            # Verify one record returned.
+            # Verify one record updated.
             results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
             self.assertEqual(len(results), 10)
             self.assertIn(row_1, results)
@@ -2002,6 +2023,129 @@ class CoreRecordsTestMixin:
             row_1 = updated_row_1
             row_2 = updated_row_2
             row_3 = updated_row_3
+
+    def test__update_many__with_quote_types(self):
+        """"""
+        table_name = 'test_queries__update_many__with_quote_types'
+
+        # Verify table exists.
+        try:
+            self.connector.query.execute('CREATE TABLE {0}{1};'.format(table_name, self._columns_clause__basic))
+        except self.connector.errors.table_already_exists:
+            # Table already exists, as we want.
+            pass
+
+        # Verify starting state.
+        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+        self.assertEqual(len(results), 0)
+
+        # Run test query.
+        row_1 = (1, """1" nail""", """1 inch nail""")
+        row_2 = (2, """2" nail""", """2 inch nail""")
+        row_3 = (3, """3" nail""", """3 inch nail""")
+        row_4 = (4, """4' ruler""", """4 foot ruler""")
+        row_5 = (5, """5' ruler""", """5 foot ruler""")
+        row_6 = (6, """6' ruler""", """6 foot ruler""")
+        rows = [
+            row_1,
+            row_2,
+            row_3,
+            row_4,
+            row_5,
+            row_6,
+        ]
+        self.connector.records.insert_many(table_name, rows)
+        results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+
+        # Verify six records returned.
+        self.assertEqual(len(results), 6)
+        self.assertIn(row_1, results)
+        self.assertIn(row_2, results)
+        self.assertIn(row_3, results)
+        self.assertIn(row_4, results)
+        self.assertIn(row_5, results)
+        self.assertIn(row_6, results)
+
+        with self.subTest('When updating away from quote types'):
+            # Run test query.
+            updated_row_2 = (2, """Some nail""", """2 inch nail""")
+            updated_row_5 = (5, """Some ruler""", """5 foot ruler""")
+            columns_clause = ['id', 'name', 'description']
+            values_clause = [
+                updated_row_2,
+                updated_row_5,
+            ]
+            where_columns_clause = ['id', 'description']
+            self.connector.records.update_many(table_name, columns_clause, values_clause, where_columns_clause)
+
+            # Verify two records updated.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertIn(row_1, results)
+            self.assertIn(updated_row_2, results)
+            self.assertIn(row_3, results)
+            self.assertIn(row_4, results)
+            self.assertIn(updated_row_5, results)
+            self.assertIn(row_6, results)
+            self.assertNotIn(row_2, results)
+            self.assertNotIn(row_5, results)
+
+            # Update row variables.
+            row_2 = updated_row_2
+            row_5 = updated_row_5
+
+        with self.subTest('When updating to use quote types'):
+            # Run test query.
+            updated_row_2 = (2, """2" nail""", """2 inch nail""")
+            updated_row_5 = (5, """5' ruler""", """5 foot ruler""")
+            columns_clause = ['id', 'name', 'description']
+            values_clause = [
+                updated_row_2,
+                updated_row_5,
+            ]
+            where_columns_clause = ['id', 'description']
+            self.connector.records.update_many(table_name, columns_clause, values_clause, where_columns_clause)
+
+            # Verify two records updated.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertIn(row_1, results)
+            self.assertIn(updated_row_2, results)
+            self.assertIn(row_3, results)
+            self.assertIn(row_4, results)
+            self.assertIn(updated_row_5, results)
+            self.assertIn(row_6, results)
+            self.assertNotIn(row_2, results)
+            self.assertNotIn(row_5, results)
+
+            # Update row variables.
+            row_2 = updated_row_2
+            row_5 = updated_row_5
+
+        with self.subTest('When matching by value with quote types'):
+            # Run test query.
+            updated_row_2 = (2, """2" nail""", """A nail description""")
+            updated_row_5 = (5, """5' ruler""", """A ruler description""")
+            columns_clause = ['id', 'name', 'description']
+            values_clause = [
+                updated_row_2,
+                updated_row_5,
+            ]
+            where_columns_clause = ['id', 'name']
+            self.connector.records.update_many(table_name, columns_clause, values_clause, where_columns_clause)
+
+            # Verify two records updated.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            self.assertIn(row_1, results)
+            self.assertIn(updated_row_2, results)
+            self.assertIn(row_3, results)
+            self.assertIn(row_4, results)
+            self.assertIn(updated_row_5, results)
+            self.assertIn(row_6, results)
+            self.assertNotIn(row_2, results)
+            self.assertNotIn(row_5, results)
+
+            # Update row variables.
+            row_2 = updated_row_2
+            row_5 = updated_row_5
 
     def test__delete__success(self):
         """
