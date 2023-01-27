@@ -75,7 +75,7 @@ class PostgresqlRecords(BaseRecords):
             raise ValueError('VALUES clause for INSERT_MANY queries must be in list/tuple format.')
         if len(values_clause) < 1:
             raise ValueError('VALUES clause cannot be empty for UPDATE_MANY queries.')
-        values_clause = self._base.validate.sanitize_values_clause(values_clause)
+        values_clause = self._base.validate.sanitize_values_many_clause(values_clause)
 
         # Check that provided WHERE clause is valid format.
         columns_clause = self._base.validate.sanitize_columns_clause(columns_clause)
@@ -110,7 +110,7 @@ class PostgresqlRecords(BaseRecords):
                 for x in columns_clause.array
             ])
         values_clause = ',\n'.join([
-            '    {0}'.format(x)
+            '    {0}'.format(tuple(x))
             for x in values_clause.array
         ])
         columns_clause = ', '.join([

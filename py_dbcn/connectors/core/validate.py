@@ -361,6 +361,9 @@ class BaseValidate:
         """
         return clauses.ValuesClauseBuilder(self, clause)
 
+    def sanitize_values_many_clause(self, clause):
+        return clauses.ValuesManyClauseBuilder(self, clause)
+
     def sanitize_set_clause(self, clause):
         return clauses.SetClauseBuilder(self, clause)
 

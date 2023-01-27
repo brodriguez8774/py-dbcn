@@ -79,6 +79,10 @@ class BaseClauseBuilder(object):
     def array(self, value):
         self._to_array(value)
 
+    @property
+    def context(self):
+        return ', '.join('{}' for i in range(len(self.array)))
+
     def _to_array(self, value):
         """Converts clause to array format for initial parsing."""
         if self._clause_prefix is None:
@@ -162,13 +166,16 @@ class BaseClauseBuilder(object):
         for item in original_clause:
 
             # Handle various specific types.
+            is_datetime = False
             if isinstance(item, datetime.datetime):
                 # Is a datetime object. Convert to string.
                 item = "'{0}'".format(item.strftime('%Y-%m-%d %H:%M:%S'))
+                is_datetime = True
 
             elif isinstance(item, datetime.date):
                 # Is a date object. Convert to string.
                 item = "'{0}'".format(item.strftime('%Y-%m-%d'))
+                is_datetime = True
 
             # Skip handling for other non-str items.
             elif not isinstance(item, str):
@@ -228,8 +235,22 @@ class BaseClauseBuilder(object):
                     item = item[:-5].rstrip()
                     order_by_descriptor = ' DESC'
 
+            # # Extra string handling for date/datetime objects.
+            # if is_datetime:
+            #     item = item[1:-1]
+
             print('')
             print('item: {0}'.format(item))
+
+            # if (
+            #     len(item) > 0
+            #     and item != '*'
+            #     and (
+            #         item[0] not in ['"', "'", '`']
+            #         or item[-1] not in ['"', "'", '`']
+            #     )
+            # ):
+            #     item = """'{0}'""".format(item)
 
             # If we made it this far, item is valid. Escape with proper quote format and readd.
             is_quoted = False
@@ -484,6 +505,72 @@ class ValuesClauseBuilder(BaseClauseBuilder):
 
         # Process and save provided clause.
         self.array = clause
+
+
+class ValuesManyClauseBuilder(ValuesClauseBuilder):
+    """"""
+
+    def _validate_clause(self, original_clause):
+        """Used to validate/sanitize an array of clause values."""
+
+        # Handle the same as original logic, except there is one extra layer.
+        # So loop through each inner item and hand that to validation.
+        print('\n\n\n\n')
+        print('original_clause:')
+        print('{0}'.format(original_clause))
+
+        if len(original_clause) > 0:
+            for index in range(len(original_clause)):
+                inner_clause = original_clause[index]
+                print('    inner_clause:')
+                print('    {0}'.format(inner_clause))
+                original_clause[index] = super()._validate_clause(inner_clause)
+                print('    updated inner_clause:')
+                print('    {0}'.format(original_clause[index]))
+
+            print('final result:')
+            print('{0}'.format(original_clause))
+
+            # Return validated clause.
+            return original_clause
+
+        else:
+            # Return empty clause.
+            return []
+
+    def __str__(self):
+        if len(self.array) > 0:
+            # Non-empty clause. Format for str output.
+            to_str = self.context
+            all_values = []
+            for inner_array in self.array:
+                for value in inner_array:
+                    all_values.append(value)
+            print('all_values:')
+            print('{0}'.format(all_values))
+            print(to_str.format(*all_values))
+            to_str = to_str.format(*all_values)
+            print('to_str:')
+            print('{0}'.format(to_str))
+            if self._print_parens:
+                to_str = '{0}({1})'.format(self._print_prefix, to_str)
+            else:
+                to_str = '{0}{1}'.format(self._print_prefix, to_str)
+            return to_str
+        else:
+            # Empty clause.
+            return ''
+
+    @property
+    def context(self):
+        if len(self.array) > 0:
+            context_line = ', '.join('{}' for i in range(len(self.array[0])))
+            context_line = '    ({0})'.format(context_line)
+            context = ',\n'.join(context_line for i in range(len(self.array)))
+            context += '\n'
+            return context
+        else:
+            return ''
 
 
 class SetClauseBuilder(BaseClauseBuilder):
