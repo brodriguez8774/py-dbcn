@@ -390,8 +390,14 @@ class WhereClauseBuilder(BaseClauseBuilder):
     def __str__(self):
         if len(self.array) > 0:
             # Non-empty clause. Format for str output.
-            to_str = ' AND '.join('({})' for x in range(len(self.array)))
-            to_str = to_str.format(*self.array)
+            to_str = ''
+            temp_array = self.array
+            for value in self._clause_connectors:
+                if value == []:
+                    to_str += '({0})'.format(temp_array.pop(0))
+                else:
+                    to_str += ' {0} '.format(value)
+
             to_str = '\n{0}{1}'.format(self._print_prefix, to_str)
             return to_str
         else:
@@ -400,60 +406,58 @@ class WhereClauseBuilder(BaseClauseBuilder):
 
     def _to_array(self, value):
         """Converts clause to array format for initial parsing."""
+        self._clause_connectors = []
+
         if self._clause_prefix is None:
             raise NotImplementedError('Query type {0} missing clause_prefix value.'.format(self.__class__))
         if self._quote_format is None:
             raise NotImplementedError('Query type {0} missing quote_format value.'.format(self.__class__))
 
-        if isinstance(value, list):
-            # Already list format.
-            clause = value
-        elif isinstance(value, tuple):
-            # Close to list format. Simply convert.
-            clause = list(value)
+        # First parse initial expected types.
+        if isinstance(value, list) or isinstance(value, tuple):
+            # In list or tuple format. For consistent tokenization, convert to str.
+            new_value = ''
+            for item in value:
+
+                # # By default, combine all individual values with AND operators.
+                # # Skip this for the first index, as there's nothing to combine yet.
+                if len(new_value) > 0:
+                    new_value += ' AND '
+
+                # Add current item to str.
+                new_value += item
+
+            # Save formatted string.
+            value = new_value
+
+        # Parse
+        if value is None or value.strip() == '':
+            # None type and empty clauses default to empty.
+            clause = []
         else:
-            # Attempt to parse as str for all other formats.
-            if value is None:
-                # None type defaults to empty.
-                clause = []
-            else:
-                clause = str(value).strip()
+            clause = str(value).strip()
 
-                # Trim prefix, if present.
-                if len(self._clause_prefix) > 0:
-                    # Check if starts with prefix, brackets, and space.
-                    if (
-                        clause.upper().startswith('{0} ('.format(self._clause_prefix)) and clause.endswith(')')
-                        or clause.upper().startswith('{0} ['.format(self._clause_prefix)) and clause.endswith(']')
-                    ):
-                        clause = clause[(len(self._clause_prefix) + 2):-1]
+            # Trim prefix, if present.
+            if len(self._clause_prefix) > 0:
+                # Check if starts with prefix, brackets, and space.
+                if (
+                    clause.upper().startswith('{0} ('.format(self._clause_prefix)) and clause.endswith(')')
+                    or clause.upper().startswith('{0} ['.format(self._clause_prefix)) and clause.endswith(']')
+                ):
+                    clause = clause[(len(self._clause_prefix) + 2):-1]
 
-                    # Check if starts with prefix, brackets, and no space.
-                    elif (
-                        clause.upper().startswith('{0}('.format(self._clause_prefix)) and clause.endswith(')')
-                        or clause.upper().startswith('{0}['.format(self._clause_prefix)) and clause.endswith(']')
-                    ):
-                        clause = clause[(len(self._clause_prefix) + 1):-1]
+                # Check if starts with prefix, brackets, and no space.
+                elif (
+                    clause.upper().startswith('{0}('.format(self._clause_prefix)) and clause.endswith(')')
+                    or clause.upper().startswith('{0}['.format(self._clause_prefix)) and clause.endswith(']')
+                ):
+                    clause = clause[(len(self._clause_prefix) + 1):-1]
 
-                    # Check if starts with prefix and no brackets.
-                    elif clause.upper().startswith('{0} '.format(self._clause_prefix)):
-                        clause = clause[(len(self._clause_prefix) + 1):]
+                # Check if starts with prefix and no brackets.
+                elif clause.upper().startswith('{0} '.format(self._clause_prefix)):
+                    clause = clause[(len(self._clause_prefix) + 1):]
 
-                # Split into subsections, based on AND + OR delimiters.
-                full_split = []
-                # First separate by AND delimiters.
-                and_split = clause.split(' AND ')
-                for and_clause in and_split:
-                    # For each inner section, also separate by OR delimiters.
-                    or_split = and_clause.split(' OR ')
-                    for or_clause in or_split:
-                        # For each of these, strip spaces and add if non-empty.
-                        or_clause = or_clause.strip()
-                        if len(or_clause) > 0:
-                            full_split.append(or_clause)
-
-                # Use final result.
-                clause = full_split
+            clause = self.tokenize_value(clause)
 
         # Validate each item in clause, now that it's an array.
         if len(clause) > 0:
@@ -480,6 +484,121 @@ class WhereClauseBuilder(BaseClauseBuilder):
         else:
             # Save empty clause.
             self._clause_array = []
+            self._clause_connectors = []
+
+    def tokenize_value(self, value):
+        """"""
+        print('\n\n\n\n')
+        print('clause:')
+        print('{0}'.format(value))
+        print('\n')
+        tokens = generate_tokens(StringIO(value).readline)
+        print('\nas tokens:')
+
+        section_str = ''
+        sub_section_str = ''
+        token_set = []
+        for token in tokens:
+            print('    {0}'.format(token))
+
+            # Process if handling a subsection.
+            if sub_section_str != '':
+                sub_section_str += token.string
+
+                # Check if end of subsection.
+                if token == ')':
+                    print('        Finishing subsection.')
+                    # End of subsection. Recursively call to process.
+                    # sub_clause = self._tokenize_value(sub_section_str)
+
+                    # Clear out subsection holder.
+                    sub_section_str = ''
+
+            # If inner parens exist, then we need to recursively call to process sub-section.
+            # First we start building our sub-string to process.
+            if token == '(':
+                print('        Handling subsection.')
+                sub_section_str += token.string
+
+            # Not processing sub-section.
+            # Determine if token is AND or OR.
+            elif token.type == 1 and token.string.upper() in ['AND', 'OR']:
+                # Token is AND or OR combiner. Handle appropriately.
+                print('        Handling combiner.')
+
+                # Trim trailing final paren, if present.
+                if len(section_str) > 1 and section_str[-1] in [')', ']']:
+                    section_str = section_str[:-1]
+
+                # Save our currently assembled section of tokens.
+                token_set.append(section_str.strip())
+
+                # Append our found combiner token.
+                self._clause_connectors.append([])
+                self._clause_connectors.append(token.string.upper())
+
+                # Clear out saved section, for further processing.
+                section_str = ''
+
+            # For all other token types, assume is part of current section. Append to existing section.
+            else:
+
+
+                # Certain types need string spacing.
+                if token.type in [1, 2, 3]:
+                    # Standard string types.
+                    print('        Handling string token.')
+                    if len(section_str) > 0 and section_str[-1] not in [' ', '`', '"', "'", '(', '[']:
+                        section_str += ' '
+                    section_str += '{0}'.format(token.string)
+
+                elif token.type in [54]:
+                    # Operator types, such as equals sign.
+                    print('        Handling operator token.')
+
+                    # If actually equals sign, add spaces.
+                    if token.string == '=':
+                        if len(section_str) > 0 and section_str[-1] != ' ':
+                            section_str += ' '
+
+                    # Skip parens if first value in section.
+                    if not (token.string in ['(', '['] and section_str == ''):
+                        section_str += '{0}'.format(token.string)
+
+                else:
+                    # All other types. Append as-is.
+                    print('        Handling generic token.')
+                    section_str += token.string
+
+        # Done with loops. Do final post-processing.
+        # Trim trailing final paren, if present.
+        if len(section_str) > 1 and section_str[-1] in [')', ']']:
+            section_str = section_str[:-1]
+
+        # Save our last-handled section, if any.
+        if section_str.strip() != '':
+            self._clause_connectors.append([])
+            token_set.append(section_str)
+
+        print('\n')
+        print('final self._clause_connectors:')
+        print('{0}'.format(self._clause_connectors))
+        print('')
+        print('final token_set:')
+        print('{0}'.format(token_set))
+        print('\n\n\n\n')
+
+        return token_set
+
+    def _tokenize_value(self, value):
+        """Recursive inner call for "tokenize_value" function."""
+        tokens = generate_tokens(StringIO(value).readline)
+        for token in tokens:
+
+            # If inner parens exist, then we need to recursively call to process sub-section.
+            if token == '(':
+                pass
+
 
 
 class ColumnsClauseBuilder(BaseClauseBuilder):

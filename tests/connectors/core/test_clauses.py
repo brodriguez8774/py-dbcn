@@ -138,60 +138,592 @@ class CoreClauseTestMixin:
         with self.subTest('Basic WHERE clause - As str'):
             # With no quotes.
             clause_object = self.connector.validate.clauses.WhereClauseBuilder(validation_class, """id = 'test'""")
+            self.assertEqual([[]], clause_object._clause_connectors)
             self.assertEqual([""""id" = 'test'"""], clause_object.array)
             self.assertText("""WHERE ("id" = 'test')""", str(clause_object))
 
             # With single quotes.
             clause_object = self.connector.validate.clauses.WhereClauseBuilder(validation_class, """'id' = 'test'""")
+            self.assertEqual([[]], clause_object._clause_connectors)
             self.assertEqual([""""id" = 'test'"""], clause_object.array)
             self.assertText("""WHERE ("id" = 'test')""", str(clause_object))
 
             # With double quotes.
             clause_object = self.connector.validate.clauses.WhereClauseBuilder(validation_class, """"id" = 'test'""")
+            self.assertEqual([[]], clause_object._clause_connectors)
             self.assertEqual([""""id" = 'test'"""], clause_object.array)
             self.assertText("""WHERE ("id" = 'test')""", str(clause_object))
 
             # With backtick quotes.
             clause_object = self.connector.validate.clauses.WhereClauseBuilder(validation_class, """`id` = 'test'""")
+            self.assertEqual([[]], clause_object._clause_connectors)
             self.assertEqual([""""id" = 'test'"""], clause_object.array)
             self.assertText("""WHERE ("id" = 'test')""", str(clause_object))
 
-            clause_object = self.connector.validate.clauses.WhereClauseBuilder(validation_class, """id = 'test' AND code = 1234 AND name = 'Test User'""")
-            self.assertEqual([""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""], clause_object.array)
-            self.assertText("""WHERE ("id" = 'test') AND ("code" = 1234) AND ("name" = 'Test User')""", str(clause_object))
+        with self.subTest('WHERE clause - As str, using ANDs only'):
+            # Without paren separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                """col_1 = 1 AND col_2 = 2 AND col_3 = 3 AND col_4 = 4""",
+            )
+            self.assertEqual([[], 'AND', [], 'AND', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""col_1" = 1""", """"col_2" = 2""", """"col_3" = 3""", """"col_4" = 4"""],
+                clause_object.array,
+            )
+            self.assertText(
+                """WHERE ("col_1" = 1) AND ("col_2" = 2) AND ("col_3" = 3) AND ("col_4" = 4)""",
+                str(clause_object),
+            )
+
+            # With paren separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                """(col_1 = 1) AND (col_2 = 2) AND (col_3 = 3) AND (col_4 = 4)""",
+            )
+            self.assertEqual([[], 'AND', [], 'AND', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""col_1" = 1""", """"col_2" = 2""", """"col_3" = 3""", """"col_4" = 4"""],
+                clause_object.array,
+            )
+            self.assertText(
+                """WHERE ("col_1" = 1) AND ("col_2" = 2) AND ("col_3" = 3) AND ("col_4" = 4)""",
+                str(clause_object),
+            )
+
+            # With bracket separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                """[col_1 = 1] AND [col_2 = 2] AND [col_3 = 3] AND [col_4 = 4]""",
+            )
+            self.assertEqual([[], 'AND', [], 'AND', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""col_1" = 1""", """"col_2" = 2""", """"col_3" = 3""", """"col_4" = 4"""],
+                clause_object.array,
+            )
+            self.assertText(
+                """WHERE ("col_1" = 1) AND ("col_2" = 2) AND ("col_3" = 3) AND ("col_4" = 4)""",
+                str(clause_object),
+            )
+
+            # Testing various formats, no separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                """id = 'test' AND `code` = 1234 AND "name" = 'Test User'""",
+            )
+            self.assertEqual([[], 'AND', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""],
+                clause_object.array)
+            self.assertText(
+                """WHERE ("id" = 'test') AND ("code" = 1234) AND ("name" = 'Test User')""",
+                str(clause_object),
+            )
+
+            # Testing various formats, with paren separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                """(id = 'test') AND (`code` = 1234) AND ("name" = 'Test User')""",
+            )
+            self.assertEqual([[], 'AND', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""],
+                clause_object.array)
+            self.assertText(
+                """WHERE ("id" = 'test') AND ("code" = 1234) AND ("name" = 'Test User')""",
+                str(clause_object),
+            )
+
+            # Testing various formats, with bracket separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                """[id = 'test'] AND [`code` = 1234] AND ["name" = 'Test User']""",
+            )
+            self.assertEqual([[], 'AND', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""],
+                clause_object.array)
+            self.assertText(
+                """WHERE ("id" = 'test') AND ("code" = 1234) AND ("name" = 'Test User')""",
+                str(clause_object),
+            )
+
+        with self.subTest('Basic WHERE clause - As str, using ORs only'):
+            # Without paren separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                """col_1 = 1 OR col_2 = 2 OR col_3 = 3 OR col_4 = 4""",
+            )
+            self.assertEqual([[], 'OR', [], 'OR', [], 'OR', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""col_1" = 1""", """"col_2" = 2""", """"col_3" = 3""", """"col_4" = 4"""],
+                clause_object.array,
+            )
+            self.assertText(
+                """WHERE ("col_1" = 1) OR ("col_2" = 2) OR ("col_3" = 3) OR ("col_4" = 4)""",
+                str(clause_object),
+            )
+
+            # With paren separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                """(col_1 = 1) OR (col_2 = 2) OR (col_3 = 3) OR (col_4 = 4)""",
+            )
+            self.assertEqual([[], 'OR', [], 'OR', [], 'OR', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""col_1" = 1""", """"col_2" = 2""", """"col_3" = 3""", """"col_4" = 4"""],
+                clause_object.array,
+            )
+            self.assertText(
+                """WHERE ("col_1" = 1) OR ("col_2" = 2) OR ("col_3" = 3) OR ("col_4" = 4)""",
+                str(clause_object),
+            )
+
+            # With bracket separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                """[col_1 = 1] OR [col_2 = 2] OR [col_3 = 3] OR [col_4 = 4]""",
+            )
+            self.assertEqual([[], 'OR', [], 'OR', [], 'OR', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""col_1" = 1""", """"col_2" = 2""", """"col_3" = 3""", """"col_4" = 4"""],
+                clause_object.array,
+            )
+            self.assertText(
+                """WHERE ("col_1" = 1) OR ("col_2" = 2) OR ("col_3" = 3) OR ("col_4" = 4)""",
+                str(clause_object),
+            )
+
+            # Testing various formats, no separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                """id = 'test' OR `code` = 1234 OR "name" = 'Test User'""",
+            )
+            self.assertEqual([[], 'OR', [], 'OR', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""],
+                clause_object.array)
+            self.assertText(
+                """WHERE ("id" = 'test') OR ("code" = 1234) OR ("name" = 'Test User')""",
+                str(clause_object),
+            )
+
+            # Testing various formats, with paren separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                """(id = 'test') OR (`code` = 1234) OR ("name" = 'Test User')""",
+            )
+            self.assertEqual([[], 'OR', [], 'OR', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""],
+                clause_object.array)
+            self.assertText(
+                """WHERE ("id" = 'test') OR ("code" = 1234) OR ("name" = 'Test User')""",
+                str(clause_object),
+            )
+
+            # Testing various formats, with bracket separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                """[id = 'test'] OR [`code` = 1234] OR ["name" = 'Test User']""",
+            )
+            self.assertEqual([[], 'OR', [], 'OR', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""],
+                clause_object.array)
+            self.assertText(
+                """WHERE ("id" = 'test') OR ("code" = 1234) OR ("name" = 'Test User')""",
+                str(clause_object),
+            )
 
         with self.subTest('Basic WHERE clause - As list'):
             clause_object = self.connector.validate.clauses.WhereClauseBuilder(validation_class, ["""id = 'test'"""])
+            self.assertEqual([[]], clause_object._clause_connectors)
             self.assertEqual([""""id" = 'test'"""], clause_object.array)
             self.assertText("""WHERE ("id" = 'test')""", str(clause_object))
 
+        with self.subTest('Where clause - As list, using ANDs only'):
+            # Note: Default combination of array assumes AND format.
+
+            # Without paren separators.
             clause_object = self.connector.validate.clauses.WhereClauseBuilder(
                 validation_class,
-                ["""id = 'test'""", """code = 1234""", """name = 'Test User'"""],
+                ["""col_1 = 1 AND col_2 = 2""", """col_3 = 3 AND col_4 = 4"""],
             )
-            self.assertEqual([""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""], clause_object.array)
-            self.assertText("""WHERE ("id" = 'test') AND ("code" = 1234) AND ("name" = 'Test User')""", str(clause_object))
+            self.assertEqual([[], 'AND', [], 'AND', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""col_1" = 1""", """"col_2" = 2""", """"col_3" = 3""", """"col_4" = 4"""],
+                clause_object.array,
+            )
+            self.assertText(
+                """WHERE ("col_1" = 1) AND ("col_2" = 2) AND ("col_3" = 3) AND ("col_4" = 4)""",
+                str(clause_object),
+            )
+
+            # With paren separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ["""(col_1 = 1) AND (col_2 = 2)""", """(col_3 = 3) AND (col_4 = 4)"""],
+            )
+            self.assertEqual([[], 'AND', [], 'AND', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""col_1" = 1""", """"col_2" = 2""", """"col_3" = 3""", """"col_4" = 4"""],
+                clause_object.array,
+            )
+            self.assertText(
+                """WHERE ("col_1" = 1) AND ("col_2" = 2) AND ("col_3" = 3) AND ("col_4" = 4)""",
+                str(clause_object),
+            )
+
+            # With bracket separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ["""[col_1 = 1] AND [col_2 = 2]""", """[col_3 = 3] AND [col_4 = 4]"""],
+            )
+            self.assertEqual([[], 'AND', [], 'AND', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""col_1" = 1""", """"col_2" = 2""", """"col_3" = 3""", """"col_4" = 4"""],
+                clause_object.array,
+            )
+            self.assertText(
+                """WHERE ("col_1" = 1) AND ("col_2" = 2) AND ("col_3" = 3) AND ("col_4" = 4)""",
+                str(clause_object),
+            )
+
+            # Testing various formats, no separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ["""id = 'test'""", """`code` = 1234""", """"name" = 'Test User'"""],
+            )
+            self.assertEqual([[], 'AND', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""],
+                clause_object.array)
+            self.assertText(
+                """WHERE ("id" = 'test') AND ("code" = 1234) AND ("name" = 'Test User')""",
+                str(clause_object),
+            )
+
+            # Testing various formats, with paren separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ["""(id = 'test')""", """(`code` = 1234)""", """("name" = 'Test User')"""],
+            )
+            self.assertEqual([[], 'AND', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""],
+                clause_object.array)
+            self.assertText(
+                """WHERE ("id" = 'test') AND ("code" = 1234) AND ("name" = 'Test User')""",
+                str(clause_object),
+            )
+
+            # Testing various formats, with bracket separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ["""[id = 'test']""", """[`code` = 1234]""", """["name" = 'Test User']"""],
+            )
+            self.assertEqual([[], 'AND', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""],
+                clause_object.array)
+            self.assertText(
+                """WHERE ("id" = 'test') AND ("code" = 1234) AND ("name" = 'Test User')""",
+                str(clause_object),
+            )
+
+        with self.subTest('Where clause - As list, using ORs only'):
+            # Note: Default combination of array assumes AND format.
+
+            # Without paren separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ["""col_1 = 1 OR col_2 = 2""", """col_3 = 3 OR col_4 = 4"""],
+            )
+            self.assertEqual([[], 'OR', [], 'AND', [], 'OR', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""col_1" = 1""", """"col_2" = 2""", """"col_3" = 3""", """"col_4" = 4"""],
+                clause_object.array,
+            )
+            self.assertText(
+                """WHERE ("col_1" = 1) OR ("col_2" = 2) AND ("col_3" = 3) OR ("col_4" = 4)""",
+                str(clause_object),
+            )
+
+            # With paren separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ["""(col_1 = 1) OR (col_2 = 2)""", """(col_3 = 3) OR (col_4 = 4)"""],
+            )
+            self.assertEqual([[], 'OR', [], 'AND', [], 'OR', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""col_1" = 1""", """"col_2" = 2""", """"col_3" = 3""", """"col_4" = 4"""],
+                clause_object.array,
+            )
+            self.assertText(
+                """WHERE ("col_1" = 1) OR ("col_2" = 2) AND ("col_3" = 3) OR ("col_4" = 4)""",
+                str(clause_object),
+            )
+
+            # With bracket separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ["""[col_1 = 1] OR [col_2 = 2]""", """[col_3 = 3] OR [col_4 = 4]"""],
+            )
+            self.assertEqual([[], 'OR', [], 'AND', [], 'OR', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""col_1" = 1""", """"col_2" = 2""", """"col_3" = 3""", """"col_4" = 4"""],
+                clause_object.array,
+            )
+            self.assertText(
+                """WHERE ("col_1" = 1) OR ("col_2" = 2) AND ("col_3" = 3) OR ("col_4" = 4)""",
+                str(clause_object),
+            )
+
+            # Testing various formats, no separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ["""id = 'test' OR `code` = 1234""", """"name" = 'Test User'"""],
+            )
+            self.assertEqual([[], 'OR', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""],
+                clause_object.array)
+            self.assertText(
+                """WHERE ("id" = 'test') OR ("code" = 1234) AND ("name" = 'Test User')""",
+                str(clause_object),
+            )
+
+            # Testing various formats, with paren separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ["""(id = 'test') OR (`code` = 1234)""", """("name" = 'Test User')"""],
+            )
+            self.assertEqual([[], 'OR', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""],
+                clause_object.array)
+            self.assertText(
+                """WHERE ("id" = 'test') OR ("code" = 1234) AND ("name" = 'Test User')""",
+                str(clause_object),
+            )
+
+            # Testing various formats, with bracket separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ["""[id = 'test'] OR [`code` = 1234]""", """["name" = 'Test User']"""],
+            )
+            self.assertEqual([[], 'OR', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""],
+                clause_object.array)
+            self.assertText(
+                """WHERE ("id" = 'test') OR ("code" = 1234) AND ("name" = 'Test User')""",
+                str(clause_object),
+            )
 
         with self.subTest('Basic WHERE clause - As tuple'):
             clause_object = self.connector.validate.clauses.WhereClauseBuilder(validation_class, ("""id = 'test'""",))
+            self.assertEqual([[]], clause_object._clause_connectors)
             self.assertEqual([""""id" = 'test'"""], clause_object.array)
             self.assertText("""WHERE ("id" = 'test')""", str(clause_object))
 
+        with self.subTest('Where clause - As tuple, using ANDs only'):
+            # Note: Default combination of array assumes AND format.
+
+            # Without paren separators.
             clause_object = self.connector.validate.clauses.WhereClauseBuilder(
                 validation_class,
-                ("""id = 'test'""", """code = 1234""", """name = 'Test User'"""),
+                ("""col_1 = 1 AND col_2 = 2""", """col_3 = 3 AND col_4 = 4"""),
             )
-            self.assertEqual([""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""], clause_object.array)
-            self.assertText("""WHERE ("id" = 'test') AND ("code" = 1234) AND ("name" = 'Test User')""", str(clause_object))
+            self.assertEqual([[], 'AND', [], 'AND', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""col_1" = 1""", """"col_2" = 2""", """"col_3" = 3""", """"col_4" = 4"""],
+                clause_object.array,
+            )
+            self.assertText(
+                """WHERE ("col_1" = 1) AND ("col_2" = 2) AND ("col_3" = 3) AND ("col_4" = 4)""",
+                str(clause_object),
+            )
 
-        with self.subTest('WHERE containing various quote types'):
-            clause_object = self.connector.validate.clauses.WhereClauseBuilder(validation_class, ("""name = '2" nail'""", """description = '2 inch nail'"""""))
-            self.assertEqual([""""name" = '2" nail'""", """"description" = '2 inch nail'"""], clause_object.array)
-            self.assertText("""WHERE ("name" = '2" nail') AND ("description" = '2 inch nail')""", str(clause_object))
+            # With paren separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ("""(col_1 = 1) AND (col_2 = 2)""", """(col_3 = 3) AND (col_4 = 4)"""),
+            )
+            self.assertEqual([[], 'AND', [], 'AND', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""col_1" = 1""", """"col_2" = 2""", """"col_3" = 3""", """"col_4" = 4"""],
+                clause_object.array,
+            )
+            self.assertText(
+                """WHERE ("col_1" = 1) AND ("col_2" = 2) AND ("col_3" = 3) AND ("col_4" = 4)""",
+                str(clause_object),
+            )
 
-            clause_object = self.connector.validate.clauses.WhereClauseBuilder(validation_class, ("""name = '1\' ruler'""", """description = '1 foot ruler'"""""))
-            self.assertEqual([""""name" = '1\' ruler'""", """"description" = '1 foot ruler'"""], clause_object.array)
-            self.assertText("""WHERE ("name" = '1\' ruler') AND ("description" = '1 foot ruler')""", str(clause_object))
+            # With bracket separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ("""[col_1 = 1] AND [col_2 = 2]""", """[col_3 = 3] AND [col_4 = 4]"""),
+            )
+            self.assertEqual([[], 'AND', [], 'AND', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""col_1" = 1""", """"col_2" = 2""", """"col_3" = 3""", """"col_4" = 4"""],
+                clause_object.array,
+            )
+            self.assertText(
+                """WHERE ("col_1" = 1) AND ("col_2" = 2) AND ("col_3" = 3) AND ("col_4" = 4)""",
+                str(clause_object),
+            )
+
+            # Testing various formats, no separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ("""id = 'test'""", """`code` = 1234""", """"name" = 'Test User'"""),
+            )
+            self.assertEqual([[], 'AND', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""],
+                clause_object.array)
+            self.assertText(
+                """WHERE ("id" = 'test') AND ("code" = 1234) AND ("name" = 'Test User')""",
+                str(clause_object),
+            )
+
+            # Testing various formats, with paren separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ("""(id = 'test')""", """(`code` = 1234)""", """("name" = 'Test User')"""),
+            )
+            self.assertEqual([[], 'AND', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""],
+                clause_object.array)
+            self.assertText(
+                """WHERE ("id" = 'test') AND ("code" = 1234) AND ("name" = 'Test User')""",
+                str(clause_object),
+            )
+
+            # Testing various formats, with bracket separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ("""[id = 'test']""", """[`code` = 1234]""", """["name" = 'Test User']"""),
+            )
+            self.assertEqual([[], 'AND', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""],
+                clause_object.array)
+            self.assertText(
+                """WHERE ("id" = 'test') AND ("code" = 1234) AND ("name" = 'Test User')""",
+                str(clause_object),
+            )
+
+        with self.subTest('Where clause - As list, using ORs only'):
+            # Note: Default combination of array assumes AND format.
+
+            # Without paren separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ("""col_1 = 1 OR col_2 = 2""", """col_3 = 3 OR col_4 = 4"""),
+            )
+            self.assertEqual([[], 'OR', [], 'AND', [], 'OR', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""col_1" = 1""", """"col_2" = 2""", """"col_3" = 3""", """"col_4" = 4"""],
+                clause_object.array,
+            )
+            self.assertText(
+                """WHERE ("col_1" = 1) OR ("col_2" = 2) AND ("col_3" = 3) OR ("col_4" = 4)""",
+                str(clause_object),
+            )
+
+            # With paren separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ("""(col_1 = 1) OR (col_2 = 2)""", """(col_3 = 3) OR (col_4 = 4)"""),
+            )
+            self.assertEqual([[], 'OR', [], 'AND', [], 'OR', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""col_1" = 1""", """"col_2" = 2""", """"col_3" = 3""", """"col_4" = 4"""],
+                clause_object.array,
+            )
+            self.assertText(
+                """WHERE ("col_1" = 1) OR ("col_2" = 2) AND ("col_3" = 3) OR ("col_4" = 4)""",
+                str(clause_object),
+            )
+
+            # With bracket separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ("""[col_1 = 1] OR [col_2 = 2]""", """[col_3 = 3] OR [col_4 = 4]"""),
+            )
+            self.assertEqual([[], 'OR', [], 'AND', [], 'OR', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""col_1" = 1""", """"col_2" = 2""", """"col_3" = 3""", """"col_4" = 4"""],
+                clause_object.array,
+            )
+            self.assertText(
+                """WHERE ("col_1" = 1) OR ("col_2" = 2) AND ("col_3" = 3) OR ("col_4" = 4)""",
+                str(clause_object),
+            )
+
+            # Testing various formats, no separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ("""id = 'test' OR `code` = 1234""", """"name" = 'Test User'"""),
+            )
+            self.assertEqual([[], 'OR', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""],
+                clause_object.array)
+            self.assertText(
+                """WHERE ("id" = 'test') OR ("code" = 1234) AND ("name" = 'Test User')""",
+                str(clause_object),
+            )
+
+            # Testing various formats, with paren separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ("""(id = 'test') OR (`code` = 1234)""", """("name" = 'Test User')"""),
+            )
+            self.assertEqual([[], 'OR', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""],
+                clause_object.array)
+            self.assertText(
+                """WHERE ("id" = 'test') OR ("code" = 1234) AND ("name" = 'Test User')""",
+                str(clause_object),
+            )
+
+            # Testing various formats, with bracket separators.
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ("""[id = 'test'] OR [`code` = 1234]""", """["name" = 'Test User']"""),
+            )
+            self.assertEqual([[], 'OR', [], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual(
+                [""""id" = 'test'""", """"code" = 1234""", """"name" = 'Test User'"""],
+                clause_object.array)
+            self.assertText(
+                """WHERE ("id" = 'test') OR ("code" = 1234) AND ("name" = 'Test User')""",
+                str(clause_object),
+            )
+
+        # with self.subTest('WHERE containing various quote types'):
+        #     clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+        #         validation_class,
+        #         ("""name = '2" nail'""", """description = '2 inch nail'"""""),
+        #     )
+        #     self.assertEqual([[], 'AND', []], clause_object._clause_connectors)
+        #     self.assertEqual([""""name" = '2" nail'""", """"description" = '2 inch nail'"""], clause_object.array)
+        #     self.assertText("""WHERE ("name" = '2" nail') AND ("description" = '2 inch nail')""", str(clause_object))
+        #
+        #     clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+        #         validation_class,
+        #         ("""name = '1\' ruler'""", """description = '1 foot ruler'"""""),
+        #     )
+        #     self.assertEqual([[], 'AND', []], clause_object._clause_connectors)
+        #     self.assertEqual([""""name" = '1\' ruler'""", """"description" = '1 foot ruler'"""], clause_object.array)
+        #     self.assertText("""WHERE ("name" = '1\' ruler') AND ("description" = '1 foot ruler')""", str(clause_object))
 
     def test__clause__columns(self):
         """Test logic for parsing a COLUMNS clause."""
