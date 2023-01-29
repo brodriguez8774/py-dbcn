@@ -492,18 +492,35 @@ class WhereClauseBuilder(BaseClauseBuilder):
         print('clause:')
         print('{0}'.format(value))
         print('\n')
-        tokens = generate_tokens(StringIO(value).readline)
+        tokens = list(generate_tokens(StringIO(value).readline))
         print('\nas tokens:')
+
+        for token in tokens:
+            token.actual_start = tuple(token.start)
+            token.actual_end = tuple(token.end)
+            token.actual_string = token.string
 
         section_str = ''
         sub_section_str = ''
         token_set = []
-        for token in tokens:
-            print('    {0}'.format(token))
+        index = 0
+        curr_line_start = 1
+        curr_line_end = 1
+        curr_index_start = 0
+        curr_index_end = 0
+        prev_line_start = 0
+        prev_line_end = 0
+        prev_index_start = 0
+        prev_index_end = 0
+        prev_prev_index_end = 0
+        while index < len(tokens):
+            print('')
+            keep_index = False
+            token = tokens[index]
 
             # Process if handling a subsection.
             if sub_section_str != '':
-                sub_section_str += token.string
+                sub_section_str += token.actual_string
 
                 # Check if end of subsection.
                 if token == ')':
@@ -518,13 +535,43 @@ class WhereClauseBuilder(BaseClauseBuilder):
             # First we start building our sub-string to process.
             if token == '(':
                 print('        Handling subsection.')
-                sub_section_str += token.string
+
+                # Update index trackers.
+                prev_line_start = curr_line_start
+                prev_index_start = curr_index_start
+                prev_line_end = curr_line_end
+                prev_prev_index_end = prev_index_end
+                prev_index_end = curr_index_end
+                curr_line_start = token.actual_start[0]
+                curr_line_end = token.actual_end[0]
+                curr_index_start = token.actual_start[1]
+                curr_index_end = token.actual_end[1]
+
+                # Handle for when tokenizer skips/ignores spaces.
+                section_str = self._tokenize_handle_space(curr_index_start, prev_index_end, section_str)
+
+                # Save value.
+                sub_section_str += token.actual_string
 
             # Not processing sub-section.
             # Determine if token is AND or OR.
-            elif token.type == 1 and token.string.upper() in ['AND', 'OR']:
+            elif token.type == 1 and token.actual_string.upper() in ['AND', 'OR']:
                 # Token is AND or OR combiner. Handle appropriately.
                 print('        Handling combiner.')
+
+                # Update index trackers.
+                prev_line_start = curr_line_start
+                prev_index_start = curr_index_start
+                prev_line_end = curr_line_end
+                prev_prev_index_end = prev_index_end
+                prev_index_end = curr_index_end
+                curr_line_start = token.actual_start[0]
+                curr_line_end = token.actual_end[0]
+                curr_index_start = token.actual_start[1]
+                curr_index_end = token.actual_end[1]
+
+                # Handle for when tokenizer skips/ignores spaces.
+                section_str = self._tokenize_handle_space(curr_index_start, prev_index_end, section_str).strip()
 
                 # Trim trailing final paren, if present.
                 if len(section_str) > 1 and section_str[-1] in [')', ']']:
@@ -535,7 +582,7 @@ class WhereClauseBuilder(BaseClauseBuilder):
 
                 # Append our found combiner token.
                 self._clause_connectors.append([])
-                self._clause_connectors.append(token.string.upper())
+                self._clause_connectors.append(token.actual_string.upper())
 
                 # Clear out saved section, for further processing.
                 section_str = ''
@@ -543,32 +590,137 @@ class WhereClauseBuilder(BaseClauseBuilder):
             # For all other token types, assume is part of current section. Append to existing section.
             else:
 
+                # To account for special tokenization edge-cases, we recursively check str types when applicable.
+                if token.type == 3:
+
+                    # Update index trackers.
+                    prev_line_start = curr_line_start
+                    prev_index_start = curr_index_start
+                    prev_line_end = curr_line_end
+                    prev_prev_index_end = prev_index_end
+                    prev_index_end = curr_index_end
+                    curr_line_start = token.actual_start[0]
+                    curr_line_end = token.actual_end[0]
+                    curr_index_start = token.actual_start[1]
+                    curr_index_end = token.actual_end[1]
+
+                    # Handle for when tokenizer skips/ignores spaces.
+                    section_str = self._tokenize_handle_space(curr_index_start, prev_index_end, section_str)
+
+                    # Re-parse as a sub-token set.
+                    re_parsed_set = self._tokenize_edge_case_str(
+                        token.actual_string,
+                        curr_line_start,
+                        curr_line_end,
+                        curr_index_start,
+                        curr_index_end,
+                    )
+
+                    # Take re-parsed sub-token set. Append to current location in token set.
+                    curr_index = index
+                    print('curr_index: {0}'.format(curr_index))
+                    orig_tokens_left = list(tokens[:curr_index])
+                    orig_tokens_right = list(tokens[(curr_index + 1):])
+                    print('    left:')
+                    for left_token in orig_tokens_left:
+                        print('        {0}'.format(left_token))
+                    print('    right:')
+                    for right_token in orig_tokens_right:
+                        print('        {0}'.format(right_token))
+
+                    new_token_set = orig_tokens_left + re_parsed_set + orig_tokens_right
+                    print('\n')
+                    print('new_token_set:')
+                    for new_token in new_token_set:
+                        print('    Token: (Type: {0}, String: \'{1}\', Start: {2}, End: {3}'.format(
+                            new_token.type,
+                            new_token.actual_string,
+                            new_token.actual_start,
+                            new_token.actual_end,
+                        ))
+                    print('\n\n')
+
+                    tokens = new_token_set
+
+                    # Record that we HAVE NOT fully handled current index yet.
+                    keep_index = True
 
                 # Certain types need string spacing.
-                if token.type in [1, 2, 3]:
+                elif token.type in [1, 2]:
                     # Standard string types.
                     print('        Handling string token.')
-                    if len(section_str) > 0 and section_str[-1] not in [' ', '`', '"', "'", '(', '[']:
-                        section_str += ' '
-                    section_str += '{0}'.format(token.string)
+
+                    # Update index trackers.
+                    prev_line_start = curr_line_start
+                    prev_index_start = curr_index_start
+                    prev_line_end = curr_line_end
+                    prev_prev_index_end = prev_index_end
+                    prev_index_end = curr_index_end
+                    curr_line_start = token.actual_start[0]
+                    curr_line_end = token.actual_end[0]
+                    curr_index_start = token.actual_start[1]
+                    curr_index_end = token.actual_end[1]
+
+                    # Handle for when tokenizer skips/ignores spaces.
+                    section_str = self._tokenize_handle_space(curr_index_start, prev_index_end, section_str)
+
+                    # Save token value.
+                    section_str += '{0}'.format(token.actual_string)
 
                 elif token.type in [54]:
                     # Operator types, such as equals sign.
                     print('        Handling operator token.')
 
-                    # If actually equals sign, add spaces.
-                    if token.string == '=':
-                        if len(section_str) > 0 and section_str[-1] != ' ':
-                            section_str += ' '
+                    # Update index trackers.
+                    prev_line_start = curr_line_start
+                    prev_index_start = curr_index_start
+                    prev_line_end = curr_line_end
+                    prev_prev_index_end = prev_index_end
+                    prev_index_end = curr_index_end
+                    curr_line_start = token.actual_start[0]
+                    curr_line_end = token.actual_end[0]
+                    curr_index_start = token.actual_start[1]
+                    curr_index_end = token.actual_end[1]
+
+                    # Handle for when tokenizer skips/ignores spaces.
+                    section_str = self._tokenize_handle_space(curr_index_start, prev_index_end, section_str)
 
                     # Skip parens if first value in section.
-                    if not (token.string in ['(', '['] and section_str == ''):
-                        section_str += '{0}'.format(token.string)
+                    if not (token.actual_string in ['(', '['] and section_str.strip() == ''):
+                        section_str += '{0}'.format(token.actual_string)
 
                 else:
                     # All other types. Append as-is.
                     print('        Handling generic token.')
-                    section_str += token.string
+
+                    # Update index trackers.
+                    prev_line_start = curr_line_start
+                    prev_index_start = curr_index_start
+                    prev_line_end = curr_line_end
+                    prev_prev_index_end = prev_index_end
+                    prev_index_end = curr_index_end
+                    curr_line_start = token.actual_start[0]
+                    curr_line_end = token.actual_end[0]
+                    curr_index_start = token.actual_start[1]
+                    curr_index_end = token.actual_end[1]
+
+                    # Handle for when tokenizer skips/ignores spaces.
+                    section_str = self._tokenize_handle_space(curr_index_start, prev_index_end, section_str)
+
+                    # Save value.
+                    section_str += token.actual_string
+
+            print('        section_str: {0}'.format(section_str))
+
+            if not keep_index:
+                index += 1
+
+                print('        Token: (Type: {0}, String: \'{1}\', Start: {2}, End: {3}'.format(
+                    token.type,
+                    token.actual_string,
+                    token.actual_start,
+                    token.actual_end,
+                ))
 
         # Done with loops. Do final post-processing.
         # Trim trailing final paren, if present.
@@ -578,7 +730,46 @@ class WhereClauseBuilder(BaseClauseBuilder):
         # Save our last-handled section, if any.
         if section_str.strip() != '':
             self._clause_connectors.append([])
-            token_set.append(section_str)
+            token_set.append(section_str.strip())
+
+        # Double check expected location.
+        temp = value.split('\n')
+        temp.append('')
+        if curr_line_end != len(temp):
+
+            print('curr_line_end: {0}'.format(curr_line_end))
+            print('len(temp): {0}'.format(len(temp)))
+
+            print('Final token_set:')
+            for token in token_set:
+                print('    {0}'.format(token))
+                # print('    Token: (Type: {0}, String: \'{1}\', Start: {2}, End: {3}'.format(
+                #     token.type,
+                #     token.actual_string,
+                #     token.actual_start,
+                #     token.actual_end,
+                # ))
+
+            raise ValueError('Error parsing array indexes. Failed at line parsing.')
+        if prev_index_end != len(value.replace('\n', '')) + 1:
+
+            print('curr_index_end: {0}'.format(curr_index_end))
+            print('prev_index_end: {0}'.format(prev_index_end))
+            print('prev_prev_index_end: {0}'.format(prev_prev_index_end))
+            print('len(value): {0}'.format(len(value.replace('\n', '')) + 1))
+
+            print('Final token_set:')
+            print('{0}'.format(token_set))
+            for token in token_set:
+                print('    {0}'.format(token))
+                # print('    Token: (Type: {0}, String: \'{1}\', Start: {2}, End: {3}'.format(
+                #     token.type,
+                #     token.actual_string,
+                #     token.actual_start,
+                #     token.actual_end,
+                # ))
+
+            raise ValueError('Error parsing array indexes. Failed at index parsing.')
 
         print('\n')
         print('final self._clause_connectors:')
@@ -590,6 +781,180 @@ class WhereClauseBuilder(BaseClauseBuilder):
 
         return token_set
 
+    def _tokenize_handle_space(self, curr_index_start, prev_index_end, section_str):
+        # Check if current index and previous index match. If not, then likely have missing space characers.
+        temp_val = curr_index_start - prev_index_end
+        if temp_val > 0:
+            # Missing characters. Add that many space tokens.
+            for x in range(temp_val):
+                section_str += ' '
+
+        # Return updated set.
+        return section_str
+
+    def _tokenize_edge_case_str(self, value, line_start, line_end, index_start, index_end):
+        """"""
+        print('line_start: {0}'.format(line_start))
+        print('line_end: {0}'.format(line_end))
+        print('index_start: {0}'.format(index_start))
+        print('index_end: {0}'.format(index_end))
+        curr_line = line_start
+        prev_index_start = index_start
+        prev_index_end = index_start + 1
+        index_start += 1
+        index_end -= 1
+        print('')
+        print('curr_line: {0}'.format(curr_line))
+        print('prev_index_start: {0}'.format(prev_index_start))
+        print('prev_index_end: {0}'.format(prev_index_end))
+        # print('curr_index_start: {0}'.format(curr_index_start))
+        # print('curr_index_end: {0}'.format(curr_index_end))
+
+        return_set = []
+        if len(value) > 0:
+            # Save starting quote in str.
+            start_token = list(generate_tokens(StringIO(value[0]).readline))[0]
+            print('handling first index')
+            start_token.actual_start = (curr_line, index_start - 1)
+            start_token.actual_end = (curr_line, index_start)
+            start_token.actual_string = start_token.string
+            return_set.append(start_token)
+
+            # Update for actual start.
+            curr_index_start = index_start
+            curr_index_end = index_start
+            print('')
+            print('curr_line: {0}'.format(curr_line))
+            print('prev_index_start: {0}'.format(prev_index_start))
+            print('prev_index_end: {0}'.format(prev_index_end))
+            # print('curr_index_start: {0}'.format(curr_index_start))
+            # print('curr_index_end: {0}'.format(curr_index_end))
+
+            # Parse all inner-values (between starting and ending quote) to force standard tokenization.
+            tokens = list(generate_tokens(StringIO(value[1:-1]).readline))
+            for token in tokens:
+
+                # For now, skip newlines and endmarkers. They mess up these calculations.
+                if token.type in [0, 4, 6]:
+                    continue
+
+                print('')
+                print('processing token: {0}'.format(token))
+                # Calculate total lengths, as determined by tokenizer.
+                line_length = token.end[0] - token.start[0]
+                index_length = token.end[1] - token.start[1]
+                if index_length < 0:
+                    index_length = 0
+
+                # Update variables for current loop.
+                curr_line = curr_line + line_length
+                curr_index_start = token.start[1] + index_start
+                curr_index_end = curr_index_start + index_length
+
+                print('')
+                print('    curr_line: {0}'.format(curr_line))
+                print('    prev_index_start: {0}'.format(prev_index_start))
+                print('    prev_index_end: {0}'.format(prev_index_end))
+                print('    curr_index_start: {0}'.format(curr_index_start))
+                print('    curr_index_end: {0}'.format(curr_index_end))
+
+                # Check if current index and previous index match. If not, then likely have missing space characters.
+                temp_val = curr_index_start - prev_index_end
+                print('    temp_val: {0}'.format(temp_val))
+                if temp_val > 0:
+                    # Missing characters. Add that many space tokens.
+
+                    print('    adding spaces')
+                    curr_index_start = prev_index_end
+                    for x in range(temp_val):
+                        space_token = list(generate_tokens(StringIO('').readline))[0]
+                        space_token.actual_string = ' '
+                        space_token.actual_start = (curr_line, curr_index_start)
+                        curr_index_start += 1
+                        space_token.actual_end = (curr_line, curr_index_start)
+                        print('        Token: (Type: {0}, String: \'{1}\', Start: {2}, End: {3}'.format(
+                            space_token.type,
+                            space_token.actual_string,
+                            space_token.actual_start,
+                            space_token.actual_end,
+                        ))
+                        return_set.append(space_token)
+
+                # Generate proper token start/end locations.
+                token.actual_start = (curr_line, curr_index_start)
+                token.actual_end = (curr_line, curr_index_end)
+                token.actual_string = token.string
+
+                # Save token value.
+                return_set.append(token)
+
+                # Update variables for next loop.
+                prev_index_start = curr_index_start
+                prev_index_end = curr_index_end
+
+                # print('')
+                # print('    curr_line: {0}'.format(curr_line))
+                # print('    prev_index_start: {0}'.format(prev_index_start))
+                # print('    prev_index_end: {0}'.format(prev_index_end))
+                # print('    curr_index_start: {0}'.format(curr_index_start))
+                # print('    curr_index_end: {0}'.format(curr_index_end))
+
+            # Double check expected location.
+            if curr_line != line_end:
+
+                print('Final return_set:')
+                for token in return_set:
+                    print('    Token: (Type: {0}, String: \'{1}\', Start: {2}, End: {3}'.format(
+                        token.type,
+                        token.actual_string,
+                        token.actual_start,
+                        token.actual_end,
+                    ))
+
+                raise ValueError('Error parsing array indexes. Failed at line parsing.')
+            if curr_index_end != index_end:
+
+                while curr_index_end < index_end:
+                    curr_index_start = curr_index_end
+                    curr_index_end += 1
+                    space_token = list(generate_tokens(StringIO('').readline))[0]
+                    space_token.actual_string = ' '
+                    space_token.actual_start = (curr_line, curr_index_start)
+                    space_token.actual_end = (curr_line, curr_index_end)
+                    print('        Token: (Type: {0}, String: \'{1}\', Start: {2}, End: {3}'.format(
+                        space_token.type,
+                        space_token.actual_string,
+                        space_token.actual_start,
+                        space_token.actual_end,
+                    ))
+                    return_set.append(space_token)
+                    curr_index_end += 1
+
+                # print('')
+                # print('curr_index_end: {0}'.format(curr_index_end))
+                # print('prev_index_end: {0}'.format(prev_index_end))
+                # print('index_end: {0}'.format(index_end))
+                #
+                # print('Final return_set:')
+                # for token in return_set:
+                #     print('    Token: (Type: {0}, String: \'{1}\', Start: {2}, End: {3}'.format(
+                #         token.type,
+                #         token.actual_string,
+                #         token.actual_start,
+                #         token.actual_end,
+                #     ))
+                #
+                # raise ValueError('Error parsing array indexes. Failed at index parsing.')
+
+            # Save ending quote in str.
+            end_token = list(generate_tokens(StringIO(value[-1]).readline))[0]
+            end_token.actual_start = (line_end, index_end)
+            end_token.actual_end = (line_end, index_end + 1)
+            end_token.actual_string = end_token.string
+            return_set.append(end_token)
+
+        return return_set
+
     def _tokenize_value(self, value):
         """Recursive inner call for "tokenize_value" function."""
         tokens = generate_tokens(StringIO(value).readline)
@@ -598,7 +963,6 @@ class WhereClauseBuilder(BaseClauseBuilder):
             # If inner parens exist, then we need to recursively call to process sub-section.
             if token == '(':
                 pass
-
 
 
 class ColumnsClauseBuilder(BaseClauseBuilder):

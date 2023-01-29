@@ -708,22 +708,22 @@ class CoreClauseTestMixin:
                 str(clause_object),
             )
 
-        # with self.subTest('WHERE containing various quote types'):
-        #     clause_object = self.connector.validate.clauses.WhereClauseBuilder(
-        #         validation_class,
-        #         ("""name = '2" nail'""", """description = '2 inch nail'"""""),
-        #     )
-        #     self.assertEqual([[], 'AND', []], clause_object._clause_connectors)
-        #     self.assertEqual([""""name" = '2" nail'""", """"description" = '2 inch nail'"""], clause_object.array)
-        #     self.assertText("""WHERE ("name" = '2" nail') AND ("description" = '2 inch nail')""", str(clause_object))
-        #
-        #     clause_object = self.connector.validate.clauses.WhereClauseBuilder(
-        #         validation_class,
-        #         ("""name = '1\' ruler'""", """description = '1 foot ruler'"""""),
-        #     )
-        #     self.assertEqual([[], 'AND', []], clause_object._clause_connectors)
-        #     self.assertEqual([""""name" = '1\' ruler'""", """"description" = '1 foot ruler'"""], clause_object.array)
-        #     self.assertText("""WHERE ("name" = '1\' ruler') AND ("description" = '1 foot ruler')""", str(clause_object))
+        with self.subTest('WHERE containing various quote types'):
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ("""name = '2" nail'""", """description = '2 inch nail'"""""),
+            )
+            self.assertEqual([[], 'AND', []], clause_object._clause_connectors)
+            self.assertEqual([""""name" = '2" nail'""", """"description" = '2 inch nail'"""], clause_object.array)
+            self.assertText("""WHERE ("name" = '2" nail') AND ("description" = '2 inch nail')""", str(clause_object))
+
+            clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+                validation_class,
+                ("""name = '1\' ruler'""", """description = '1 foot ruler'"""""),
+            )
+            self.assertEqual([[], 'AND', []], clause_object._clause_connectors)
+            # self.assertEqual([""""name" = '1\' ruler'""", """"description" = '1 foot ruler'"""], clause_object.array)
+            self.assertText("""WHERE ("name" = '1\' ruler') AND ("description" = '1 foot ruler')""", str(clause_object))
 
     def test__clause__columns(self):
         """Test logic for parsing a COLUMNS clause."""
