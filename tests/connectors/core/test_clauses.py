@@ -248,7 +248,7 @@ class CoreClauseTestMixin:
                 str(clause_object),
             )
 
-        with self.subTest('Basic WHERE clause - As str, using ORs only'):
+        with self.subTest('WHERE clause - As str, using ORs only'):
             # Without paren separators.
             clause_object = self.connector.validate.clauses.WhereClauseBuilder(
                 validation_class,
@@ -335,6 +335,24 @@ class CoreClauseTestMixin:
                 """WHERE ("id" = 'test') OR ("code" = 1234) OR ("name" = 'Test User')""",
                 str(clause_object),
             )
+
+        # with self.subTest('Nested WHERE clause - As str'):
+        #     clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+        #         validation_class,
+        #         """((col_1 = 1 OR col_2 = 2) OR (col_3 = 3 AND col_4 = 4)) AND (col_5 = 5)""",
+        #     )
+        #     self.assertEqual(
+        #         [ [ [ [], 'OR', [] ], 'OR', [ [], 'AND', [] ] ], 'AND', [] ],
+        #         clause_object._clause_connectors,
+        #     )
+        #     self.assertEqual(
+        #         [""""col_1" = 1""", """"col_2" = 2""", """"col_3" = 3""", """"col_4" = 4""", """"col_5" = 5"""],
+        #         clause_object.array,
+        #     )
+        #     self.assertText(
+        #         """WHERE (("col_1" = 1) OR ("col_2" = 2) OR ("col_3" = 3 AND "col_4" = 4)) AND ("col_5" = 5)""",
+        #         str(clause_object),
+        #     )
 
         with self.subTest('Basic WHERE clause - As list'):
             clause_object = self.connector.validate.clauses.WhereClauseBuilder(validation_class, ["""id = 'test'"""])
