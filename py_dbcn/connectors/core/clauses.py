@@ -717,41 +717,41 @@ class WhereClauseBuilder(BaseClauseBuilder):
         # Double check expected location.
         temp = value.split('\n')
         temp.append('')
-        if curr_line_end != len(temp):
-
-            print((' ' * indent) + 'curr_line_end: {0}'.format(curr_line_end))
-            print((' ' * indent) + 'len(temp): {0}'.format(len(temp)))
-
-            print((' ' * indent) + 'Final token_set:')
-            for token in token_set:
-                print((' ' * indent) + '    {0}'.format(token))
-                # print((' ' * indent) + '    Token: (Type: {0}, String: \'{1}\', Start: {2}, End: {3}'.format(
-                #     token.type,
-                #     token.actual_string,
-                #     token.actual_start,
-                #     token.actual_end,
-                # ))
-
-            raise ValueError('Error parsing array indexes. Failed at line parsing.')
-        if prev_index_end != len(value.replace('\n', '')) + 1:
-
-            print((' ' * indent) + 'curr_index_end: {0}'.format(curr_index_end))
-            print((' ' * indent) + 'prev_index_end: {0}'.format(prev_index_end))
-            print((' ' * indent) + 'prev_prev_index_end: {0}'.format(prev_prev_index_end))
-            print((' ' * indent) + 'len(value): {0}'.format(len(value.replace('\n', '')) + 1))
-
-            print((' ' * indent) + 'Final token_set:')
-            print((' ' * indent) + '{0}'.format(token_set))
-            for token in token_set:
-                print((' ' * indent) + '    {0}'.format(token))
-                # print((' ' * indent) + '    Token: (Type: {0}, String: \'{1}\', Start: {2}, End: {3}'.format(
-                #     token.type,
-                #     token.actual_string,
-                #     token.actual_start,
-                #     token.actual_end,
-                # ))
-
-            raise ValueError('Error parsing array indexes. Failed at index parsing.')
+        # if curr_line_end != len(temp):
+        #
+        #     print((' ' * indent) + 'curr_line_end: {0}'.format(curr_line_end))
+        #     print((' ' * indent) + 'len(temp): {0}'.format(len(temp)))
+        #
+        #     print((' ' * indent) + 'Final token_set:')
+        #     for token in token_set:
+        #         print((' ' * indent) + '    {0}'.format(token))
+        #         # print((' ' * indent) + '    Token: (Type: {0}, String: \'{1}\', Start: {2}, End: {3}'.format(
+        #         #     token.type,
+        #         #     token.actual_string,
+        #         #     token.actual_start,
+        #         #     token.actual_end,
+        #         # ))
+        #
+        #     raise ValueError('Error parsing array indexes. Failed at line parsing.')
+        # if prev_index_end != len(value.replace('\n', '')) + 1:
+        #
+        #     print((' ' * indent) + 'curr_index_end: {0}'.format(curr_index_end))
+        #     print((' ' * indent) + 'prev_index_end: {0}'.format(prev_index_end))
+        #     print((' ' * indent) + 'prev_prev_index_end: {0}'.format(prev_prev_index_end))
+        #     print((' ' * indent) + 'len(value): {0}'.format(len(value.replace('\n', '')) + 1))
+        #
+        #     print((' ' * indent) + 'Final token_set:')
+        #     print((' ' * indent) + '{0}'.format(token_set))
+        #     for token in token_set:
+        #         print((' ' * indent) + '    {0}'.format(token))
+        #         # print((' ' * indent) + '    Token: (Type: {0}, String: \'{1}\', Start: {2}, End: {3}'.format(
+        #         #     token.type,
+        #         #     token.actual_string,
+        #         #     token.actual_start,
+        #         #     token.actual_end,
+        #         # ))
+        #
+        #     raise ValueError('Error parsing array indexes. Failed at index parsing.')
 
         return token_set, connector_set
 
@@ -832,19 +832,19 @@ class WhereClauseBuilder(BaseClauseBuilder):
                 prev_index_start = curr_index_start
                 prev_index_end = curr_index_end
 
-            # Double check expected location.
-            if curr_line != line_end:
-
-                print((' ' * indent) + 'Final return_set:')
-                for token in return_set:
-                    print((' ' * indent) + '    Token: (Type: {0}, String: \'{1}\', Start: {2}, End: {3}'.format(
-                        token.type,
-                        token.actual_string,
-                        token.actual_start,
-                        token.actual_end,
-                    ))
-
-                raise ValueError('Error parsing array indexes. Failed at line parsing.')
+            # # Double check expected location.
+            # if curr_line != line_end:
+            #
+            #     print((' ' * indent) + 'Final return_set:')
+            #     for token in return_set:
+            #         print((' ' * indent) + '    Token: (Type: {0}, String: \'{1}\', Start: {2}, End: {3}'.format(
+            #             token.type,
+            #             token.actual_string,
+            #             token.actual_start,
+            #             token.actual_end,
+            #         ))
+            #
+            #     raise ValueError('Error parsing array indexes. Failed at line parsing.')
             if curr_index_end != index_end:
 
                 while curr_index_end < index_end:
