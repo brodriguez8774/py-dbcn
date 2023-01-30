@@ -430,10 +430,11 @@ class WhereClauseBuilder(BaseClauseBuilder):
             # Save formatted string.
             value = new_value
 
-        # Parse
-        if value is None or value.strip() == '':
+        # Check for empty values.
+        if value is None or str(value).strip() == '':
             # None type and empty clauses default to empty.
             clause = []
+
         else:
             clause = str(value).strip()
 
