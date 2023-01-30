@@ -103,8 +103,20 @@ class MysqlDbConnector(AbstractDbConnector):
         """
         return MysqlUtils(self)
 
-    def _get_related_validate_class(self):
+    def _get_related_validate_class(
+        self,
+        enable_identifier_validators, enable_where_validators, enable_column_validators,
+        enable_values_validators, enable_order_by_validators, enable_limit_validators,
+    ):
         """
         Overridable method to get the related "validation functionality" class.
         """
-        return MysqlValidate(self)
+        return MysqlValidate(
+            self,
+            enable_identifier_validators=enable_identifier_validators,
+            enable_where_validators=enable_where_validators,
+            enable_column_validators=enable_column_validators,
+            enable_values_validators=enable_values_validators,
+            enable_order_by_validators=enable_order_by_validators,
+            enable_limit_validators=enable_limit_validators,
+        )

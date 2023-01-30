@@ -336,6 +336,34 @@ class CoreClauseTestMixin:
                 str(clause_object),
             )
 
+        # with self.subTest('WHERE clause - As str, using IN'):
+        #     # As simple as possible.
+        #     clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+        #         validation_class,
+        #         """"id" IN ('Test')""",
+        #     )
+        #     self.assertEqual([[]], clause_object._clause_connectors)
+        #     self.assertEqual([""""id" IN ('Test')"""], clause_object.array)
+        #     self.assertText("""WHERE "id" IN ('Test')""", str(clause_object))
+        #
+        #     # With some spaces.
+        #     clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+        #         validation_class,
+        #         """test_column IN ('Test Value')""",
+        #     )
+        #     self.assertEqual([[]], clause_object._clause_connectors)
+        #     self.assertEqual([""""test_column" IN ('Test Value')"""], clause_object.array)
+        #     self.assertText("""WHERE "test_column" IN ('Test Value')""", str(clause_object))
+        #
+        #     # With multiple values.
+        #     clause_object = self.connector.validate.clauses.WhereClauseBuilder(
+        #         validation_class,
+        #         """test_column IN ('Aaa', "Bbb", `Ccc`, 'Ddd')""",
+        #     )
+        #     self.assertEqual([[]], clause_object._clause_connectors)
+        #     self.assertEqual([""""test_column" IN ('Aaa', 'Bbb', 'Ccc', 'Ddd')"""], clause_object.array)
+        #     self.assertText("""WHERE "test_column" IN ('Aaa', 'Bbb', 'Ccc', 'Ddd')""", str(clause_object))
+
         # with self.subTest('Nested WHERE clause - As str'):
         #     clause_object = self.connector.validate.clauses.WhereClauseBuilder(
         #         validation_class,

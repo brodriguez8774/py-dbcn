@@ -24,7 +24,14 @@ class BaseValidate:
     (As this project develops, logic will likely start here,
     and then be gradually moved to specific connectors as needed.)
     """
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(
+        self,
+        parent,
+        *args,
+        enable_identifier_validators=True, enable_where_validators=True, enable_column_validators=True,
+        enable_values_validators=True, enable_order_by_validators=True, enable_limit_validators=True,
+        **kwargs,
+    ):
         logger.debug('Generating related (core) Validate class.')
 
         # Define connector root object.
@@ -33,6 +40,14 @@ class BaseValidate:
         # Define provided direct parent object.
         self._parent = parent
         self.clauses = clauses
+
+        # Save provided values.
+        self._enable_identifier_validators = enable_identifier_validators
+        self._enable_where_validators = enable_where_validators
+        self._enable_column_validators = enable_column_validators
+        self._enable_values_validators = enable_values_validators
+        self._enable_order_by_validators = enable_order_by_validators
+        self._enable_limit_validators = enable_limit_validators
 
         # Define inheritance variables.
         self._reserved_function_names = None
@@ -333,7 +348,10 @@ class BaseValidate:
         :param as_str: Bool indicating if return value should be formatted as a str. Otherwise is list.
         :return: Properly formatted clause if possible, otherwise error.
         """
-        return clauses.SelectClauseBuilder(self, clause)
+        if self._enable_identifier_validators:
+            return clauses.SelectClauseBuilder(self, clause)
+        else:
+            return clause
 
     def sanitize_where_clause(self, clause):
         """
@@ -341,7 +359,10 @@ class BaseValidate:
         :param clause: WHERE clause to validate.
         :return: Properly formatted clause if possible, otherwise error.
         """
-        return clauses.WhereClauseBuilder(self, clause)
+        if self._enable_where_validators:
+            return clauses.WhereClauseBuilder(self, clause)
+        else:
+            return clause
 
     def sanitize_columns_clause(self, clause):
         """
@@ -350,7 +371,10 @@ class BaseValidate:
         :param as_str: Bool indicating if return value should be formatted as a str. Otherwise is list.
         :return: Properly formatted clause if possible, otherwise error.
         """
-        return clauses.ColumnsClauseBuilder(self, clause)
+        if self._enable_column_validators:
+            return clauses.ColumnsClauseBuilder(self, clause)
+        else:
+            return clause
 
     def sanitize_values_clause(self, clause):
         """
@@ -359,13 +383,22 @@ class BaseValidate:
         :param clause: VALUES clause to validate.
         :return: Properly formatted clause if possible, otherwise error.
         """
-        return clauses.ValuesClauseBuilder(self, clause)
+        if self._enable_values_validators:
+            return clauses.ValuesClauseBuilder(self, clause)
+        else:
+            return clause
 
     def sanitize_values_many_clause(self, clause):
-        return clauses.ValuesManyClauseBuilder(self, clause)
+        if self._enable_values_validators:
+            return clauses.ValuesManyClauseBuilder(self, clause)
+        else:
+            return clause
 
     def sanitize_set_clause(self, clause):
-        return clauses.SetClauseBuilder(self, clause)
+        if self._enable_values_validators:
+            return clauses.SetClauseBuilder(self, clause)
+        else:
+            return clause
 
     def sanitize_order_by_clause(self, clause):
         """
@@ -374,7 +407,10 @@ class BaseValidate:
         :param as_str: Bool indicating if return value should be formatted as a str. Otherwise is list.
         :return: Properly formatted clause if possible, otherwise error.
         """
-        return clauses.OrderByClauseBuilder(self, clause)
+        if self._enable_order_by_validators:
+            return clauses.OrderByClauseBuilder(self, clause)
+        else:
+            return clause
 
     def sanitize_limit_clause(self, clause):
         """

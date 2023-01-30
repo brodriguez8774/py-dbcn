@@ -33,8 +33,12 @@ class AbstractDbConnector(ABC):
     @abstractmethod
     def __init__(
         self,
-        db_host, db_port, db_user, db_pass, db_name, *args,
-        display_connection_output=True, debug=False, **kwargs,
+        db_host, db_port, db_user, db_pass, db_name,
+        *args,
+        display_connection_output=True, debug=False,
+        enable_identifier_validators=True, enable_where_validators=True, enable_column_validators=True,
+        enable_values_validators=True, enable_order_by_validators=True, enable_limit_validators=True,
+        **kwargs,
     ):
         logger.debug('Generating (core) Connector class.')
         db_port = int(db_port)
@@ -90,7 +94,14 @@ class AbstractDbConnector(ABC):
         self.table = self._get_related_tables_class()
         self.tables = self._get_related_tables_class()
         self.utils = self._get_related_utils_class()
-        self.validate = self._get_related_validate_class()
+        self.validate = self._get_related_validate_class(
+            enable_identifier_validators=enable_identifier_validators,
+            enable_where_validators=enable_where_validators,
+            enable_column_validators=enable_column_validators,
+            enable_values_validators=enable_values_validators,
+            enable_order_by_validators=enable_order_by_validators,
+            enable_limit_validators=enable_limit_validators,
+        )
 
         # endregion Child Sub-Class Initialization
 
@@ -153,8 +164,20 @@ class AbstractDbConnector(ABC):
         """
         return BaseUtils(self)
 
-    def _get_related_validate_class(self):
+    def _get_related_validate_class(
+        self,
+        enable_identifier_validators, enable_where_validators, enable_column_validators,
+        enable_values_validators, enable_order_by_validators, enable_limit_validators,
+    ):
         """
         Overridable method to get the related "validation functionality" class.
         """
-        return BaseValidate(self)
+        return BaseValidate(
+            self,
+            enable_identifier_validators=enable_identifier_validators,
+            enable_where_validators=enable_where_validators,
+            enable_column_validators=enable_column_validators,
+            enable_values_validators=enable_values_validators,
+            enable_order_by_validators=enable_order_by_validators,
+            enable_limit_validators=enable_limit_validators,
+        )
