@@ -104,9 +104,6 @@ class BaseClauseBuilder(object):
         if self._quote_format is None:
             raise NotImplementedError('Query type {0} missing quote_format value.'.format(self.__class__))
 
-        print('')
-        print('original val: {0}'.format(value))
-
         if isinstance(value, list):
             # Already list format.
             clause = value
@@ -247,30 +244,6 @@ class BaseClauseBuilder(object):
                     item = item[:-5].rstrip()
                     order_by_descriptor = ' DESC'
 
-            # # Extra string handling for date/datetime objects.
-            # if is_datetime:
-            #     item = item[1:-1]
-
-            print('')
-            print('item: {0}'.format(item))
-
-            # if (
-            #     len(item) > 0
-            #     and item != '*'
-            #     and (
-            #         item[0] not in ['"', "'", '`']
-            #         or item[-1] not in ['"', "'", '`']
-            #     )
-            # ):
-            #     item = """'{0}'""".format(item)
-
-            # # Check if apostrophe in value.
-            # if "'" in item:
-            #     print('\n\n\n\n')
-            #     print('replacing quote in {0}'.format(item))
-            #     item.replace("'", '\0027')
-            #     print('replaced quote in {0}'.format(item))
-
             # If we made it this far, item is valid. Escape with proper quote format and readd.
             is_quoted = False
             if self.is_quoted(item):
@@ -279,9 +252,6 @@ class BaseClauseBuilder(object):
 
             # Skip items that are empty. Otherwise append.
             if len(item) > 0:
-                print('')
-                print('item: {0}'.format(item))
-                print('is_quoted: {0}'.format(is_quoted))
                 if item != '*':
                     # Readd quotes in proper format.
                     # Account for statements that may have multiple parts (denoted by spaces).
@@ -305,8 +275,6 @@ class BaseClauseBuilder(object):
 
                 # Save item to clause.
                 new_clause.append(item)
-
-        print('final result: {0}'.format(item))
 
         return new_clause
 
@@ -491,10 +459,6 @@ class WhereClauseBuilder(BaseClauseBuilder):
 
     def tokenize_value(self, value, indent=0):
         """"""
-        print((' ' * indent) + '\n\n\n\n')
-        print((' ' * indent) + 'clause:')
-        print((' ' * indent) + '{0}'.format(value))
-        print((' ' * indent) + '\n')
         tokens = list(generate_tokens(StringIO(value).readline))
 
         for token in tokens:
@@ -518,7 +482,6 @@ class WhereClauseBuilder(BaseClauseBuilder):
         prev_index_end = 0
         prev_prev_index_end = 0
         while index < len(tokens):
-            print((' ' * indent) + '')
             keep_index = False
             token = tokens[index]
 
@@ -542,14 +505,8 @@ class WhereClauseBuilder(BaseClauseBuilder):
                 # Save value.
                 sub_section_str += token.actual_string
 
-                print((' ' * indent) + '')
-                print((' ' * indent) + 'processing subsection:')
-                print((' ' * indent) + '{0}'.format(sub_section_str))
-                print((' ' * indent) + 'token was: "{0}"'.format(token.actual_string))
-
                 # Check if end of subsection.
                 if token.type in [54] and token.actual_string == ')':
-                    print((' ' * indent) + 'Finishing subsection.')
 
                     # Strip out final outer characters for processing.
                     sub_section_str = sub_section_str.strip()
@@ -561,17 +518,9 @@ class WhereClauseBuilder(BaseClauseBuilder):
                         sub_clause, sub_connectors = self.tokenize_value(sub_section_str, indent=indent+4)
 
                         for item in sub_clause:
-                            print((' ' * indent) + '===> sub appending "{0}"'.format(item))
                             token_set.append(item)
                         for item in sub_connectors:
-                            print((' ' * indent) + '---> sub appending "{0}"'.format(item))
                             connectors.append(item)
-
-                        print((' ' * indent) + 'final sub_clause:')
-                        print(sub_clause)
-                        print((' ' * indent) + 'final sub_connectors:')
-                        print(sub_connectors)
-                        print((' ' * indent) + '\n\n')
 
                     # Clear out subsection holder.
                     sub_section_str = ''
@@ -579,7 +528,6 @@ class WhereClauseBuilder(BaseClauseBuilder):
             # If inner parens exist, then we need to recursively call to process sub-section.
             # First we start building our sub-string to process.
             elif token.type in [54] and token.actual_string == '(':
-                print((' ' * indent) + 'Handling subsection.')
 
                 # Update index trackers.
                 prev_line_start = curr_line_start
@@ -598,16 +546,10 @@ class WhereClauseBuilder(BaseClauseBuilder):
                 # Save value.
                 sub_section_str += token.actual_string
 
-                print((' ' * indent) + '')
-                print((' ' * indent) + 'processing subsection:')
-                print((' ' * indent) + '{0}'.format(sub_section_str))
-                print((' ' * indent) + 'token was: "{0}"'.format(token.actual_string))
-
             # Not processing sub-section.
             # Determine if token is AND or OR.
             elif token.type == 1 and token.actual_string.upper() in ['AND', 'OR']:
                 # Token is AND or OR combiner. Handle appropriately.
-                print((' ' * indent) + 'Handling combiner.')
 
                 # Update index trackers.
                 prev_line_start = curr_line_start
@@ -630,7 +572,6 @@ class WhereClauseBuilder(BaseClauseBuilder):
                 # Save our currently assembled section of tokens.
                 section_str = section_str.strip()
                 if len(section_str) > 0:
-                    print((' ' * indent) + '===> co appending "{0}"'.format(section_str))
                     token_set.append(section_str)
 
                 # Append our found combiner token.
@@ -638,12 +579,9 @@ class WhereClauseBuilder(BaseClauseBuilder):
                 if len(connectors) > 0:
                     for item in connectors:
                         connector_set.append(item)
-                        print((' ' * indent) + '---> co appending "{0}"'.format(item))
                 else:
                     connector_set.append([])
-                    print((' ' * indent) + '---> co appending "{0}"'.format([]))
                 connector_set.append(token.actual_string.upper())
-                print((' ' * indent) + '---> co appending "{0}"'.format(token.actual_string.upper()))
 
                 # Clear out saved section, for further processing.
                 section_str = ''
@@ -681,29 +619,10 @@ class WhereClauseBuilder(BaseClauseBuilder):
 
                     # Take re-parsed sub-token set. Append to current location in token set.
                     curr_index = index
-                    print((' ' * indent) + 'curr_index: {0}'.format(curr_index))
                     orig_tokens_left = list(tokens[:curr_index])
                     orig_tokens_right = list(tokens[(curr_index + 1):])
-                    print((' ' * indent) + 'left:')
-                    for left_token in orig_tokens_left:
-                        print((' ' * indent) + '        {0}'.format(left_token))
-                    print((' ' * indent) + 'right:')
-                    for right_token in orig_tokens_right:
-                        print((' ' * indent) + '        {0}'.format(right_token))
 
-                    new_token_set = orig_tokens_left + re_parsed_set + orig_tokens_right
-                    print((' ' * indent) + '\n')
-                    print((' ' * indent) + 'new_token_set:')
-                    for new_token in new_token_set:
-                        print((' ' * indent) + '    Token: (Type: {0}, String: \'{1}\', Start: {2}, End: {3}'.format(
-                            new_token.type,
-                            new_token.actual_string,
-                            new_token.actual_start,
-                            new_token.actual_end,
-                        ))
-                    print((' ' * indent) + '\n\n')
-
-                    tokens = new_token_set
+                    tokens = orig_tokens_left + re_parsed_set + orig_tokens_right
 
                     # Record that we HAVE NOT fully handled current index yet.
                     keep_index = True
@@ -711,7 +630,6 @@ class WhereClauseBuilder(BaseClauseBuilder):
                 # Certain types need string spacing.
                 elif token.type in [1, 2]:
                     # Standard string types.
-                    print((' ' * indent) + 'Handling string token.')
 
                     # Update index trackers.
                     prev_line_start = curr_line_start
@@ -732,7 +650,6 @@ class WhereClauseBuilder(BaseClauseBuilder):
 
                 elif token.type in [54]:
                     # Operator types, such as equals sign.
-                    print((' ' * indent) + 'Handling operator token.')
 
                     # Update index trackers.
                     prev_line_start = curr_line_start
@@ -754,7 +671,6 @@ class WhereClauseBuilder(BaseClauseBuilder):
 
                 else:
                     # All other types. Append as-is.
-                    print((' ' * indent) + 'Handling generic token.')
 
                     # Update index trackers.
                     prev_line_start = curr_line_start
@@ -773,17 +689,8 @@ class WhereClauseBuilder(BaseClauseBuilder):
                     # Save value.
                     section_str += token.actual_string
 
-            print((' ' * indent) + 'section_str: {0}'.format(section_str))
-
             if not keep_index:
                 index += 1
-
-                print((' ' * indent) + 'Token: (Type: {0}, String: \'{1}\', Start: {2}, End: {3}'.format(
-                    token.type,
-                    token.actual_string,
-                    token.actual_start,
-                    token.actual_end,
-                ))
 
         # Done with loops. Do final post-processing.
         # Trim trailing final paren, if present.
@@ -794,15 +701,12 @@ class WhereClauseBuilder(BaseClauseBuilder):
         section_str = section_str.strip()
         if len(section_str) > 0:
             token_set.append(section_str)
-            print((' ' * indent) + '===> fin appending "{0}"'.format(section_str))
 
         if len(connectors) > 0:
             for item in connectors:
                 connector_set.append(item)
-                print((' ' * indent) + '---> fin appending "{0}"'.format(item))
         elif len(section_str) > 0:
             connector_set.append([])
-            print((' ' * indent) + '---> fin appending "{0}"'.format([]))
 
         # Double check expected location.
         temp = value.split('\n')
@@ -843,14 +747,6 @@ class WhereClauseBuilder(BaseClauseBuilder):
 
             raise ValueError('Error parsing array indexes. Failed at index parsing.')
 
-        print((' ' * indent) + '\n')
-        print((' ' * indent) + 'final clause_connectors:')
-        print((' ' * indent) + '{0}'.format(connector_set))
-        print((' ' * indent) + '')
-        print((' ' * indent) + 'final token_set:')
-        print((' ' * indent) + '{0}'.format(token_set))
-        print((' ' * indent) + '\n\n\n\n')
-
         return token_set, connector_set
 
     def _tokenize_handle_space(self, curr_index_start, prev_index_end, section_str):
@@ -866,27 +762,16 @@ class WhereClauseBuilder(BaseClauseBuilder):
 
     def _tokenize_edge_case_str(self, value, line_start, line_end, index_start, index_end, indent=0):
         """"""
-        print((' ' * indent) + 'line_start: {0}'.format(line_start))
-        print((' ' * indent) + 'line_end: {0}'.format(line_end))
-        print((' ' * indent) + 'index_start: {0}'.format(index_start))
-        print((' ' * indent) + 'index_end: {0}'.format(index_end))
         curr_line = line_start
         prev_index_start = index_start
         prev_index_end = index_start + 1
         index_start += 1
         index_end -= 1
-        print((' ' * indent) + '')
-        print((' ' * indent) + 'curr_line: {0}'.format(curr_line))
-        print((' ' * indent) + 'prev_index_start: {0}'.format(prev_index_start))
-        print((' ' * indent) + 'prev_index_end: {0}'.format(prev_index_end))
-        # print((' ' * indent) + 'curr_index_start: {0}'.format(curr_index_start))
-        # print((' ' * indent) + 'curr_index_end: {0}'.format(curr_index_end))
 
         return_set = []
         if len(value) > 0:
             # Save starting quote in str.
             start_token = list(generate_tokens(StringIO(value[0]).readline))[0]
-            print((' ' * indent) + 'handling first index')
             start_token.actual_start = (curr_line, index_start - 1)
             start_token.actual_end = (curr_line, index_start)
             start_token.actual_string = start_token.string
@@ -895,12 +780,6 @@ class WhereClauseBuilder(BaseClauseBuilder):
             # Update for actual start.
             curr_index_start = index_start
             curr_index_end = index_start
-            print((' ' * indent) + '')
-            print((' ' * indent) + 'curr_line: {0}'.format(curr_line))
-            print((' ' * indent) + 'prev_index_start: {0}'.format(prev_index_start))
-            print((' ' * indent) + 'prev_index_end: {0}'.format(prev_index_end))
-            # print((' ' * indent) + 'curr_index_start: {0}'.format(curr_index_start))
-            # print((' ' * indent) + 'curr_index_end: {0}'.format(curr_index_end))
 
             # Parse all inner-values (between starting and ending quote) to force standard tokenization.
             tokens = list(generate_tokens(StringIO(value[1:-1]).readline))
@@ -910,8 +789,6 @@ class WhereClauseBuilder(BaseClauseBuilder):
                 if token.type in [0, 4, 6]:
                     continue
 
-                print((' ' * indent) + '')
-                print((' ' * indent) + 'processing token: {0}'.format(token))
                 # Calculate total lengths, as determined by tokenizer.
                 line_length = token.end[0] - token.start[0]
                 index_length = token.end[1] - token.start[1]
@@ -923,20 +800,11 @@ class WhereClauseBuilder(BaseClauseBuilder):
                 curr_index_start = token.start[1] + index_start
                 curr_index_end = curr_index_start + index_length
 
-                print((' ' * indent) + '')
-                print((' ' * indent) + '    curr_line: {0}'.format(curr_line))
-                print((' ' * indent) + '    prev_index_start: {0}'.format(prev_index_start))
-                print((' ' * indent) + '    prev_index_end: {0}'.format(prev_index_end))
-                print((' ' * indent) + '    curr_index_start: {0}'.format(curr_index_start))
-                print((' ' * indent) + '    curr_index_end: {0}'.format(curr_index_end))
-
                 # Check if current index and previous index match. If not, then likely have missing space characters.
                 temp_val = curr_index_start - prev_index_end
-                print((' ' * indent) + '    temp_val: {0}'.format(temp_val))
                 if temp_val > 0:
                     # Missing characters. Add that many space tokens.
 
-                    print((' ' * indent) + '    adding spaces')
                     curr_index_start = prev_index_end
                     for x in range(temp_val):
                         space_token = list(generate_tokens(StringIO('').readline))[0]
@@ -944,12 +812,6 @@ class WhereClauseBuilder(BaseClauseBuilder):
                         space_token.actual_start = (curr_line, curr_index_start)
                         curr_index_start += 1
                         space_token.actual_end = (curr_line, curr_index_start)
-                        print((' ' * indent) + '        Token: (Type: {0}, String: \'{1}\', Start: {2}, End: {3}'.format(
-                            space_token.type,
-                            space_token.actual_string,
-                            space_token.actual_start,
-                            space_token.actual_end,
-                        ))
                         return_set.append(space_token)
 
                 # Generate proper token start/end locations.
@@ -963,13 +825,6 @@ class WhereClauseBuilder(BaseClauseBuilder):
                 # Update variables for next loop.
                 prev_index_start = curr_index_start
                 prev_index_end = curr_index_end
-
-                # print((' ' * indent) + '')
-                # print((' ' * indent) + '    curr_line: {0}'.format(curr_line))
-                # print((' ' * indent) + '    prev_index_start: {0}'.format(prev_index_start))
-                # print((' ' * indent) + '    prev_index_end: {0}'.format(prev_index_end))
-                # print((' ' * indent) + '    curr_index_start: {0}'.format(curr_index_start))
-                # print((' ' * indent) + '    curr_index_end: {0}'.format(curr_index_end))
 
             # Double check expected location.
             if curr_line != line_end:
@@ -993,30 +848,8 @@ class WhereClauseBuilder(BaseClauseBuilder):
                     space_token.actual_string = ' '
                     space_token.actual_start = (curr_line, curr_index_start)
                     space_token.actual_end = (curr_line, curr_index_end)
-                    print((' ' * indent) + '        Token: (Type: {0}, String: \'{1}\', Start: {2}, End: {3}'.format(
-                        space_token.type,
-                        space_token.actual_string,
-                        space_token.actual_start,
-                        space_token.actual_end,
-                    ))
                     return_set.append(space_token)
                     curr_index_end += 1
-
-                # print((' ' * indent) + '')
-                # print((' ' * indent) + 'curr_index_end: {0}'.format(curr_index_end))
-                # print((' ' * indent) + 'prev_index_end: {0}'.format(prev_index_end))
-                # print((' ' * indent) + 'index_end: {0}'.format(index_end))
-                #
-                # print((' ' * indent) + 'Final return_set:')
-                # for token in return_set:
-                #     print((' ' * indent) + '    Token: (Type: {0}, String: \'{1}\', Start: {2}, End: {3}'.format(
-                #         token.type,
-                #         token.actual_string,
-                #         token.actual_start,
-                #         token.actual_end,
-                #     ))
-                #
-                # raise ValueError('Error parsing array indexes. Failed at index parsing.')
 
             # Save ending quote in str.
             end_token = list(generate_tokens(StringIO(value[-1]).readline))[0]
@@ -1026,15 +859,6 @@ class WhereClauseBuilder(BaseClauseBuilder):
             return_set.append(end_token)
 
         return return_set
-
-    def _tokenize_value(self, value):
-        """Recursive inner call for "tokenize_value" function."""
-        tokens = generate_tokens(StringIO(value).readline)
-        for token in tokens:
-
-            # If inner parens exist, then we need to recursively call to process sub-section.
-            if token == '(':
-                pass
 
 
 class ColumnsClauseBuilder(BaseClauseBuilder):
@@ -1081,27 +905,16 @@ class ValuesClauseBuilder(BaseClauseBuilder):
 
 class ValuesManyClauseBuilder(ValuesClauseBuilder):
     """"""
-
     def _validate_clause(self, original_clause):
         """Used to validate/sanitize an array of clause values."""
 
         # Handle the same as original logic, except there is one extra layer.
         # So loop through each inner item and hand that to validation.
-        print('\n\n\n\n')
-        print('original_clause:')
-        print('{0}'.format(original_clause))
 
         if len(original_clause) > 0:
             for index in range(len(original_clause)):
                 inner_clause = original_clause[index]
-                print('    inner_clause:')
-                print('    {0}'.format(inner_clause))
                 original_clause[index] = super()._validate_clause(inner_clause)
-                print('    updated inner_clause:')
-                print('    {0}'.format(original_clause[index]))
-
-            print('final result:')
-            print('{0}'.format(original_clause))
 
             # Return validated clause.
             return original_clause
@@ -1118,12 +931,7 @@ class ValuesManyClauseBuilder(ValuesClauseBuilder):
             for inner_array in self.array:
                 for value in inner_array:
                     all_values.append(value)
-            print('all_values:')
-            print('{0}'.format(all_values))
-            print(to_str.format(*all_values))
             to_str = to_str.format(*all_values)
-            print('to_str:')
-            print('{0}'.format(to_str))
             if self._print_parens:
                 to_str = '{0}({1})'.format(self._print_prefix, to_str)
             else:

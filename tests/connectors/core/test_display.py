@@ -391,9 +391,6 @@ class CoreDisplayRecordsMixin:
 
         with self.subTest('With 1 record present'):
             # Create record.
-            print('quote_str_literal_format: {0}'.format(self.connector.validate._quote_str_literal_format))
-            print('')
-            print('insert str: {0}'.format('(1, {0}tn{0}, {0}td{0})'.format(self.connector.validate._quote_str_literal_format)))
             self.connector.records.insert(
                 'category',
                 '(1, {0}tn{0}, {0}td{0})'.format(self.connector.validate._quote_str_literal_format),
