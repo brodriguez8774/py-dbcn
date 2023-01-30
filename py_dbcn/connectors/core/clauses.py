@@ -315,6 +315,7 @@ class SelectClauseBuilder(BaseClauseBuilder):
 
         # Process and save provided clause.
         self.array = clause
+        self._print_parens = False
 
     def __str__(self):
         # Handle for all-star return.

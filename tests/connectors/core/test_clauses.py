@@ -54,61 +54,61 @@ class CoreClauseTestMixin:
             # With no quotes.
             clause_object = self.connector.validate.clauses.SelectClauseBuilder(validation_class, 'id')
             self.assertEqual(['"id"'], clause_object.array)
-            self.assertText("""("id")""", str(clause_object))
+            self.assertText(""""id\"""", str(clause_object))
 
             # With single quotes.
             clause_object = self.connector.validate.clauses.SelectClauseBuilder(validation_class, "'id'")
             self.assertEqual(['"id"'], clause_object.array)
-            self.assertText("""("id")""", str(clause_object))
+            self.assertText(""""id\"""", str(clause_object))
 
             # With double quotes.
             clause_object = self.connector.validate.clauses.SelectClauseBuilder(validation_class, '"id"')
             self.assertEqual(['"id"'], clause_object.array)
-            self.assertText("""("id")""", str(clause_object))
+            self.assertText(""""id\"""", str(clause_object))
 
             # With backtick quotes.
             clause_object = self.connector.validate.clauses.SelectClauseBuilder(validation_class, '`id`')
             self.assertEqual(['"id"'], clause_object.array)
-            self.assertText("""("id")""", str(clause_object))
+            self.assertText(""""id\"""", str(clause_object))
 
             clause_object = self.connector.validate.clauses.SelectClauseBuilder(validation_class, 'id, code, name')
             self.assertEqual(['"id"', '"code"', '"name"'], clause_object.array)
-            self.assertText("""("id", "code", "name")""", str(clause_object))
+            self.assertText(""""id", "code", "name\"""", str(clause_object))
 
         with self.subTest('Basic SELECT clause - As list'):
             clause_object = self.connector.validate.clauses.SelectClauseBuilder(validation_class, ['id'])
             self.assertEqual(['"id"'], clause_object.array)
-            self.assertText("""("id")""", str(clause_object))
+            self.assertText(""""id\"""", str(clause_object))
 
             clause_object = self.connector.validate.clauses.SelectClauseBuilder(
                 validation_class,
                 ['id', 'code', 'name'],
             )
             self.assertEqual(['"id"', '"code"', '"name"'], clause_object.array)
-            self.assertText("""("id", "code", "name")""", str(clause_object))
+            self.assertText(""""id", "code", "name\"""", str(clause_object))
 
         with self.subTest('Basic SELECT clause - As tuple'):
             clause_object = self.connector.validate.clauses.SelectClauseBuilder(validation_class, ('id',))
             self.assertEqual(['"id"'], clause_object.array)
-            self.assertText("""("id")""", str(clause_object))
+            self.assertText(""""id\"""", str(clause_object))
 
             clause_object = self.connector.validate.clauses.SelectClauseBuilder(
                 validation_class,
                 ('id', 'code', 'name'),
             )
             self.assertEqual(['"id"', '"code"', '"name"'], clause_object.array)
-            self.assertText("""("id", "code", "name")""", str(clause_object))
+            self.assertText(""""id", "code", "name\"""", str(clause_object))
 
         with self.subTest('Values with function calls'):
             # Uppercase.
             clause_object = self.connector.validate.clauses.SelectClauseBuilder(validation_class, 'COUNT(*)')
             self.assertEqual(['COUNT(*)'], clause_object.array)
-            self.assertText("""(COUNT(*))""", str(clause_object))
+            self.assertText("""COUNT(*)""", str(clause_object))
 
             # Lowercase.
             clause_object = self.connector.validate.clauses.SelectClauseBuilder(validation_class, 'count(*)')
             self.assertEqual(['COUNT(*)'], clause_object.array)
-            self.assertText("""(COUNT(*))""", str(clause_object))
+            self.assertText("""COUNT(*)""", str(clause_object))
 
     def test__clause__where(self):
         """Test logic for parsing a WHERE clause."""

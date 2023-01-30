@@ -931,15 +931,15 @@ class CoreValidateTestMixin:
         with self.subTest('Values as str - Without quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause('id')
-            self.assertText('({0})'.format(self._quote_select_identifier_format.format('id')), result)
+            self.assertText('{0}'.format(self._quote_select_identifier_format.format('id')), result)
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause(' id ')
-            self.assertText('({0})'.format(self._quote_select_identifier_format.format('id')), result)
+            self.assertText('{0}'.format(self._quote_select_identifier_format.format('id')), result)
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause('id, name')
             self.assertText(
-                '({0}, {1})'.format(
+                '{0}, {1}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name')
                 ),
@@ -948,7 +948,7 @@ class CoreValidateTestMixin:
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause(' id ,  name ')
             self.assertText(
-                '({0}, {1})'.format(
+                '{0}, {1}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                 ),
@@ -958,7 +958,7 @@ class CoreValidateTestMixin:
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause('id, name, code')
             self.assertText(
-                '({0}, {1}, {2})'.format(
+                '{0}, {1}, {2}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                     self._quote_select_identifier_format.format('code'),
@@ -968,7 +968,7 @@ class CoreValidateTestMixin:
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause(' id ,  name ,  code ')
             self.assertText(
-                '({0}, {1}, {2})'.format(
+                '{0}, {1}, {2}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                     self._quote_select_identifier_format.format('code'),
@@ -979,15 +979,15 @@ class CoreValidateTestMixin:
         with self.subTest('Values as triple str - Without quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause("""id""")
-            self.assertText('({0})'.format(self._quote_select_identifier_format.format('id')), result)
+            self.assertText('{0}'.format(self._quote_select_identifier_format.format('id')), result)
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause(""" id """)
-            self.assertText('({0})'.format(self._quote_select_identifier_format.format('id')), result)
+            self.assertText('{0}'.format(self._quote_select_identifier_format.format('id')), result)
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause("""id, name""")
             self.assertText(
-                '({0}, {1})'.format(
+                '{0}, {1}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                 ),
@@ -996,7 +996,7 @@ class CoreValidateTestMixin:
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause(""" id ,  name """)
             self.assertText(
-                '({0}, {1})'.format(
+                '{0}, {1}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                 ),
@@ -1006,7 +1006,7 @@ class CoreValidateTestMixin:
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause("""id, name, code""")
             self.assertText(
-                '({0}, {1}, {2})'.format(
+                '{0}, {1}, {2}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                     self._quote_select_identifier_format.format('code'),
@@ -1016,7 +1016,7 @@ class CoreValidateTestMixin:
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause(""" id ,  name ,  code """)
             self.assertText(
-                '({0}, {1}, {2})'.format(
+                '{0}, {1}, {2}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                     self._quote_select_identifier_format.format('code'),
@@ -1027,15 +1027,15 @@ class CoreValidateTestMixin:
         with self.subTest('Values as list - Without quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause(['id'])
-            self.assertText('({0})'.format(self._quote_select_identifier_format.format('id')), result)
+            self.assertText('{0}'.format(self._quote_select_identifier_format.format('id')), result)
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause([' id '])
-            self.assertText('({0})'.format(self._quote_select_identifier_format.format('id')), result)
+            self.assertText('{0}'.format(self._quote_select_identifier_format.format('id')), result)
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(['id', 'name'])
             self.assertText(
-                '({0}, {1})'.format(
+                '{0}, {1}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                 ),
@@ -1044,7 +1044,7 @@ class CoreValidateTestMixin:
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause([' id ', ' name '])
             self.assertText(
-                '({0}, {1})'.format(
+                '{0}, {1}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                 ),
@@ -1054,7 +1054,7 @@ class CoreValidateTestMixin:
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(['id', 'name', 'code'])
             self.assertText(
-                '({0}, {1}, {2})'.format(
+                '{0}, {1}, {2}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                     self._quote_select_identifier_format.format('code'),
@@ -1064,7 +1064,7 @@ class CoreValidateTestMixin:
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause([' id ', ' name ', ' code '])
             self.assertText(
-                '({0}, {1}, {2})'.format(
+                '{0}, {1}, {2}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                     self._quote_select_identifier_format.format('code'),
@@ -1075,15 +1075,15 @@ class CoreValidateTestMixin:
         with self.subTest('Values as tuple - Without quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause(('id',))
-            self.assertText('({0})'.format(self._quote_select_identifier_format.format('id')), result)
+            self.assertText('{0}'.format(self._quote_select_identifier_format.format('id')), result)
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause((' id ',))
-            self.assertText('({0})'.format(self._quote_select_identifier_format.format('id')), result)
+            self.assertText('{0}'.format(self._quote_select_identifier_format.format('id')), result)
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(('id', 'name'))
             self.assertText(
-                '({0}, {1})'.format(
+                '{0}, {1}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                 ),
@@ -1092,7 +1092,7 @@ class CoreValidateTestMixin:
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause((' id ', ' name '))
             self.assertText(
-                '({0}, {1})'.format(
+                '{0}, {1}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                 ),
@@ -1102,7 +1102,7 @@ class CoreValidateTestMixin:
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(('id', 'name', 'code'))
             self.assertText(
-                '({0}, {1}, {2})'.format(
+                '{0}, {1}, {2}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                     self._quote_select_identifier_format.format('code'),
@@ -1112,7 +1112,7 @@ class CoreValidateTestMixin:
             # With extra whitespace.
             result = self.connector.validate.sanitize_select_identifier_clause((' id ', ' name ', ' code '))
             self.assertText(
-                '({0}, {1}, {2})'.format(
+                '{0}, {1}, {2}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                     self._quote_select_identifier_format.format('code'),
@@ -1123,12 +1123,12 @@ class CoreValidateTestMixin:
         with self.subTest('Values as str - With single quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause("'id'")
-            self.assertText('({0})'.format(self._quote_select_identifier_format.format('id')), result)
+            self.assertText('{0}'.format(self._quote_select_identifier_format.format('id')), result)
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause("'id', 'name'")
             self.assertText(
-                '({0}, {1})'.format(
+                '{0}, {1}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                 ),
@@ -1138,7 +1138,7 @@ class CoreValidateTestMixin:
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause("'id', 'name', 'code'")
             self.assertText(
-                '({0}, {1}, {2})'.format(
+                '{0}, {1}, {2}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                     self._quote_select_identifier_format.format('code')
@@ -1149,12 +1149,12 @@ class CoreValidateTestMixin:
         with self.subTest('Values as list - With single quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause(["'id'"])
-            self.assertText('({0})'.format(self._quote_select_identifier_format.format('id')), result)
+            self.assertText('{0}'.format(self._quote_select_identifier_format.format('id')), result)
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(["'id'", "'name'"])
             self.assertText(
-                '({0}, {1})'.format(
+                '{0}, {1}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                 ),
@@ -1164,7 +1164,7 @@ class CoreValidateTestMixin:
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(["'id'", "'name'", "'code'"])
             self.assertText(
-                '({0}, {1}, {2})'.format(
+                '{0}, {1}, {2}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                     self._quote_select_identifier_format.format('code'),
@@ -1175,12 +1175,12 @@ class CoreValidateTestMixin:
         with self.subTest('Values as tuple - With single quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause(("'id'",))
-            self.assertText('({0})'.format(self._quote_select_identifier_format.format('id')), result)
+            self.assertText('{0}'.format(self._quote_select_identifier_format.format('id')), result)
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(("'id'", "'name'"))
             self.assertText(
-                '({0}, {1})'.format(
+                '{0}, {1}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                 ),
@@ -1190,7 +1190,7 @@ class CoreValidateTestMixin:
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(("'id'", "'name'", "'code'"))
             self.assertText(
-                '({0}, {1}, {2})'.format(
+                '{0}, {1}, {2}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                     self._quote_select_identifier_format.format('code'),
@@ -1201,12 +1201,12 @@ class CoreValidateTestMixin:
         with self.subTest('Values as str - With double quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause('"id"')
-            self.assertText('({0})'.format(self._quote_select_identifier_format.format('id')), result)
+            self.assertText('{0}'.format(self._quote_select_identifier_format.format('id')), result)
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause('"id", "name"')
             self.assertText(
-                '({0}, {1})'.format(
+                '{0}, {1}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                 ),
@@ -1216,7 +1216,7 @@ class CoreValidateTestMixin:
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause('"id", "name", code')
             self.assertText(
-                '({0}, {1}, {2})'.format(
+                '{0}, {1}, {2}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                     self._quote_select_identifier_format.format('code'),
@@ -1227,12 +1227,12 @@ class CoreValidateTestMixin:
         with self.subTest('Values as list - With double quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause(['"id"'])
-            self.assertText('({0})'.format(self._quote_select_identifier_format.format('id')), result)
+            self.assertText('{0}'.format(self._quote_select_identifier_format.format('id')), result)
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(['"id"', '"name"'])
             self.assertText(
-                '({0}, {1})'.format(
+                '{0}, {1}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                 ),
@@ -1242,7 +1242,7 @@ class CoreValidateTestMixin:
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(['"id"', '"name"', '"code"'])
             self.assertText(
-                '({0}, {1}, {2})'.format(
+                '{0}, {1}, {2}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                     self._quote_select_identifier_format.format('code'),
@@ -1253,12 +1253,12 @@ class CoreValidateTestMixin:
         with self.subTest('Values as tuple - With double quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause(('"id"',))
-            self.assertText('({0})'.format(self._quote_select_identifier_format.format('id')), result)
+            self.assertText('{0}'.format(self._quote_select_identifier_format.format('id')), result)
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(('"id"', '"name"'))
             self.assertText(
-                '({0}, {1})'.format(
+                '{0}, {1}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                 ),
@@ -1268,7 +1268,7 @@ class CoreValidateTestMixin:
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(('"id"', '"name"', '"code"'))
             self.assertText(
-                '({0}, {1}, {2})'.format(
+                '{0}, {1}, {2}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                     self._quote_select_identifier_format.format('code'),
@@ -1279,12 +1279,12 @@ class CoreValidateTestMixin:
         with self.subTest('Values as str - With backtick quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause('`id`')
-            self.assertText('({0})'.format(self._quote_select_identifier_format.format('id')), result)
+            self.assertText('{0}'.format(self._quote_select_identifier_format.format('id')), result)
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause('`id`, `name`')
             self.assertText(
-                '({0}, {1})'.format(
+                '{0}, {1}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                 ),
@@ -1294,7 +1294,7 @@ class CoreValidateTestMixin:
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause('`id`, `name`, `code`')
             self.assertText(
-                '({0}, {1}, {2})'.format(
+                '{0}, {1}, {2}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                     self._quote_select_identifier_format.format('code'),
@@ -1305,12 +1305,12 @@ class CoreValidateTestMixin:
         with self.subTest('Values as list - With backtick quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause(['`id`'])
-            self.assertText('({0})'.format(self._quote_select_identifier_format.format('id')), result)
+            self.assertText('{0}'.format(self._quote_select_identifier_format.format('id')), result)
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(['`id`', '`name`'])
             self.assertText(
-                '({0}, {1})'.format(
+                '{0}, {1}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                 ),
@@ -1320,7 +1320,7 @@ class CoreValidateTestMixin:
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(['`id`', '`name`', '`code`'])
             self.assertText(
-                '({0}, {1}, {2})'.format(
+                '{0}, {1}, {2}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                     self._quote_select_identifier_format.format('code'),
@@ -1331,12 +1331,12 @@ class CoreValidateTestMixin:
         with self.subTest('Values as tuple - With backtick quotes'):
             # Single val provided.
             result = self.connector.validate.sanitize_select_identifier_clause(('`id`',))
-            self.assertText('({0})'.format(self._quote_select_identifier_format.format('id')), result)
+            self.assertText('{0}'.format(self._quote_select_identifier_format.format('id')), result)
 
             # Two vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(('`id`', '`name`'))
             self.assertText(
-                '({0}, {1})'.format(
+                '{0}, {1}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                 ),
@@ -1346,7 +1346,7 @@ class CoreValidateTestMixin:
             # Three vals provided.
             result = self.connector.validate.sanitize_select_identifier_clause(('`id`', '`name`', '`code`'))
             self.assertText(
-                '({0}, {1}, {2})'.format(
+                '{0}, {1}, {2}'.format(
                     self._quote_select_identifier_format.format('id'),
                     self._quote_select_identifier_format.format('name'),
                     self._quote_select_identifier_format.format('code'),
@@ -1356,16 +1356,16 @@ class CoreValidateTestMixin:
 
         with self.subTest('Values as non-standard types'):
             result = self.connector.validate.sanitize_select_identifier_clause((1, True))
-            self.assertText('({0}, {1})'.format(1, True), result)
+            self.assertText('{0}, {1}'.format(1, True), result)
 
         with self.subTest('Values with function calls'):
             # Uppercase.
             result = self.connector.validate.sanitize_select_identifier_clause('COUNT(*)')
-            self.assertText('(COUNT(*))', result)
+            self.assertText('COUNT(*)', result)
 
             # Lowercase.
             result = self.connector.validate.sanitize_select_identifier_clause('count(*)')
-            self.assertText('(COUNT(*))', result)
+            self.assertText('COUNT(*)', result)
 
     def test__sanitize_select_identifier_clause__failure(self):
         """
