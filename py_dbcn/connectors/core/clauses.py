@@ -308,14 +308,17 @@ class SelectClauseBuilder(BaseClauseBuilder):
         # Pre-parent-call initialize values.
         self._clause_prefix = ''
         self._print_prefix = ''
-        self._quote_format = '"'
 
         # Call parent logic.
         super().__init__(validation_class, *args, clause_type=clause_type, **kwargs)
 
+        # Post-parent-call initialize values.
+        self._quote_format = self._parent._quote_identifier_format
+        self._print_parens = False
+
         # Process and save provided clause.
         self.array = clause
-        self._print_parens = False
+
 
     def __str__(self):
         # Handle for all-star return.
@@ -348,10 +351,12 @@ class WhereClauseBuilder(BaseClauseBuilder):
         # Pre-parent-call initialize values.
         self._clause_prefix = 'WHERE'
         self._print_prefix = 'WHERE '
-        self._quote_format = '"'
 
         # Call parent logic.
         super().__init__(validation_class, *args, clause_type=clause_type, **kwargs)
+
+        # Post-parent-call initialize values.
+        self._quote_format = self._parent._quote_column_format
 
         # Process and save provided clause.
         self.array = clause
@@ -868,10 +873,12 @@ class ColumnsClauseBuilder(BaseClauseBuilder):
         # Pre-parent-call initialize values.
         self._clause_prefix = 'COLUMNS'
         self._print_prefix = ''
-        self._quote_format = '"'
 
         # Call parent logic.
         super().__init__(validation_class, *args, clause_type=clause_type, **kwargs)
+
+        # Post-parent-call initialize values.
+        self._quote_format = self._parent._quote_column_format
 
         # Process and save provided clause.
         self.array = clause
@@ -891,12 +898,12 @@ class ValuesClauseBuilder(BaseClauseBuilder):
         # Pre-parent-call initialize values.
         self._clause_prefix = 'VALUES'
         self._print_prefix = 'VALUES '
-        self._quote_format = "'"
 
         # Call parent logic.
         super().__init__(validation_class, *args, clause_type=clause_type, **kwargs)
 
         # Post-parent-call initialize values.
+        self._quote_format = self._parent._quote_str_literal_format
         self._always_quote = False
         self._allow_spaces = True
 
@@ -973,12 +980,12 @@ class SetClauseBuilder(BaseClauseBuilder):
         # Pre-parent-call initialize values.
         self._clause_prefix = 'SET'
         self._print_prefix = 'SET '
-        self._quote_format = '"'
 
         # Call parent logic.
         super().__init__(validation_class, *args, clause_type=clause_type, **kwargs)
 
         # Post-parent-call initialize values.
+        self._quote_format = self._parent._quote_column_format
         self._print_parens = False
         self._always_quote = True
         self._allow_spaces = False
@@ -999,6 +1006,7 @@ class OrderByClauseBuilder(BaseClauseBuilder):
         super().__init__(validation_class, *args, clause_type=clause_type, **kwargs)
 
         # Post-parent-call initialize values.
+        self._quote_format = self._parent._quote_column_format
         self._print_parens = False
 
         # Process and save provided clause.
