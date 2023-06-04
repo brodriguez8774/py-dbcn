@@ -2,8 +2,15 @@ Version History
 ***************
 
 
+0.3.2 - Bugfixes for PostgreSQL
+===============================
+* Corrects some issues with PostgreSQL queries.
+* Unfortunately breaks MySQL. Use 0.3.1 for MySQL for now.
+
+
 0.3.1 - Bugfix Release
-----------------------
+======================
+* Various general bugfixes.
 
 
 0.3.0 - Stable PostgreSQL Querying

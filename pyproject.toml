@@ -4,7 +4,7 @@ build-backend = 'setuptools.build_meta:__legacy__'
 
 [project]
 name = "py-dbcn"
-version = "0.3.1"
+version = "0.3.2"
 description = "Connector for Pythonic interaction with multiple database types."
 readme = "readme.md"
 authors = [{ name = "Brandon Rodriguez", email = "brodriguez8774@gmail.com"}]
@@ -24,9 +24,11 @@ classifiers = [
 keywords = [
     "database",
     "mysql",
+    "postgresql",
 ]
 dependencies = [
-    "mysqlclient",
+#    "mysqlclient",         # Required if connecting to MySQL databases.
+#    "psycopg2-binary",     # Required if connecting to PostgreSQL databases.
 ]
 requires-python = ">=3.7"
 
