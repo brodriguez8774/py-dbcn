@@ -267,10 +267,10 @@ class BaseClauseBuilder(object):
                         if self._always_quote or is_quoted:
                             item = '{1}{0}{1}'.format(item, self._quote_format)
 
-                # Readd identifiers in proper format.
+                # Re-add identifiers in proper format.
                 item = '{0}{1}{2}'.format(item, cast_identifier, order_by_descriptor)
 
-                # Readd function calls if present.
+                # Re-add function calls if present.
                 item = '{1}{0}{2}'.format(item, stripped_left.upper(), stripped_right)
 
                 # Save item to clause.
