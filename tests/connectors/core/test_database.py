@@ -53,12 +53,16 @@ class CoreDatabaseTestMixin:
         with self.subTest('With select_1 database selected'):
             db_name = '{0}__select_1'.format(self.test_db_name)
 
-            # Verify database exists.
+            # Ensure database does not currently exists.
+            # Guarantees tests are done from a consistent state.
             try:
-                self.connector.database.create(db_name)
-            except self.connector.errors.database_already_exists:
+                self.connector.database.drop(db_name, display_query=False, display_results=False)
+            except self.connector.errors.database_does_not_exist:
                 # Database already exists, as we want.
                 pass
+
+            # Create desired database.
+            self.connector.database.create(db_name)
 
             # Switch databases and verify select changed.
             self.connector.database.use(db_name)
@@ -72,12 +76,16 @@ class CoreDatabaseTestMixin:
         with self.subTest('With select_2 database selected'):
             db_name = '{0}__select_2'.format(self.test_db_name)
 
-            # Verify database exists.
+            # Ensure database does not currently exists.
+            # Guarantees tests are done from a consistent state.
             try:
-                self.connector.database.create(db_name)
-            except self.connector.errors.database_already_exists:
+                self.connector.database.drop(db_name, display_query=False, display_results=False)
+            except self.connector.errors.database_does_not_exist:
                 # Database already exists, as we want.
                 pass
+
+            # Create desired database.
+            self.connector.database.create(db_name)
 
             # Switch databases and verify select changed.
             self.connector.database.use(db_name)
@@ -95,12 +103,16 @@ class CoreDatabaseTestMixin:
         db_name = '{0}__show'.format(self.test_db_name)
 
         with self.subTest('SHOW query when database exists'):
-            # Verify database exists.
+            # Ensure database does not currently exists.
+            # Guarantees tests are done from a consistent state.
             try:
-                self.connector.database.create(db_name)
-            except self.connector.errors.database_already_exists:
+                self.connector.database.drop(db_name, display_query=False, display_results=False)
+            except self.connector.errors.database_does_not_exist:
                 # Database already exists, as we want.
                 pass
+
+            # Create desired database.
+            self.connector.database.create(db_name)
 
             # Run test query.
             results = self.connector.database.show()
@@ -132,18 +144,19 @@ class CoreDatabaseTestMixin:
         """
         db_name = '{0}__create__success'.format(self.test_db_name)
 
-        # Verify database does not yet exist.
+        # Ensure database does not currently exists.
+        # Guarantees tests are done from a consistent state.
         try:
-            self.connector.database.drop(db_name)
-        except ValueError:
-            # Database does not yet exist, as we want.
+            self.connector.database.drop(db_name, display_query=False, display_results=False)
+        except self.connector.errors.database_does_not_exist:
+            # Database already exists, as we want.
             pass
 
         # Check databases prior to test query. Verify expected database did not return.
         results = self.connector.database.show()
         self.assertNotIn(db_name.casefold(), (str(x).casefold() for x in results))
 
-        # Run test query.
+        # Create desired database.
         self.connector.database.create(db_name)
 
         # Check databases after test query. Verify expected database returned.
@@ -157,12 +170,16 @@ class CoreDatabaseTestMixin:
         """
         db_name = '{0}__create__failure'.format(self.test_db_name)
 
-        # Verify database does not yet exist.
+        # Ensure database does not currently exists.
+        # Guarantees tests are done from a consistent state.
         try:
-            self.connector.database.create(db_name)
-        except self.connector.errors.database_already_exists:
+            self.connector.database.drop(db_name, display_query=False, display_results=False)
+        except self.connector.errors.database_does_not_exist:
             # Database already exists, as we want.
             pass
+
+        # Create desired database.
+        self.connector.database.create(db_name)
 
         # Check databases prior to test query. Verify expected database returned.
         results = self.connector.database.show()
@@ -184,12 +201,16 @@ class CoreDatabaseTestMixin:
         """
         db_name = '{0}__use__success'.format(self.test_db_name)
 
-        # Verify database exists.
+        # Ensure database does not currently exists.
+        # Guarantees tests are done from a consistent state.
         try:
-            self.connector.database.create(db_name)
-        except self.connector.errors.database_already_exists:
+            self.connector.database.drop(db_name, display_query=False, display_results=False)
+        except self.connector.errors.database_does_not_exist:
             # Database already exists, as we want.
             pass
+
+        # Create desired database.
+        self.connector.database.create(db_name)
 
         # Check databases prior to test query. Verify expected database returned.
         results = self.connector.database.show()
@@ -212,11 +233,12 @@ class CoreDatabaseTestMixin:
         """
         db_name = '{0}__use__failure'.format(self.test_db_name)
 
-        # Verify database does not yet exist.
+        # Ensure database does not currently exists.
+        # Guarantees tests are done from a consistent state.
         try:
-            self.connector.database.drop(db_name)
-        except ValueError:
-            # Database does not exist, as we want.
+            self.connector.database.drop(db_name, display_query=False, display_results=False)
+        except self.connector.errors.database_does_not_exist:
+            # Database already exists, as we want.
             pass
 
         # Check databases prior to test query. Verify expected database did not return.
@@ -233,12 +255,16 @@ class CoreDatabaseTestMixin:
         """
         db_name = '{0}__delete__success'.format(self.test_db_name)
 
-        # Verify database does not yet exist.
+        # Ensure database does not currently exists.
+        # Guarantees tests are done from a consistent state.
         try:
-            self.connector.database.create(db_name)
-        except self.connector.errors.database_already_exists:
+            self.connector.database.drop(db_name, display_query=False, display_results=False)
+        except self.connector.errors.database_does_not_exist:
             # Database already exists, as we want.
             pass
+
+        # Create desired database.
+        self.connector.database.create(db_name)
 
         # Check databases prior to test query. Verify expected database returned.
         results = self.connector.database.show()
@@ -259,10 +285,11 @@ class CoreDatabaseTestMixin:
         """
         db_name = '{0}__delete__failure'.format(self.test_db_name)
 
-        # Verify database does not yet exist.
+        # Ensure database does not currently exists.
+        # Guarantees tests are done from a consistent state.
         try:
-            self.connector.database.drop(db_name)
-        except ValueError:
+            self.connector.database.drop(db_name, display_query=False, display_results=False,)
+        except self.connector.errors.database_does_not_exist:
             # Database does not yet exist, as we want.
             pass
 
@@ -271,5 +298,5 @@ class CoreDatabaseTestMixin:
         self.assertNotIn(db_name, results)
 
         # Run test query.
-        with self.assertRaises(ValueError):
+        with self.assertRaises(self.connector.errors.database_does_not_exist):
             self.connector.database.delete(db_name)

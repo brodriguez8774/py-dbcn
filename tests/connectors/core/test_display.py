@@ -196,7 +196,19 @@ class CoreDisplayTablesTestMixin:
 
         # Since this directly tests display of tables, ensure we use a fresh database.
         db_name = '{0}d__tables__show'.format(self.test_db_name[0:-15])
-        self.connector.database.create(db_name, display_query=False)
+
+        # Ensure database does not currently exists.
+        # Guarantees tests are done from a consistent state.
+        try:
+            self.connector.database.drop(db_name, display_query=False, display_results=False)
+        except self.connector.errors.database_does_not_exist:
+            # Database already exists, as we want.
+            pass
+
+        # Create desired database.
+        self.connector.database.create(db_name)
+
+        # Select desired database.
         self.connector.database.use(db_name, display_query=False)
 
         with self.subTest('With no tables present'):
@@ -315,7 +327,19 @@ class CoreDisplayTablesTestMixin:
 
         # Since this directly tests display of tables, ensure we use a fresh database.
         db_name = '{0}d__tables__desc'.format(self.test_db_name[0:-15])
-        self.connector.database.create(db_name, display_query=False)
+
+        # Ensure database does not currently exists.
+        # Guarantees tests are done from a consistent state.
+        try:
+            self.connector.database.drop(db_name, display_query=False, display_results=False)
+        except self.connector.errors.database_does_not_exist:
+            # Database already exists, as we want.
+            pass
+
+        # Create desired database.
+        self.connector.database.create(db_name)
+
+        # Select desired database.
         self.connector.database.use(db_name, display_query=False)
 
         # Create initial table to describe.

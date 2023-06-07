@@ -98,7 +98,7 @@ class PostgresqlDatabase(BaseDatabase):
                 break
         if not db_found:
             # Database does not exist. Raise error.
-            raise ValueError(
+            raise self._base.errors.database_does_not_exist(
                 'Could not find database "{0}". Valid options are {1}.'.format(db_name, available_databases)
             )
 
