@@ -59,13 +59,17 @@ class BaseDisplay:
         # Return max of all.
         return max(max_count, len(curr_database))
 
-    def query(self, query_str):
+    def query(self, query_str, data=None):
         """Formats query output for display."""
         # Remove any whitespace created from standard code indentations.
         query_str = textwrap.dedent(query_str).strip()
 
+        data_str = ''
+        if data is not None:
+            data_str = '\nWith data of {0}'.format(data)
+
         # Log results.
-        logger.query('{0}{1}{2}'.format(OUTPUT_QUERY, query_str, OUTPUT_RESET))
+        logger.query('{0}{1}{2}{3}'.format(OUTPUT_QUERY, query_str, data_str, OUTPUT_RESET))
 
     def results(self, result_str):
         """Formats result output for display."""

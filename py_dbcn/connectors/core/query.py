@@ -38,7 +38,7 @@ class BaseQuery:
         :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
         """
         if display_query:
-            self._base.display.query(query)
+            self._base.display.query(query, data=data)
 
         if isinstance(data, str):
             data = [data]
@@ -73,7 +73,7 @@ class BaseQuery:
         :param display_query: Optional bool indicating if query should output to console or not. Defaults to True.
         """
         if display_query:
-            self._base.display.query(query)
+            self._base.display.query(query, data=data)
 
         # Create connection and execute query.
         cursor = self._base._connection.cursor()
