@@ -469,7 +469,8 @@ class BaseValidate:
             # Only attempt to check if str type.
             value = value.strip()
 
-            # Must have matching outer quotes, plus at least one inner character.
+            # Must have matching outer quotes.
+            # Generally expects at least one inner character, but also allows 0 inner characters for empty strings.
             if len(value) > 1 and value[0] == value[-1] and value[0] in ['`', '"', "'"]:
                 is_quoted = True
 

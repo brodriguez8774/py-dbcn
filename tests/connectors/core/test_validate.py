@@ -3970,6 +3970,12 @@ class CoreValidateTestMixin:
         self.assertTrue(self.connector.validate._is_quoted("'True, False'"))
         self.assertTrue(self.connector.validate._is_quoted('`True, False`'))
 
+        # Empty strings.
+        self.assertTrue(self.connector.validate._is_quoted("""''"""))
+        self.assertTrue(self.connector.validate._is_quoted("""\"\""""))
+        self.assertTrue(self.connector.validate._is_quoted("""``"""))
+
+
     def test__is_quoted__false(self):
         """
         Tests is_quoted() function, when return val should be False.

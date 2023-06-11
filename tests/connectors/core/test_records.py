@@ -30,6 +30,7 @@ class CoreRecordsTestMixin:
         cls._columns_clause__basic = None
         cls._columns_clause__datetime = None
         cls._columns_clause__aggregates = None
+        cls._columns_clause__insert_bug__number_of_values = None
 
     def test_error_catch_types(self):
         """Tests to ensure database ERROR types are properly caught.
@@ -975,6 +976,67 @@ class CoreRecordsTestMixin:
         # Verify two records returned.
         self.assertEqual(len(results), 2)
         self.assertIn(row, results)
+
+    def test__insert__extra_cases(self):
+        """Various cases that were bugs at one point or another."""
+
+        with self.subTest('Blank strings are not translated to properly validated data columns'):
+            # Verify table exists.
+            try:
+                self.connector.query.execute('CREATE TABLE {0}{1};'.format(
+                    'test__insert_bug__blank_strings_not_translated',
+                    self._columns_clause__insert_bug__number_of_values,
+                ))
+            except self.connector.errors.table_already_exists:
+                # Table already exists, as we want.
+                pass
+
+            # Insert record.
+            self.connector.records.insert(
+                'test__insert_bug__blank_strings_not_translated',
+                [
+                    '',
+                    'test_first',
+                    'test_last',
+                    '',
+                    '123 Test St',
+                    'Room 456',
+                    'Test City',
+                    'Michigan',
+                    '12345',
+                    '',
+                    '(123) 456-7890',
+                    '(098) 765-4321',
+                    'test@test.com',
+                    '',
+                    datetime.datetime.now(),
+                    datetime.datetime.now(),
+                    False,
+                    datetime.datetime.now(),
+                    '',
+                ],
+                columns_clause=[
+                    'test_blank_1',
+                    'first_name',
+                    'last_name',
+                    'test_blank_2',
+                    'address1',
+                    'address2',
+                    'city',
+                    'state',
+                    'zipcode',
+                    'test_blank_3',
+                    'phone',
+                    'fax',
+                    'email',
+                    'test_blank_4',
+                    'date_created',
+                    'date_modified',
+                    'is_active',
+                    'last_activity',
+                    'test_blank_5',
+                ],
+            )
 
     def test__insert_many__basic__success(self):
         """

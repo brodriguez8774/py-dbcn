@@ -6,7 +6,12 @@ Tests for "records" logic of "PostgreSQL" DB Connector class.
 from decimal import Decimal
 
 # Internal Imports.
-from .constants import COLUMNS_CLAUSE__BASIC, COLUMNS_CLAUSE__DATETIME, COLUMNS_CLAUSE__AGGREGATES
+from .constants import (
+    COLUMNS_CLAUSE__BASIC,
+    COLUMNS_CLAUSE__DATETIME,
+    COLUMNS_CLAUSE__AGGREGATES,
+    COLUMNS_CLAUSE__INSERT_BUG__NUMBER_OF_VALUES,
+)
 from .test_core import TestPostgresqlDatabaseParent
 from tests.connectors.core.test_records import CoreRecordsTestMixin
 
@@ -50,6 +55,7 @@ class TestPostgresqlRecords(TestPostgresqlDatabaseParent, CoreRecordsTestMixin):
         cls._columns_clause__basic = COLUMNS_CLAUSE__BASIC
         cls._columns_clause__datetime = COLUMNS_CLAUSE__DATETIME
         cls._columns_clause__aggregates = COLUMNS_CLAUSE__AGGREGATES
+        cls._columns_clause__insert_bug__number_of_values = COLUMNS_CLAUSE__INSERT_BUG__NUMBER_OF_VALUES
 
     def test_error_catch_types(self):
         """Tests to ensure database ERROR types are properly caught.

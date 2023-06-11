@@ -44,6 +44,7 @@ class BaseClauseBuilder(object):
         self._print_parens = True
         self._always_quote = True
         self._allow_spaces = False
+        self._skip_empty_clause_values = True
 
     def __str__(self):
         if len(self.array) > 0:
@@ -161,7 +162,7 @@ class BaseClauseBuilder(object):
 
         elif len(clause) > 0:
             # Handle any other clause that is non-empty.
-            clause = self._validate_clause(clause)
+            clause = self._validate_clause(clause, value)
 
             # Save validated clause.
             self._clause_array = clause
@@ -169,8 +170,13 @@ class BaseClauseBuilder(object):
             # Save empty clause.
             self._clause_array = []
 
-    def _validate_clause(self, original_clause):
+    def _validate_clause(self, original_clause, original_value=None):
         """Used to validate/sanitize an array of clause values."""
+
+        # Special case for clause of an empty str.
+        if original_value == '':
+            return []
+
         new_clause = []
         for item in original_clause:
 
@@ -244,16 +250,16 @@ class BaseClauseBuilder(object):
                     item = item[:-5].rstrip()
                     order_by_descriptor = ' DESC'
 
-            # If we made it this far, item is valid. Escape with proper quote format and readd.
+            # If we made it this far, item is valid. Escape with proper quote format and re-add.
             is_quoted = False
-            if self.is_quoted(item):
+            if self._base.validate._is_quoted(item):
                 item = item[1:-1].strip()
                 is_quoted = True
 
-            # Skip items that are empty. Otherwise append.
-            if len(item) > 0:
+            # Situationally skip items that are empty. Otherwise append.
+            if (not self._skip_empty_clause_values) or len(item) > 0:
                 if item != '*':
-                    # Readd quotes in proper format.
+                    # Re-add quotes in proper format.
                     # Account for statements that may have multiple parts (denoted by spaces).
                     if not self._allow_spaces:
                         item_split = item.split(' ')
@@ -290,6 +296,9 @@ class BaseClauseBuilder(object):
             `id'
             etc...
         """
+        # TODO: Why is there two instances of this method?
+        #   One here, and one in validate.py.
+        #   One in validate.py seems to be thoroughly tested and more reliable.
         is_quoted = False
         if isinstance(value, str):
             # Only attempt to check if str type.
@@ -448,7 +457,7 @@ class WhereClauseBuilder(BaseClauseBuilder):
                 # Split based on spaces. For now, we assume only the first item needs quotes.
                 clause_split = clause_item.split(' ')
                 first_item = clause_split[0]
-                if self.is_quoted(first_item):
+                if self._base.validate._is_quoted(first_item):
                     first_item = first_item[1:-1]
                 first_item = '{1}{0}{1}'.format(first_item, self._quote_format)
 
@@ -906,6 +915,7 @@ class ValuesClauseBuilder(BaseClauseBuilder):
         self._quote_format = self._parent._quote_str_literal_format
         self._always_quote = False
         self._allow_spaces = True
+        self._skip_empty_clause_values = False
 
         # Process and save provided clause.
         self.array = clause
@@ -913,7 +923,7 @@ class ValuesClauseBuilder(BaseClauseBuilder):
 
 class ValuesManyClauseBuilder(ValuesClauseBuilder):
     """"""
-    def _validate_clause(self, original_clause):
+    def _validate_clause(self, original_clause, original_value=None):
         """Used to validate/sanitize an array of clause values."""
 
         # Handle the same as original logic, except there is one extra layer.
@@ -922,7 +932,7 @@ class ValuesManyClauseBuilder(ValuesClauseBuilder):
         if len(original_clause) > 0:
             for index in range(len(original_clause)):
                 inner_clause = original_clause[index]
-                original_clause[index] = super()._validate_clause(inner_clause)
+                original_clause[index] = super()._validate_clause(inner_clause, original_value=original_value)
 
             # Return validated clause.
             return original_clause

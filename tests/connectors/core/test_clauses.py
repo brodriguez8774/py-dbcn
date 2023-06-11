@@ -1271,13 +1271,28 @@ class CoreClauseTestMixin:
             self.assertEqual(["""test"""], clause_object.array)
             self.assertText("""VALUES (test)""", str(clause_object))
 
+            # Empty str with single quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, """''""")
+            self.assertEqual(["""{0}{0}""".format(self.str_literal_format)], clause_object.array)
+            self.assertText("""VALUES ({0}{0})""".format(self.str_literal_format), str(clause_object))
+
+            # Empty str with double quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, """\"\"""")
+            self.assertEqual(["""{0}{0}""".format(self.str_literal_format)], clause_object.array)
+            self.assertText("""VALUES ({0}{0})""".format(self.str_literal_format), str(clause_object))
+
+            # Empty str with backtick quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, """``""")
+            self.assertEqual(["""{0}{0}""".format(self.str_literal_format)], clause_object.array)
+            self.assertText("""VALUES ({0}{0})""".format(self.str_literal_format), str(clause_object))
+
             # With single quotes.
             clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, """'test'""")
             self.assertEqual(["""{0}test{0}""".format(self.str_literal_format)], clause_object.array)
             self.assertText("""VALUES ({0}test{0})""".format(self.str_literal_format), str(clause_object))
 
             # With double quotes.
-            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, """"test\"""")
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, """\"test\"""")
             self.assertEqual(["""{0}test{0}""".format(self.str_literal_format)], clause_object.array)
             self.assertText("""VALUES ({0}test{0})""".format(self.str_literal_format), str(clause_object))
 
@@ -1286,7 +1301,11 @@ class CoreClauseTestMixin:
             self.assertEqual(["""{0}test{0}""".format(self.str_literal_format)], clause_object.array)
             self.assertText("""VALUES ({0}test{0})""".format(self.str_literal_format), str(clause_object))
 
-            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, """'test', 1234, 'Test User'""")
+            # Multi-value clause.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(
+                validation_class,
+                """'test', 1234, 'Test User'""",
+            )
             self.assertEqual([
                 """{0}test{0}""".format(self.str_literal_format),
                 """1234""",
@@ -1297,50 +1316,275 @@ class CoreClauseTestMixin:
                 str(clause_object),
             )
 
+            # Mixed empty and non-empty strings, with single quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(
+                validation_class,
+                """'', 'test 1', '', 'test 2', ''""",
+            )
+            self.assertEqual(
+                [
+                    """{0}{0}""".format(self.str_literal_format),
+                    """{0}test 1{0}""".format(self.str_literal_format),
+                    """{0}{0}""".format(self.str_literal_format),
+                    """{0}test 2{0}""".format(self.str_literal_format),
+                    """{0}{0}""".format(self.str_literal_format),
+                ],
+                clause_object.array,
+            )
+            self.assertText(
+                """VALUES ({0}{0}, {0}test 1{0}, {0}{0}, {0}test 2{0}, {0}{0})""".format(self.str_literal_format),
+                str(clause_object),
+            )
+
+            # Mixed empty and non-empty strings, with double quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(
+                validation_class,
+                """"", "test 1", "", "test 2", "\"""",
+            )
+            self.assertEqual(
+                [
+                    """{0}{0}""".format(self.str_literal_format),
+                    """{0}test 1{0}""".format(self.str_literal_format),
+                    """{0}{0}""".format(self.str_literal_format),
+                    """{0}test 2{0}""".format(self.str_literal_format),
+                    """{0}{0}""".format(self.str_literal_format),
+                ],
+                clause_object.array,
+            )
+            self.assertText(
+                """VALUES ({0}{0}, {0}test 1{0}, {0}{0}, {0}test 2{0}, {0}{0})""".format(self.str_literal_format),
+                str(clause_object),
+            )
+
+            # Mixed empty and non-empty strings, with backtick quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(
+                validation_class,
+                """``, `test 1`, ``, `test 2`, ``""",
+            )
+            self.assertEqual(
+                [
+                    """{0}{0}""".format(self.str_literal_format),
+                    """{0}test 1{0}""".format(self.str_literal_format),
+                    """{0}{0}""".format(self.str_literal_format),
+                    """{0}test 2{0}""".format(self.str_literal_format),
+                    """{0}{0}""".format(self.str_literal_format),
+                ],
+                clause_object.array,
+            )
+            self.assertText(
+                """VALUES ({0}{0}, {0}test 1{0}, {0}{0}, {0}test 2{0}, {0}{0})""".format(self.str_literal_format),
+                str(clause_object),
+            )
+
         with self.subTest('Basic VALUES clause - As list'):
+            # Empty str with single quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, ["""''"""])
+            self.assertEqual(["""{0}{0}""".format(self.str_literal_format)], clause_object.array)
+            self.assertText("""VALUES ({0}{0})""".format(self.str_literal_format), str(clause_object))
+
+            # Empty str with double quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, ["""\"\""""])
+            self.assertEqual(["""{0}{0}""".format(self.str_literal_format)], clause_object.array)
+            self.assertText("""VALUES ({0}{0})""".format(self.str_literal_format), str(clause_object))
+
+            # Empty str with backtick quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, ["""``"""])
+            self.assertEqual(["""{0}{0}""".format(self.str_literal_format)], clause_object.array)
+            self.assertText("""VALUES ({0}{0})""".format(self.str_literal_format), str(clause_object))
+
+            # With single quotes.
             clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, ["""'test'"""])
             self.assertEqual(["""{0}test{0}""".format(self.str_literal_format)], clause_object.array)
             self.assertText("""VALUES ({0}test{0})""".format(self.str_literal_format), str(clause_object))
 
+            # With double quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, [""""test\""""])
+            self.assertEqual(["""{0}test{0}""".format(self.str_literal_format)], clause_object.array)
+            self.assertText("""VALUES ({0}test{0})""".format(self.str_literal_format), str(clause_object))
+
+            # With backtick quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, ["""`test`"""])
+            self.assertEqual(["""{0}test{0}""".format(self.str_literal_format)], clause_object.array)
+            self.assertText("""VALUES ({0}test{0})""".format(self.str_literal_format), str(clause_object))
+
+            # Multi-value clause.
             clause_object = self.connector.validate.clauses.ValuesClauseBuilder(
                 validation_class,
                 ["""'test'""", """1234""", """'Test User'"""],
             )
-            self.assertEqual(
-                [
-                    """{0}test{0}""".format(self.str_literal_format),
-                    """1234""",
-                    """{0}Test User{0}""".format(self.str_literal_format),
-                ],
-                clause_object.array,
-            )
+            self.assertEqual([
+                """{0}test{0}""".format(self.str_literal_format),
+                """1234""",
+                """{0}Test User{0}""".format(self.str_literal_format),
+            ], clause_object.array)
             self.assertText(
                 """VALUES ({0}test{0}, 1234, {0}Test User{0})""".format(self.str_literal_format),
                 str(clause_object),
             )
 
-        with self.subTest('Basic VALUES clause - As tuple'):
-            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, ("""'test'""",))
-            self.assertEqual(["""{0}test{0}""".format(self.str_literal_format)], clause_object.array)
-            self.assertText("""VALUES ({0}test{0})""".format(self.str_literal_format), str(clause_object))
-
+            # Mixed empty and non-empty strings, with single quotes.
             clause_object = self.connector.validate.clauses.ValuesClauseBuilder(
                 validation_class,
-                (
-                    """{0}test{0}""".format(self.str_literal_format),
-                    """1234""",
-                    """{0}Test User{0}""".format(self.str_literal_format)),
+                ["""''""", """'test 1'""", """''""", """'test 2'""", """''"""],
             )
             self.assertEqual(
                 [
-                    """{0}test{0}""".format(self.str_literal_format),
-                    """1234""",
-                    """{0}Test User{0}""".format(self.str_literal_format),
+                    """{0}{0}""".format(self.str_literal_format),
+                    """{0}test 1{0}""".format(self.str_literal_format),
+                    """{0}{0}""".format(self.str_literal_format),
+                    """{0}test 2{0}""".format(self.str_literal_format),
+                    """{0}{0}""".format(self.str_literal_format),
                 ],
                 clause_object.array,
             )
             self.assertText(
+                """VALUES ({0}{0}, {0}test 1{0}, {0}{0}, {0}test 2{0}, {0}{0})""".format(self.str_literal_format),
+                str(clause_object),
+            )
+
+            # Mixed empty and non-empty strings, with double quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(
+                validation_class,
+                ["""\"\"""", """\"test 1\"""", """\"\"""", """\"test 2\"""", """\"\""""],
+            )
+            self.assertEqual(
+                [
+                    """{0}{0}""".format(self.str_literal_format),
+                    """{0}test 1{0}""".format(self.str_literal_format),
+                    """{0}{0}""".format(self.str_literal_format),
+                    """{0}test 2{0}""".format(self.str_literal_format),
+                    """{0}{0}""".format(self.str_literal_format),
+                ],
+                clause_object.array,
+            )
+            self.assertText(
+                """VALUES ({0}{0}, {0}test 1{0}, {0}{0}, {0}test 2{0}, {0}{0})""".format(self.str_literal_format),
+                str(clause_object),
+            )
+
+            # Mixed empty and non-empty strings, with backtick quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(
+                validation_class,
+                ["""``""", """`test 1`""", """``""", """`test 2`""", """``"""],
+            )
+            self.assertEqual(
+                [
+                    """{0}{0}""".format(self.str_literal_format),
+                    """{0}test 1{0}""".format(self.str_literal_format),
+                    """{0}{0}""".format(self.str_literal_format),
+                    """{0}test 2{0}""".format(self.str_literal_format),
+                    """{0}{0}""".format(self.str_literal_format),
+                ],
+                clause_object.array,
+            )
+            self.assertText(
+                """VALUES ({0}{0}, {0}test 1{0}, {0}{0}, {0}test 2{0}, {0}{0})""".format(self.str_literal_format),
+                str(clause_object),
+            )
+
+        with self.subTest('Basic VALUES clause - As tuple'):
+            # Empty str with single quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, ("""''""",))
+            self.assertEqual(["""{0}{0}""".format(self.str_literal_format)], clause_object.array)
+            self.assertText("""VALUES ({0}{0})""".format(self.str_literal_format), str(clause_object))
+
+            # Empty str with double quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, ("""\"\"""",))
+            self.assertEqual(["""{0}{0}""".format(self.str_literal_format)], clause_object.array)
+            self.assertText("""VALUES ({0}{0})""".format(self.str_literal_format), str(clause_object))
+
+            # Empty str with backtick quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, ("""``""",))
+            self.assertEqual(["""{0}{0}""".format(self.str_literal_format)], clause_object.array)
+            self.assertText("""VALUES ({0}{0})""".format(self.str_literal_format), str(clause_object))
+
+            # With single quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, ("""'test'""",))
+            self.assertEqual(["""{0}test{0}""".format(self.str_literal_format)], clause_object.array)
+            self.assertText("""VALUES ({0}test{0})""".format(self.str_literal_format), str(clause_object))
+
+            # With double quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, (""""test\"""",))
+            self.assertEqual(["""{0}test{0}""".format(self.str_literal_format)], clause_object.array)
+            self.assertText("""VALUES ({0}test{0})""".format(self.str_literal_format), str(clause_object))
+
+            # With backtick quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(validation_class, ("""`test`""",))
+            self.assertEqual(["""{0}test{0}""".format(self.str_literal_format)], clause_object.array)
+            self.assertText("""VALUES ({0}test{0})""".format(self.str_literal_format), str(clause_object))
+
+            # Multi-value clause.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(
+                validation_class,
+                ("""'test'""", """1234""", """'Test User'"""),
+            )
+            self.assertEqual([
+                """{0}test{0}""".format(self.str_literal_format),
+                """1234""",
+                """{0}Test User{0}""".format(self.str_literal_format),
+            ], clause_object.array)
+            self.assertText(
                 """VALUES ({0}test{0}, 1234, {0}Test User{0})""".format(self.str_literal_format),
+                str(clause_object),
+            )
+
+            # Mixed empty and non-empty strings, with single quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(
+                validation_class,
+                ("""''""", """'test 1'""", """''""", """'test 2'""", """''"""),
+            )
+            self.assertEqual(
+                [
+                    """{0}{0}""".format(self.str_literal_format),
+                    """{0}test 1{0}""".format(self.str_literal_format),
+                    """{0}{0}""".format(self.str_literal_format),
+                    """{0}test 2{0}""".format(self.str_literal_format),
+                    """{0}{0}""".format(self.str_literal_format),
+                ],
+                clause_object.array,
+            )
+            self.assertText(
+                """VALUES ({0}{0}, {0}test 1{0}, {0}{0}, {0}test 2{0}, {0}{0})""".format(self.str_literal_format),
+                str(clause_object),
+            )
+
+            # Mixed empty and non-empty strings, with double quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(
+                validation_class,
+                ("""\"\"""", """\"test 1\"""", """\"\"""", """\"test 2\"""", """\"\""""),
+            )
+            self.assertEqual(
+                [
+                    """{0}{0}""".format(self.str_literal_format),
+                    """{0}test 1{0}""".format(self.str_literal_format),
+                    """{0}{0}""".format(self.str_literal_format),
+                    """{0}test 2{0}""".format(self.str_literal_format),
+                    """{0}{0}""".format(self.str_literal_format),
+                ],
+                clause_object.array,
+            )
+            self.assertText(
+                """VALUES ({0}{0}, {0}test 1{0}, {0}{0}, {0}test 2{0}, {0}{0})""".format(self.str_literal_format),
+                str(clause_object),
+            )
+
+            # Mixed empty and non-empty strings, with backtick quotes.
+            clause_object = self.connector.validate.clauses.ValuesClauseBuilder(
+                validation_class,
+                ("""``""", """`test 1`""", """``""", """`test 2`""", """``"""),
+            )
+            self.assertEqual(
+                [
+                    """{0}{0}""".format(self.str_literal_format),
+                    """{0}test 1{0}""".format(self.str_literal_format),
+                    """{0}{0}""".format(self.str_literal_format),
+                    """{0}test 2{0}""".format(self.str_literal_format),
+                    """{0}{0}""".format(self.str_literal_format),
+                ],
+                clause_object.array,
+            )
+            self.assertText(
+                """VALUES ({0}{0}, {0}test 1{0}, {0}{0}, {0}test 2{0}, {0}{0})""".format(self.str_literal_format),
                 str(clause_object),
             )
 
