@@ -14,7 +14,7 @@ Below is the minimum viable state for each version release.
     * Project is in viable state to import and use in other projects,
       for both **MySQL** and **PostgreSQL** databases.
 
-* v 0.4.x
+* v 0.5.x
 
     * Project is in viable state to import and use in other projects,
       for **MySQL**, **PostgreSQL**, and **SqLite** databases.

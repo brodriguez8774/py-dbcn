@@ -2,10 +2,28 @@ Version History
 ***************
 
 
-0.3.2 - Bugfixes for PostgreSQL
-===============================
-* Corrects some issues with PostgreSQL queries.
-* Unfortunately breaks MySQL. Use 0.3.1 for MySQL for now.
+0.3.3 - Clause Validation BugFixes
+==================================
+* Fixed some bugs with 0.3.2's clause validation.
+
+    * In particular, empty strings as part of VALUES clauses were dropped. This
+      is now fixed.
+
+* Some additional validation and MySQL bugs still remain.
+
+    * Continue to use 0.3.1 for MySQL for now.
+    * Due to these issues, in the future, release 0.3.2 and 0.3.3 will probably
+      be dropped once 0.4.0 is out.
+    * 0.4.0 is intended to be a stable release of the updated clause validation,
+      with compatibility for both MySQL and PostgreSQL.
+
+
+0.3.2 - Reworked Clause Validation Logic
+========================================
+* Reworked internal validation to correct some issues with PostgreSQL queries.
+* Refrained from releasing as 0.4 due to changes breaking MySQL.
+
+    * Use release 0.3.1 for MySQL for now.
 
 
 0.3.1 - Bugfix Release
