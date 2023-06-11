@@ -1424,6 +1424,33 @@ class CoreRecordsTestMixin:
             self.assertNotIn(old_row_2, results)
             self.assertNotIn(old_row_3, results)
 
+        with self.subTest('With columns quoted'):
+            self.connector.records.update(
+                table_name,
+                '"name" = {0}Abc 123{0}'.format(self.connector.validate._quote_str_literal_format),
+                '\'id\' = 4',
+            )
+            self.connector.records.update(
+                table_name,
+                '"name" = {0}Testing{0}'.format(self.connector.validate._quote_str_literal_format),
+                '"id" = 2',
+            )
+
+            # Verify all rows updated.
+            results = self.connector.query.execute('SELECT * FROM {0};'.format(table_name))
+            old_row_1 = row_1
+            old_row_2 = row_2
+            row_1 = (4, 'Abc 123', 'test_desc_1')
+            row_2 = (2, 'Testing', 'test_desc_2')
+            row_3 = (3, 'test name', 'testing aaa')
+            self.assertEqual(len(results), 3)
+            self.assertIn(row_1, results)
+            self.assertIn(row_2, results)
+            self.assertIn(row_3, results)
+            self.assertNotIn(old_row_1, results)
+            self.assertNotIn(old_row_2, results)
+
+
     def test__update__datetime__success(self):
         """
         Test `UPDATE` query with datetime values.
