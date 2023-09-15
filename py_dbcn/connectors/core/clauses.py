@@ -98,6 +98,7 @@ class BaseClauseBuilder(object):
 
     def _to_array(self, value):
         """Converts clause to array format for initial parsing."""
+
         if self._clause_prefix is None:
             raise NotImplementedError('Query type {0} missing clause_prefix value.'.format(self.__class__))
         if self._print_prefix is None:
@@ -196,6 +197,36 @@ class BaseClauseBuilder(object):
             elif not isinstance(item, str):
                 new_clause.append(item)
                 continue
+
+            else:
+                # Is str.
+                # Check if we can parse sub-sections of provided item.
+                if '=' in item and (item.count('=') == 1):
+                    temp = item.split('=')
+
+                    pt_1 = temp[0].strip()
+                    pt_2 = temp[1].strip()
+
+                    if (
+                        self._base.validate._is_quoted(pt_1)
+                        and self._base.validate._is_quoted(pt_2)
+                    ):
+                        # Handle each sub-section individually.
+                        original_spaces = self._allow_spaces
+                        self._allow_spaces = True
+                        pt_1 = self._validate_clause([pt_1], original_value=pt_1)[0]
+                        pt_2 = self._validate_clause([pt_2], original_value=pt_2)[0]
+                        self._allow_spaces = original_spaces
+
+                        # Correct likely incorrect quotes for second half.
+                        if self._base.validate._is_quoted(pt_2):
+                            pt_2 = '{0}{1}{0}'.format(self._base.validate._quote_str_literal_format, pt_2[1:-1])
+
+                        item = '{0} = {1}'.format(pt_1, pt_2)
+                        new_clause.append(item)
+
+                        # Already parsed as subsections. Skip further processing.
+                        continue
 
             # If we made it this far, then item is a str (or converted to such).
             item = str(item).strip()
@@ -300,6 +331,7 @@ class BaseClauseBuilder(object):
         #   One here, and one in validate.py.
         #   One in validate.py seems to be thoroughly tested and more reliable.
         is_quoted = False
+
         if isinstance(value, str):
             # Only attempt to check if str type.
             value = value.strip()
