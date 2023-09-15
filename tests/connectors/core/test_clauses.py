@@ -1049,7 +1049,7 @@ class CoreClauseTestMixin:
                 ],
                 clause_object.array)
             self.assertText(
-                """WHERE ({0}id{0} = 'test') OR ("code" = 1234) AND ("name" = 'Test User')""".format(
+                """WHERE ({0}id{0} = {1}test{1}) OR ({0}code{0} = 1234) AND ({0}name{0} = {1}Test User{1})""".format(
                     self.column_format,
                     self.str_literal_format,
                 ),

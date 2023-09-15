@@ -53,6 +53,7 @@ COLUMNS_CLAUSE__AGGREGATES = """
 
 
 COLUMNS_CLAUSE__INSERT_BUG__NUMBER_OF_VALUES = """
+(
     id INT NOT NULL AUTO_INCREMENT,
     test_blank_1 VARCHAR(255),
     first_name VARCHAR(255),
@@ -72,6 +73,7 @@ COLUMNS_CLAUSE__INSERT_BUG__NUMBER_OF_VALUES = """
     date_modified DATETIME,
     is_active TINYINT,
     last_activity TIMESTAMP,
-    test_blank_5 VARCHAR(255)
+    test_blank_5 VARCHAR(255),
     PRIMARY KEY ( id )
+)
 """

@@ -85,7 +85,7 @@ class PostgresqlRecords(BaseRecords):
         for column in where_columns_clause.array:
             if column not in columns_clause.array:
                 raise ValueError(
-                    'All columns specified in WHERE_COLUMNS must also be present in COLUMNS.'
+                    'All columns specified in WHERE_COLUMNS must also be present in COLUMNS. '
                     'Failed to find "{0}" in {1}'.format(
                         column,
                         columns_clause,

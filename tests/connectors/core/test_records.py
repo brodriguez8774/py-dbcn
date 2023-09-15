@@ -1450,7 +1450,6 @@ class CoreRecordsTestMixin:
             self.assertNotIn(old_row_1, results)
             self.assertNotIn(old_row_2, results)
 
-
     def test__update__datetime__success(self):
         """
         Test `UPDATE` query with datetime values.

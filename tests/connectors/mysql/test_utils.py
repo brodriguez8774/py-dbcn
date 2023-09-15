@@ -75,7 +75,7 @@ class TestMysqlUtils(TestMysqlDatabaseParent, CoreUtilsTestMixin):
         # Get "now" in Python, and also insert into database.
         detroit_now = datetime.datetime.now(tz=detroit_timezone)
         utc_now = detroit_now.astimezone(utc_timezone)
-        self.connector.records.insert(table_name, '((now()), (now()))')
+        self.connector.records.insert(table_name, '(now(), now())')
 
         # Pull values as database created them.
         records = self.connector.records.select(table_name, 'my_timestamp')

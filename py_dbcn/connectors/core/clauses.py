@@ -181,17 +181,35 @@ class BaseClauseBuilder(object):
         new_clause = []
         for item in original_clause:
 
+            # Handle if date/datetime provided as str.
+            if isinstance(item, str):
+                temp_item = item
+                if self._base.validate._is_quoted(item):
+                    temp_item = item.strip()[1:-1]
+                # Attempt to convert to datetime object.
+                try:
+                    item = datetime.datetime.strptime(temp_item.strip(), '%Y-%m-%d %H:%M:%S')
+                except ValueError:
+                    pass
+            if isinstance(item, str):
+                # Attempt to convert to date object.
+                try:
+                    item = datetime.datetime.strptime(temp_item.strip(), '%Y-%m-%d')
+                except ValueError:
+                    pass
+
             # Handle various specific types.
-            is_datetime = False
             if isinstance(item, datetime.datetime):
                 # Is a datetime object. Convert to string.
-                item = "'{0}'".format(item.strftime('%Y-%m-%d %H:%M:%S'))
-                is_datetime = True
+                item = "{0}".format(item.strftime('%Y-%m-%d %H:%M:%S'))
+                new_clause.append(item)
+                continue
 
             elif isinstance(item, datetime.date):
                 # Is a date object. Convert to string.
-                item = "'{0}'".format(item.strftime('%Y-%m-%d'))
-                is_datetime = True
+                item = "{0}".format(item.strftime('%Y-%m-%d'))
+                new_clause.append(item)
+                continue
 
             # Skip handling for other non-str items.
             elif not isinstance(item, str):
@@ -240,6 +258,7 @@ class BaseClauseBuilder(object):
             stripped_left = ''
             stripped_right = ''
             if matches:
+
                 index = 0
                 while index < len(self._parent._reserved_function_names):
                     func_call = self._parent._reserved_function_names[index]
@@ -421,6 +440,7 @@ class WhereClauseBuilder(BaseClauseBuilder):
 
     def _to_array(self, value):
         """Converts clause to array format for initial parsing."""
+
         self._clause_connectors = []
 
         if self._clause_prefix is None:
@@ -485,6 +505,26 @@ class WhereClauseBuilder(BaseClauseBuilder):
             #  Fix this logic later.
             for index in range(len(clause)):
                 clause_item = clause[index]
+
+                # Check if we can parse sub-sections of provided item.
+                if '=' in clause_item and (clause_item.count('=') == 1):
+                    temp = clause_item.split('=')
+
+                    pt_1 = temp[0].strip()
+                    pt_2 = temp[1].strip()
+
+                    if self._base.validate._is_quoted(pt_2):
+                        # Handle each sub-section individually.
+                        original_spaces = self._allow_spaces
+                        self._allow_spaces = True
+                        pt_2 = self._validate_clause([pt_2], original_value=pt_2)[0]
+                        self._allow_spaces = original_spaces
+
+                        # Correct likely incorrect quotes for second half.
+                        if self._base.validate._is_quoted(pt_2):
+                            pt_2 = '{0}{1}{0}'.format(self._base.validate._quote_str_literal_format, pt_2[1:-1])
+
+                        clause_item = '{0} = {1}'.format(pt_1, pt_2)
 
                 # Split based on spaces. For now, we assume only the first item needs quotes.
                 clause_split = clause_item.split(' ')

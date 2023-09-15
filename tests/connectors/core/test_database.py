@@ -187,11 +187,7 @@ class CoreDatabaseTestMixin:
         self.assertIn(db_name.casefold(), (str(x).casefold() for x in results))
 
         # Run test query.
-        error_type = None
-        if self.connector._config.db_type == 'MySQL':
-            error_type = ValueError
-        elif self.connector._config.db_type == 'PostgreSQL':
-            error_type = self.connector.errors.database_already_exists
+        error_type = self.connector.errors.database_already_exists
         with self.assertRaises(error_type):
             self.connector.database.create(db_name)
 
