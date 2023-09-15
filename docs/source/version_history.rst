@@ -2,28 +2,25 @@ Version History
 ***************
 
 
-0.3.3 - Clause Validation BugFixes
+0.4.0 - Reworked Clause Validation
 ==================================
-* Fixed some bugs with 0.3.2's clause validation.
+* Expanded/reworked handling of clauses and validation, to hopefully be much
+  more user-friendly.
 
-    * In particular, empty strings as part of VALUES clauses were dropped. This
-      is now fixed.
+    * That is, creating clauses with py-dbcn should now feel much more natural,
+      with most extraneous escape character requirements removed.
+    * Previously, this was a problem particularly with quotation characters,
+      depending on the database engine. Now this should be handled much more
+      uniformly regardless of engine.
+    * This will receive further refining in the future, but it's a big step
+      up from original handling.
 
-* Some additional validation and MySQL bugs still remain.
+* If any validation gives issues, each clause type can have validation
+  turned off via passing in the associated bool (value False) on constructing
+  the connector class.
 
-    * Continue to use 0.3.1 for MySQL for now.
-    * Due to these issues, in the future, release 0.3.2 and 0.3.3 will probably
-      be dropped once 0.4.0 is out.
-    * 0.4.0 is intended to be a stable release of the updated clause validation,
-      with compatibility for both MySQL and PostgreSQL.
-
-
-0.3.2 - Reworked Clause Validation Logic
-========================================
-* Reworked internal validation to correct some issues with PostgreSQL queries.
-* Refrained from releasing as 0.4 due to changes breaking MySQL.
-
-    * Use release 0.3.1 for MySQL for now.
+    * Clauses validation turned off this way will be entered as raw string into
+      the query.
 
 
 0.3.1 - Bugfix Release
